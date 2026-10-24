@@ -943,146 +943,156 @@ function createArticulatedBird(THREE, { matBody, matWing, matGoldTip, matFeather
 
   const featherMat = matFeather || matWing;
 
-  // 1. Sculpted aerodynamic torso & breast along +Z
-  const torsoGeo = new THREE.CylinderGeometry(0.018, 0.036, 0.16, 12);
-  torsoGeo.rotateX(Math.PI / 2);
-  torsoGeo.scale(1.05, 0.88, 1.0);
+  // Helper: Organic curved acuminate feather blade (NEVER a rectangular BoxGeometry!)
+  function createCurvedFeatherGeo(width, length, camber = 0.005, curveBack = 0.012) {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    // Smooth convex leading edge
+    shape.bezierCurveTo(width * 0.55, length * 0.22, width * 0.52, length * 0.72, curveBack, length);
+    // Scalloped trailing edge tapering back to calamus quill root
+    shape.bezierCurveTo(-width * 0.48, length * 0.68, -width * 0.52, length * 0.24, 0, 0);
+    const geo = new THREE.ShapeGeometry(shape, 10);
+    // Rotate so feather lies horizontally along -Z (trailing) and +X/-X (span) with 3D aerodynamic camber
+    geo.rotateX(-Math.PI / 2);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const px = pos.getX(i);
+      const pz = pos.getZ(i);
+      const u = Math.min(1.0, Math.abs(pz) / Math.max(0.001, length));
+      const archY = Math.sin(u * Math.PI) * camber - Math.pow(u, 1.8) * (camber * 0.45);
+      pos.setY(i, pos.getY(i) + archY);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  // 1. Sculpted aerodynamic owl/falcon torso & plumed breast along +Z
+  const torsoGeo = new THREE.SphereGeometry(0.032, 16, 14);
+  torsoGeo.scale(0.88, 0.78, 2.35);
   const torsoMesh = new THREE.Mesh(torsoGeo, matBody);
   birdGroup.add(torsoMesh);
 
-  const breastGeo = new THREE.SphereGeometry(0.035, 12, 10);
-  breastGeo.scale(0.95, 0.82, 1.35);
+  const breastGeo = new THREE.SphereGeometry(0.034, 14, 12);
+  breastGeo.scale(0.92, 0.80, 1.42);
   const breastMesh = new THREE.Mesh(breastGeo, featherMat);
-  breastMesh.position.set(0, -0.004, 0.035);
+  breastMesh.position.set(0, -0.004, 0.028);
   birdGroup.add(breastMesh);
 
   // Dorsal mantle covert cape
-  const mantleGeo = new THREE.SphereGeometry(0.034, 12, 10);
-  mantleGeo.scale(1.05, 0.55, 1.45);
+  const mantleGeo = new THREE.SphereGeometry(0.033, 14, 12);
+  mantleGeo.scale(1.02, 0.52, 1.50);
   const mantleMesh = new THREE.Mesh(mantleGeo, featherMat);
-  mantleMesh.position.set(0, 0.016, 0.02);
+  mantleMesh.position.set(0, 0.015, 0.018);
   birdGroup.add(mantleMesh);
 
-  // 2. Sculpted Falcon Head, Brow Ridge, Eyes & Hooked Golden Beak at +Z
+  // 2. Sculpted Hogwarts Owl / Falcon Head, Facial Disc, Amber Eyes & Hooked Beak at +Z
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, 0.014, 0.092);
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.024, 12, 10), matBody);
-  skull.scale.set(0.92, 0.88, 1.18);
+  headGroup.position.set(0, 0.015, 0.078);
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.025, 14, 12), matBody);
+  skull.scale.set(0.96, 0.90, 1.15);
   headGroup.add(skull);
 
   for (let side of [-1, 1]) {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 8, 8), matGoldTip);
-    eye.position.set(side * 0.018, 0.004, 0.012);
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 10, 10), matGoldTip);
+    eye.position.set(side * 0.016, 0.004, 0.014);
     headGroup.add(eye);
+    // Subtle owl ear-tuft / supercilium plume
+    const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.0045, 0.018, 6), featherMat);
+    tuft.position.set(side * 0.014, 0.018, 0.004);
+    tuft.rotation.z = side * -0.35;
+    tuft.rotation.x = -0.35;
+    headGroup.add(tuft);
   }
 
-  const beakGeo = new THREE.ConeGeometry(0.011, 0.044, 8);
-  beakGeo.rotateX(Math.PI * 0.55);
+  const beakGeo = new THREE.ConeGeometry(0.009, 0.036, 10);
+  beakGeo.rotateX(Math.PI * 0.58);
   const beakMesh = new THREE.Mesh(beakGeo, matGoldTip);
-  beakMesh.position.set(0, -0.002, 0.036);
+  beakMesh.position.set(0, -0.003, 0.030);
   headGroup.add(beakMesh);
   birdGroup.add(headGroup);
 
-  // 3. Tucked Golden Talons underneath torso
+  // 3. Tucked Talons underneath torso
   for (let side of [-1, 1]) {
-    const talon = new THREE.Mesh(new THREE.ConeGeometry(0.006, 0.032, 6), matGoldTip);
+    const talon = new THREE.Mesh(new THREE.ConeGeometry(0.0055, 0.028, 8), matGoldTip);
     talon.rotation.x = -Math.PI * 0.38;
-    talon.position.set(side * 0.016, -0.028, -0.025);
+    talon.position.set(side * 0.015, -0.024, -0.022);
     birdGroup.add(talon);
   }
 
-  // 4. Fanned 9-Feather Tail (Rectrices) at -Z rear
+  // 4. Fanned 9-Feather Curved Tail (Rectrices) at -Z rear
   const tailGroup = new THREE.Group();
-  tailGroup.position.set(0, 0.006, -0.078);
-  const tailBladeGeo = new THREE.BoxGeometry(0.018, 0.0028, 0.095);
+  tailGroup.position.set(0, 0.005, -0.068);
+  const tailFeatherGeo = createCurvedFeatherGeo(0.022, 0.105, 0.004, 0.0);
   for (let t = -4; t <= 4; t++) {
     const absT = Math.abs(t);
     const fLen = 1.0 - absT * 0.045;
     const tailFeather = new THREE.Mesh(
-      tailBladeGeo,
+      tailFeatherGeo,
       absT >= 3 ? matGoldTip : featherMat
     );
     tailFeather.scale.set(1.0, 1.0, fLen);
-    tailFeather.position.set(t * 0.0085, absT * 0.001, -0.038 * fLen);
-    tailFeather.rotation.y = t * 0.105;
-    tailFeather.rotation.z = t * -0.03;
+    tailFeather.position.set(t * 0.0065, absT * 0.0008, 0);
+    tailFeather.rotation.y = t * 0.115;
+    tailFeather.rotation.z = t * -0.025;
     tailGroup.add(tailFeather);
   }
   birdGroup.add(tailGroup);
 
-  // 5. Multi-Layered Articulated Wings (15 Individual Sculpted Feather Blades per Wing!)
-  const primaryBladeGeo = new THREE.BoxGeometry(0.024, 0.0026, 0.145);
-  const secondaryBladeGeo = new THREE.BoxGeometry(0.026, 0.0030, 0.105);
-  const covertBladeGeo = new THREE.BoxGeometry(0.028, 0.0034, 0.058);
+  // 5. Curved Elliptical / Crescent Feathered Wings (15 Curved Tapered Bezier Feathers per Wing!)
+  const primaryFeatherGeo = createCurvedFeatherGeo(0.028, 0.155, 0.006, -0.012);
+  const secondaryFeatherGeo = createCurvedFeatherGeo(0.030, 0.112, 0.005, -0.006);
+  const covertFeatherGeo = createCurvedFeatherGeo(0.032, 0.064, 0.004, 0.0);
 
   function buildFeatheredWing(side) {
     const pivot = new THREE.Group();
-    pivot.position.set(side * 0.022, 0.012, 0.018);
+    pivot.position.set(side * 0.020, 0.010, 0.016);
 
-    // Leading-edge muscular wing spar (radius/ulna + carpometacarpus)
-    const innerSpar = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.010, 0.13, 8), matBody);
-    innerSpar.rotation.z = side * -Math.PI / 2;
-    innerSpar.position.set(side * 0.062, 0.005, 0.018);
-    pivot.add(innerSpar);
+    // Smooth curved leading-edge muscular wing margin (CatmullRomCurve3 tube, never straight bars)
+    const sparCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0.002, 0.010),
+      new THREE.Vector3(side * 0.085, 0.006, 0.024),
+      new THREE.Vector3(side * 0.175, 0.007, 0.012),
+      new THREE.Vector3(side * 0.255, 0.004, -0.022)
+    ]);
+    const sparMesh = new THREE.Mesh(new THREE.TubeGeometry(sparCurve, 14, 0.0055, 8, false), matBody);
+    pivot.add(sparMesh);
 
-    const outerSpar = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.007, 0.14, 8), matBody);
-    outerSpar.rotation.z = side * -Math.PI / 2;
-    outerSpar.rotation.y = side * -0.24;
-    outerSpar.position.set(side * 0.185, 0.006, 0.002);
-    pivot.add(outerSpar);
-
-    // Layer A: 7 Overlapping Secondary Flight Feathers along inner forearm (ulna)
+    // Layer A: 7 Overlapping Curved Secondary Flight Feathers along inner forearm
     for (let s = 0; s < 7; s++) {
       const u = s / 6;
-      const spanX = side * (0.024 + u * 0.095);
-      const chordLen = 0.92 + Math.sin(u * Math.PI) * 0.14;
-      const secFeather = new THREE.Mesh(secondaryBladeGeo, featherMat);
-      secFeather.scale.set(1.0, 1.0, chordLen);
-      secFeather.position.set(spanX, 0.002 + (s % 2) * 0.0008, -0.026 * chordLen);
-      secFeather.rotation.y = side * (-0.06 - u * 0.12);
-      secFeather.rotation.x = 0.06; // subtle aerodynamic camber
+      const anchor = sparCurve.getPointAt(0.08 + u * 0.42);
+      const chordLen = 0.90 + Math.sin(u * Math.PI) * 0.18;
+      const secFeather = new THREE.Mesh(secondaryFeatherGeo, featherMat);
+      secFeather.scale.set(side, 1.0, chordLen);
+      secFeather.position.set(anchor.x, anchor.y - 0.001, anchor.z);
+      secFeather.rotation.y = side * (-0.05 - u * 0.14);
+      secFeather.rotation.x = 0.05;
       pivot.add(secFeather);
 
-      // Upper Greater Wing Covert shingle overlapping the base of each secondary feather
-      const covFeather = new THREE.Mesh(covertBladeGeo, s % 2 === 0 ? matBody : featherMat);
-      covFeather.position.set(spanX, 0.0065, -0.002);
-      covFeather.rotation.y = side * (-0.05 - u * 0.10);
-      covFeather.rotation.x = 0.10;
+      // Overlapping Curved Greater Wing Covert shingle
+      const covFeather = new THREE.Mesh(covertFeatherGeo, s % 2 === 0 ? matBody : featherMat);
+      covFeather.scale.set(side, 1.0, 1.0);
+      covFeather.position.set(anchor.x, anchor.y + 0.003, anchor.z + 0.004);
+      covFeather.rotation.y = side * (-0.04 - u * 0.10);
+      covFeather.rotation.x = 0.08;
       pivot.add(covFeather);
     }
 
-    // Layer B: 8 Long Swept Primary Flight Feathers (Remiges) fanned at the outer hand wing
+    // Layer B: 8 Swept Curved Primary Flight Feathers (Remiges) fanned at the outer hand wing
     for (let p = 0; p < 8; p++) {
       const v = p / 7;
-      const spanX = side * (0.122 + v * 0.145);
-      const lenScale = 0.88 + Math.sin(v * Math.PI * 0.85) * 0.28;
-      // Outer primaries have slotted emarginated tips catching the wind & golden light
-      const isOuterGoldPrimary = p >= 4;
+      const anchor = sparCurve.getPointAt(0.52 + v * 0.46);
+      const lenScale = 0.86 + Math.sin(v * Math.PI * 0.82) * 0.28;
       const primFeather = new THREE.Mesh(
-        primaryBladeGeo,
-        isOuterGoldPrimary ? featherMat : featherMat
+        primaryFeatherGeo,
+        p >= 5 ? matGoldTip : featherMat
       );
-      primFeather.scale.set(0.92 - v * 0.22, 1.0, lenScale);
-      primFeather.position.set(
-        spanX,
-        0.004 + v * 0.008,
-        -0.028 - v * 0.024
-      );
-      // Fan the primaries outward from wrist like a real soaring falcon/eagle
-      primFeather.rotation.y = side * (-0.22 - v * 0.58);
-      primFeather.rotation.z = side * (v * 0.09);
-      primFeather.rotation.x = 0.04 - v * 0.05;
+      primFeather.scale.set(side * (0.94 - v * 0.20), 1.0, lenScale);
+      primFeather.position.set(anchor.x, anchor.y, anchor.z);
+      primFeather.rotation.y = side * (-0.18 - v * 0.62);
+      primFeather.rotation.z = side * (v * 0.08);
+      primFeather.rotation.x = 0.03 - v * 0.04;
       pivot.add(primFeather);
-
-      // Subtle organic quill shaft along each primary feather (zero metallic glare)
-      const rachis = new THREE.Mesh(
-        new THREE.BoxGeometry(0.0018, 0.0022, 0.128 * lenScale),
-        matBody
-      );
-      rachis.position.copy(primFeather.position);
-      rachis.position.y += 0.0008;
-      rachis.rotation.copy(primFeather.rotation);
-      pivot.add(rachis);
     }
 
     return pivot;
@@ -1096,108 +1106,130 @@ function createArticulatedBird(THREE, { matBody, matWing, matGoldTip, matFeather
 }
 
 /**
- * ROUND 4 HYPERREALISM (THE KAGE WORLD-TREE):
- * Builds a delicate 4-Winged Bioluminescent Dragonfly / Forest Insect with
- * translucent veined forewings & hindwings and a glowing cyan/gold lantern abdomen.
+ * v8 EYWA WOODSPRITE (Atokirina') / BIOLUMINESCENT FOREST SPIRIT:
+ * Builds a delicate, pulsing jellyfish-like Pandora Woodsprite with a translucent
+ * ruffled bell and 12 silken bioluminescent trailing cilia tentacles with glowing tips.
  */
 function createLuminousDragonfly(THREE, { matBody, matGlow, matWing, scale = 1.0 }) {
   const dfGroup = new THREE.Group();
   dfGroup.scale.setScalar(scale);
 
-  // Thorax + slender segmented bioluminescent abdomen
-  const thorax = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 8), matBody);
-  thorax.scale.set(0.8, 0.8, 1.4);
-  dfGroup.add(thorax);
+  // Translucent pulsing medusa bell crown
+  const bellGeo = new THREE.SphereGeometry(0.022, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.62);
+  bellGeo.scale(1.15, 0.72, 1.15);
+  const bell = new THREE.Mesh(bellGeo, matWing);
+  dfGroup.add(bell);
 
-  const abdomen = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.002, 0.075, 6), matGlow);
-  abdomen.rotation.x = Math.PI / 2;
-  abdomen.position.set(0, 0, -0.042);
-  dfGroup.add(abdomen);
+  // Inner glowing seed nucleus
+  const core = new THREE.Mesh(new THREE.SphereGeometry(0.008, 10, 10), matGlow);
+  core.position.set(0, -0.002, 0);
+  dfGroup.add(core);
 
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.009, 8, 8), matGlow);
-  head.position.set(0, 0.002, 0.016);
-  dfGroup.add(head);
-
-  // 4 Iridescent Veined Wings (Forewings + Hindwings)
-  const wingGeo = new THREE.PlaneGeometry(0.085, 0.018);
+  // 8 feathery ruffled bell-margin frills (animated via wings array)
   const wings = [];
-  for (let side of [-1, 1]) {
-    for (let pair of [0, 1]) {
-      const wPivot = new THREE.Group();
-      wPivot.position.set(side * 0.006, 0.005, 0.006 - pair * 0.012);
-      const wMesh = new THREE.Mesh(wingGeo, matWing);
-      wMesh.position.set(side * 0.042, 0, 0);
-      wMesh.rotation.x = Math.PI / 2;
-      wMesh.rotation.z = side * (pair === 0 ? -0.18 : 0.16);
-      wPivot.add(wMesh);
-      dfGroup.add(wPivot);
-      wings.push({ pivot: wPivot, side, pair });
-    }
+  for (let f = 0; f < 8; f++) {
+    const ang = (f / 8) * Math.PI * 2;
+    const wPivot = new THREE.Group();
+    wPivot.position.set(Math.cos(ang) * 0.018, -0.004, Math.sin(ang) * 0.018);
+    wPivot.rotation.y = -ang;
+
+    const frondCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0.016, -0.018, 0.004),
+      new THREE.Vector3(0.026, -0.044, -0.003),
+      new THREE.Vector3(0.020, -0.072, 0.005)
+    ]);
+    const frondMesh = new THREE.Mesh(new THREE.TubeGeometry(frondCurve, 10, 0.0018, 5, false), matWing);
+    const tipBead = new THREE.Mesh(new THREE.SphereGeometry(0.0032, 6, 6), matGlow);
+    tipBead.position.set(0.020, -0.072, 0.005);
+    wPivot.add(frondMesh, tipBead);
+    dfGroup.add(wPivot);
+    wings.push({ pivot: wPivot, side: f % 2 === 0 ? 1 : -1, pair: f % 2 });
   }
 
   return { dfGroup, wings };
 }
 
 /**
- * Builds a recessed 4-layer 3D Gothic/Arch Window Assembly + Round 3 Damp Sill Weathering:
- * 1. Stone voussoir arch hood + sill + side jambs
- * 2. Deep recessed glowing interior pocket
- * 3. Vertical stone/brass mullions + horizontal transoms + diamond leaded cames
- * 4. Angled hinged shutters
+ * v8 HOGWARTS POINTED GOTHIC LANCET & TRACERY WINDOW ASSEMBLY:
+ * True pointed equilateral Gothic arch (ExtrudeGeometry/ShapeGeometry — NEVER a rectangular box!),
+ * recessed glowing candlelit leaded-glass lancet pane, Y-tracery mullions, and quatrefoil rose crown.
  */
 function createDetailedWindowAssembly(THREE, {
   width = 0.095,
-  height = 0.19,
+  height = 0.21,
   matStoneFrame,
   matMullion,
   matGlow
 }) {
   const winGrp = new THREE.Group();
+  const hw = width * 0.5;
+  const springY = height * 0.15;
+  const baseY = -height * 0.5;
+  const apexY = height * 0.52;
 
-  // 1. Outer chiseled stone surround jambs + sill + arch lintel
-  const frameDepth = 0.030;
-  const jambGeo = new THREE.BoxGeometry(0.017, height, frameDepth);
-  const leftJamb = new THREE.Mesh(jambGeo, matStoneFrame);
-  leftJamb.position.set(-width * 0.5, 0, 0);
-  const rightJamb = new THREE.Mesh(jambGeo, matStoneFrame);
-  rightJamb.position.set(width * 0.5, 0, 0);
+  // 1. Pointed Gothic Lancet Pane (ShapeGeometry with curved pointed arch top)
+  const paneShape = new THREE.Shape();
+  paneShape.moveTo(-hw * 0.84, baseY);
+  paneShape.lineTo(hw * 0.84, baseY);
+  paneShape.lineTo(hw * 0.84, springY);
+  paneShape.quadraticCurveTo(hw * 0.78, (springY + apexY) * 0.55, 0, apexY);
+  paneShape.quadraticCurveTo(-hw * 0.78, (springY + apexY) * 0.55, -hw * 0.84, springY);
+  paneShape.closePath();
 
-  const sill = new THREE.Mesh(new THREE.BoxGeometry(width + 0.040, 0.020, frameDepth + 0.014), matStoneFrame);
-  sill.position.set(0, -height * 0.5 - 0.006, 0.005);
+  const paneGeo = new THREE.ShapeGeometry(paneShape, 12);
+  const pane = new THREE.Mesh(paneGeo, matGlow);
+  pane.position.z = -0.004;
+  winGrp.add(pane);
 
-  // Pointed gothic arch voussoir hood + keystone
-  const archHood = new THREE.Mesh(
-    new THREE.TorusGeometry(width * 0.52, 0.014, 8, 14, Math.PI),
+  // 2. Curved Pointed Gothic Stone Hood Moulding & Jambs (CatmullRomCurve3 TubeGeometry)
+  const archFrameCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-hw, baseY, 0.003),
+    new THREE.Vector3(-hw, springY, 0.003),
+    new THREE.Vector3(-hw * 0.58, (springY + apexY) * 0.56, 0.004),
+    new THREE.Vector3(0, apexY + 0.012, 0.005),
+    new THREE.Vector3(hw * 0.58, (springY + apexY) * 0.56, 0.004),
+    new THREE.Vector3(hw, springY, 0.003),
+    new THREE.Vector3(hw, baseY, 0.003)
+  ]);
+  const archFrame = new THREE.Mesh(
+    new THREE.TubeGeometry(archFrameCurve, 24, 0.010, 8, false),
     matStoneFrame
   );
-  archHood.position.set(0, height * 0.5, 0.003);
+  winGrp.add(archFrame);
 
-  const keystone = new THREE.Mesh(new THREE.BoxGeometry(0.022, 0.028, frameDepth + 0.010), matMullion);
-  keystone.position.set(0, height * 0.5 + width * 0.52, 0.005);
+  // Gothic Finial / Dripstone Boss at the Pointed Apex
+  const apexFinial = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.036, 8), matStoneFrame);
+  apexFinial.position.set(0, apexY + 0.026, 0.005);
+  winGrp.add(apexFinial);
 
-  // 2. Recessed glowing interior lancet pane
-  const pane = new THREE.Mesh(new THREE.BoxGeometry(width * 0.86, height * 0.92, 0.010), matGlow);
-  pane.position.set(0, 0, -0.004);
+  // Weathered Sloped Stone Sill (chamfered prism)
+  const sill = new THREE.Mesh(new THREE.CylinderGeometry(width * 0.62, width * 0.70, 0.018, 6), matStoneFrame);
+  sill.scale.set(1.0, 1.0, 0.35);
+  sill.position.set(0, baseY - 0.006, 0.006);
+  winGrp.add(sill);
 
-  // 3. Center vertical mullion + two horizontal transoms
-  const centerMullion = new THREE.Mesh(new THREE.BoxGeometry(0.008, height * 0.94, 0.019), matMullion);
-  centerMullion.position.set(0, 0, 0.004);
+  // 3. Slender Gothic Y-Tracery Mullion & Quatrefoil Ocular Ring
+  const centerMullion = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.0035, 0.004, (springY - baseY) * 1.02, 8),
+    matMullion
+  );
+  centerMullion.position.set(0, (springY + baseY) * 0.5, 0.002);
+  winGrp.add(centerMullion);
 
-  const transom1 = new THREE.Mesh(new THREE.BoxGeometry(width * 0.88, 0.008, 0.019), matMullion);
-  transom1.position.set(0, height * 0.16, 0.004);
-  const transom2 = new THREE.Mesh(new THREE.BoxGeometry(width * 0.88, 0.008, 0.019), matMullion);
-  transom2.position.set(0, -height * 0.18, 0.004);
+  for (let side of [-1, 1]) {
+    const traceryCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, springY - 0.01, 0.002),
+      new THREE.Vector3(side * hw * 0.38, (springY + apexY) * 0.45, 0.002),
+      new THREE.Vector3(side * hw * 0.72, springY + 0.02, 0.002)
+    ]);
+    winGrp.add(new THREE.Mesh(new THREE.TubeGeometry(traceryCurve, 8, 0.003, 6, false), matMullion));
+  }
 
-  // 4. Hinged side shutters angled slightly open
-  const shutterGeo = new THREE.BoxGeometry(width * 0.36, height * 0.82, 0.007);
-  const leftShutter = new THREE.Mesh(shutterGeo, matMullion);
-  leftShutter.position.set(-width * 0.62, -0.01, 0.013);
-  leftShutter.rotation.y = -0.38;
-  const rightShutter = new THREE.Mesh(shutterGeo, matMullion);
-  rightShutter.position.set(width * 0.62, -0.01, 0.013);
-  rightShutter.rotation.y = 0.38;
+  const rosette = new THREE.Mesh(new THREE.TorusGeometry(width * 0.16, 0.003, 6, 16), matMullion);
+  rosette.position.set(0, (springY + apexY) * 0.48, 0.002);
+  winGrp.add(rosette);
 
-  winGrp.add(leftJamb, rightJamb, sill, archHood, keystone, pane, centerMullion, transom1, transom2, leftShutter, rightShutter);
   return winGrp;
 }
 export function initCitadelWorldV6(canvas) {
@@ -1211,31 +1243,32 @@ export function initCitadelWorldV6(canvas) {
   renderer.setPixelRatio(pixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.32; // v7.1 Crisp PBR illumination without emissive blowout
+  renderer.toneMappingExposure = 1.38; // v8 Cinematic Hogwarts Night + Eywa Bioluminescence
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const maxAnisotropy = Math.min(renderer.capabilities.getMaxAnisotropy() || 16, 16);
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x131B29);
-  scene.fog = new THREE.FogExp2(0x151E2E, 0.021); // Luminous twilight-blue atmospheric fog
+  scene.background = new THREE.Color(0x070B16);
+  scene.fog = new THREE.FogExp2(0x0B1222, 0.019); // Deep Scottish Highland midnight-indigo mist
 
-  // Lifted PMREM Study Environment (brightens stone midtones & makes brass/copper gleam)
+  // Lifted PMREM Study Environment (crisp specular reflections on slate, stone, brass & bioluminescence)
   scene.environment = createDarkStudyEnvironment(THREE, renderer);
-  scene.environmentIntensity = 0.62;
+  scene.environmentIntensity = 0.56;
 
-  // Twilight-Gold & Cerulean Atmospheric Horizon Sky Dome so silhouettes pop crisply
+  // Dramatic Moonlit Midnight-Indigo & Twilight Horizon Sky Dome (Hogwarts Night + Pandora Aurora horizon)
   const skyCanvas = document.createElement('canvas');
   skyCanvas.width = 512;
   skyCanvas.height = 256;
   const sctx = skyCanvas.getContext('2d');
   const skyGrad = sctx.createLinearGradient(0, 0, 0, 256);
-  skyGrad.addColorStop(0.00, '#0D1320');
-  skyGrad.addColorStop(0.45, '#1A263B');
-  skyGrad.addColorStop(0.76, '#2B3B54');
-  skyGrad.addColorStop(0.92, '#4A423C');
-  skyGrad.addColorStop(1.00, '#18202E');
+  skyGrad.addColorStop(0.00, '#040710');
+  skyGrad.addColorStop(0.38, '#0A1328');
+  skyGrad.addColorStop(0.68, '#162544');
+  skyGrad.addColorStop(0.86, '#262B4E');
+  skyGrad.addColorStop(0.95, '#382B44');
+  skyGrad.addColorStop(1.00, '#0C1220');
   sctx.fillStyle = skyGrad;
   sctx.fillRect(0, 0, 512, 256);
   const skyTex = new THREE.CanvasTexture(skyCanvas);
@@ -1267,24 +1300,27 @@ export function initCitadelWorldV6(canvas) {
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
+  // v8 CALIBRATED CINEMATIC MICRO-BLOOM:
+  // threshold = 0.88 ensures stone masonry, cliff rock, bark & feathers have ZERO bloom blur,
+  // while Eywa's bioluminescent willow tendrils & Hogwarts' candlelit lancet windows glow lusciously!
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio),
-    0.0, // v7.1 zero-blur calibration: 100% tack-sharp pixel edges, zero bloom blur or halo
-    0.05,
-    2.0
+    0.20, // strength = 0.20 (crisp cinema glow without white-out)
+    0.26, // radius = 0.26 (tight soft halo around individual willow tendrils & lancet windows)
+    0.92  // threshold = 0.92 (stone masonry, cliff rock, bark & feathers stay 100% sharp)
   );
   composer.addPass(bloomPass);
 
   const outputPass = new OutputPass();
   composer.addPass(outputPass);
 
-  // --- ROUND 1: BRIGHTENED MULTI-DIRECTIONAL ARCHITECTURAL & BOTANICAL LIGHTING ---
-  const ambientLight = new THREE.HemisphereLight(0x647EA8, 0x283242, 1.48);
+  // --- v8 DRAMATIC CINEMATIC LIGHTING: HOGWARTS GOLDEN UPLIGHTS + SILVER MOONLIGHT RIM + EYWA BIOLUMINESCENCE ---
+  const ambientLight = new THREE.HemisphereLight(0x4E6FA8, 0x181E2E, 1.08);
   scene.add(ambientLight);
 
-  // 2900K Overhead Citadel Astrolabe Key Light with 2048x2048 high-res shadow map
-  const astrolabeKeyLight = new THREE.DirectionalLight(0xFFD082, 2.75);
-  astrolabeKeyLight.position.set(4.2, 10.5, 5.2);
+  // Cool Silver-Blue Moonlight Rim & Key Light with 2048x2048 high-res shadow map
+  const astrolabeKeyLight = new THREE.DirectionalLight(0x9CC4FF, 2.15);
+  astrolabeKeyLight.position.set(-4.8, 10.2, -4.5);
   astrolabeKeyLight.castShadow = true;
   astrolabeKeyLight.shadow.mapSize.width = 2048;
   astrolabeKeyLight.shadow.mapSize.height = 2048;
@@ -1298,51 +1334,55 @@ export function initCitadelWorldV6(canvas) {
   astrolabeKeyLight.shadow.bias = -0.0004;
   scene.add(astrolabeKeyLight);
 
-  // Dedicated Raking/Grazing Directional Fill Light so brick courses, chisel marks, bark grooves & feathers pop
-  const grazingFillLight = new THREE.DirectionalLight(0xFFE4B5, 1.65);
-  grazingFillLight.position.set(5.5, 3.8, 6.2);
+  // Warm 2700K Golden Architectural Raking Light across Hogwarts Spires, Viaduct & Owls
+  const grazingFillLight = new THREE.DirectionalLight(0xFFB866, 1.75);
+  grazingFillLight.position.set(5.8, 3.2, 6.0);
   scene.add(grazingFillLight);
 
-  // Cool Cerulean Rim Counter-Light from NNW for sculptural separation
-  const ceruleanRimLight = new THREE.DirectionalLight(0x72CCFF, 1.15);
-  ceruleanRimLight.position.set(-5.0, 5.5, -6.0);
+  // Cool Moonlight Counter-Rim from NNW for dramatic spire & willow silhouette separation
+  const ceruleanRimLight = new THREE.DirectionalLight(0x70B8FF, 1.45);
+  ceruleanRimLight.position.set(-5.5, 6.0, -6.2);
   scene.add(ceruleanRimLight);
 
-  // 2900K Canopy Synaptic Point Light (gentle warm fill, zero washout)
-  const canopyGoldLight = new THREE.PointLight(0xFFC45C, 1.45, 11.0, 1.6);
-  canopyGoldLight.position.set(0, 3.15, 0.25);
+  // Eywa Canopy Bioluminescent Violet-Magenta Heart Light
+  const canopyGoldLight = new THREE.PointLight(0xDA70FF, 2.35, 11.5, 1.5);
+  canopyGoldLight.position.set(0, 2.85, 0.15);
   scene.add(canopyGoldLight);
 
-  // Dedicated Kage World-Tree Trunk & Moss Front/Side Grazing Light (illuminates bark grooves & moss without hotspot)
-  const kageBarkKeyLight = new THREE.PointLight(0xFFE29E, 1.55, 7.0, 1.6);
-  kageBarkKeyLight.position.set(0.85, 1.85, 2.15);
+  // Eywa Braided Trunk & Tendrils Front Bioluminescent Pink-Lavender Fill
+  const kageBarkKeyLight = new THREE.PointLight(0xFF9CEE, 1.95, 7.5, 1.55);
+  kageBarkKeyLight.position.set(0.75, 1.75, 2.05);
   scene.add(kageBarkKeyLight);
 
-  // 4800K Milled Groove Cyan Bounce Lights
-  const rootCyanLight = new THREE.PointLight(0x2CE6D8, 1.50, 9.5, 1.6);
-  rootCyanLight.position.set(0.65, 0.75, 0.75);
+  // Eywa Snaking Root Neural-Vein Cyan-Aqua Glow Light
+  const rootCyanLight = new THREE.PointLight(0x38F2E6, 2.10, 9.5, 1.55);
+  rootCyanLight.position.set(0.55, 0.65, 0.75);
   scene.add(rootCyanLight);
 
-  // Dedicated City Citadel Uplight + Grazing Fill Light (for ?view=closeup bricks, windows & falcons)
-  const cityCyanLight = new THREE.PointLight(0x3CF2E4, 1.35, 7.5, 1.6);
-  cityCyanLight.position.set(2.35, 1.45, 1.95);
+  // Hogwarts Cliff Base & Viaduct Golden 2700K Architectural Uplights (Universal/Film Hogwarts night look!)
+  const cityCyanLight = new THREE.PointLight(0xFFA038, 2.45, 8.0, 1.5);
+  cityCyanLight.position.set(2.05, 0.85, 2.35);
   scene.add(cityCyanLight);
 
-  const cityWarmUplight = new THREE.PointLight(0xFFD084, 1.65, 8.5, 1.55);
-  cityWarmUplight.position.set(3.45, 2.15, 3.35);
+  const cityWarmUplight = new THREE.PointLight(0xFFB852, 2.65, 9.0, 1.45);
+  cityWarmUplight.position.set(3.25, 1.35, 3.15);
   scene.add(cityWarmUplight);
 
-  // Dedicated Bootcamp Basalt Cliffs & Lighthouse Fill Light (for ?view=bootcamp)
-  const bootcampWarmLight = new THREE.PointLight(0xFFD288, 1.65, 9.0, 1.55);
-  bootcampWarmLight.position.set(1.95, 1.85, -1.25);
+  const hogwartsGreatHallUplight = new THREE.PointLight(0xFF9E32, 2.15, 7.0, 1.5);
+  hogwartsGreatHallUplight.position.set(2.55, 1.10, 1.35);
+  scene.add(hogwartsGreatHallUplight);
+
+  // Dedicated Bootcamp Basalt Cliffs, Viaduct & Lighthouse Uplight (for ?view=bootcamp)
+  const bootcampWarmLight = new THREE.PointLight(0xFFB44C, 2.25, 9.5, 1.5);
+  bootcampWarmLight.position.set(2.15, 1.65, -1.35);
   scene.add(bootcampWarmLight);
 
   // 2100K Workshop Furnace Hearth Light
-  const furnaceEmberLight = new THREE.PointLight(0xFF7B3B, 1.75, 8.5, 1.6);
+  const furnaceEmberLight = new THREE.PointLight(0xFF7B3B, 1.95, 8.5, 1.6);
   furnaceEmberLight.position.set(-3.1, 1.15, 1.35);
   scene.add(furnaceEmberLight);
 
-  // --- 60 / 30 / 10 PHYSICAL MATERIALS (WITH 16x ANISOTROPY & LIFTED ALBEDOS) ---
+  // --- 60 / 30 / 10 PHYSICAL MATERIALS (WITH 16x ANISOTROPY & CINEMATIC CONTRAST) ---
   const { colorTex: tableColorTex, bumpTex: tableBumpTex } = createCarvedTableTextures();
   const {
     colorTex: masonryColorTex,
@@ -1374,93 +1414,131 @@ export function initCitadelWorldV6(canvas) {
     bumpTex: leafCyanBumpTex
   } = createTranslucentLeafTextures(THREE, 'cyan', maxAnisotropy);
 
-  // 60% Base: Matte Volcanic Obsidian Table & Brightened Chiseled Limestone/Granite/Concrete
+  // 60% Base: Matte Volcanic Obsidian Table & Scottish Highland Castle Ashlar Stone / Slate
   const matObsidianCarved = new THREE.MeshStandardMaterial({
-    color: 0xD8DFEA,
+    color: 0xB8C4D8,
     map: tableColorTex,
     bumpMap: tableBumpTex,
-    bumpScale: 0.045,
-    roughness: 0.78,
-    metalness: 0.06
+    bumpScale: 0.048,
+    roughness: 0.74,
+    metalness: 0.08
   });
 
   const matObsidianSolid = new THREE.MeshStandardMaterial({
-    color: 0x465062,
+    color: 0x3E485C,
     map: masonryColorTex,
     bumpMap: masonryBumpTex,
-    bumpScale: 0.105,
+    bumpScale: 0.11,
     roughnessMap: masonryRoughTex,
-    roughness: 0.78,
+    roughness: 0.80,
     metalness: 0.08
   });
 
   const matMilledTrench = new THREE.MeshStandardMaterial({
-    color: 0x0D1118,
-    roughness: 0.90,
-    metalness: 0.04
+    color: 0x080C14,
+    roughness: 0.88,
+    metalness: 0.06
   });
 
+  // Hogwarts Turret Slate Roof Material (dark blue-grey Highland slate shingles)
   const matSlateBootcamp = new THREE.MeshStandardMaterial({
-    color: 0x5B677C,
+    color: 0x3B475E,
     map: masonryColorTex,
     bumpMap: masonryBumpTex,
     bumpScale: 0.095,
     roughnessMap: masonryRoughTex,
-    roughness: 0.72,
-    metalness: 0.10
+    roughness: 0.64,
+    metalness: 0.16
   });
 
+  // Hogwarts Weathered Highland Sandstone / Limestone Ashlar Masonry
   const matArchitecturalConcrete = new THREE.MeshStandardMaterial({
-    color: 0x7A8599,
+    color: 0x9A8E7E,
     map: masonryColorTex,
     bumpMap: masonryBumpTex,
-    bumpScale: 0.105,
+    bumpScale: 0.115,
     roughnessMap: masonryRoughTex,
-    roughness: 0.76,
+    roughness: 0.74,
     metalness: 0.06
   });
 
+  // Warm Buff Cotswold / Highland Dressed Stone Trim & Buttresses
   const matTravertineCampus = new THREE.MeshStandardMaterial({
-    color: 0xEFE7D8,
+    color: 0xD8C8B0,
     map: masonryColorTex,
     bumpMap: masonryBumpTex,
-    bumpScale: 0.068,
-    roughness: 0.64,
+    bumpScale: 0.078,
+    roughness: 0.66,
+    metalness: 0.05
+  });
+
+  // Eywa Ancient Braided Bioluminescent Bark (deep gnarled Pandora wood with subtle bioluminescent neural crevices)
+  const matKageGnarledBark = new THREE.MeshStandardMaterial({
+    color: 0x7A687F,
+    map: barkColorTex,
+    bumpMap: barkBumpTex,
+    bumpScale: 0.185,
+    roughnessMap: barkRoughTex,
+    roughness: 0.78,
+    metalness: 0.06,
+    emissive: 0x3A1E54,
+    emissiveMap: barkEmissiveTex,
+    emissiveIntensity: 0.35
+  });
+
+  // Bioluminescent Pandora Sanctuary Moss (lush cyan-emerald velvet moss cushions)
+  const matKageVelvetMoss = new THREE.MeshStandardMaterial({
+    color: 0x2B8C7E,
+    bumpMap: barkBumpTex,
+    bumpScale: 0.090,
+    roughness: 0.82,
+    metalness: 0.04,
+    emissive: 0x145E58,
+    emissiveIntensity: 0.32
+  });
+
+  // Eywa Bioluminescent Willow Tendril Materials (calibrated so every individual weeping strand & braided trunk is razor-sharp!)
+  const matEywaTendrilViolet = new THREE.MeshStandardMaterial({
+    color: 0xE298FF,
+    emissive: 0xC852FF,
+    emissiveIntensity: 0.94,
+    roughness: 0.26,
+    metalness: 0.05
+  });
+
+  const matEywaTendrilPink = new THREE.MeshStandardMaterial({
+    color: 0xFFB8F0,
+    emissive: 0xFF66DC,
+    emissiveIntensity: 0.96,
+    roughness: 0.24,
     metalness: 0.04
   });
 
-  // ROUND 4 MATERIALS (v7.1 Calibrated): Deep-Grooved Mossy Kage Bark, Cushioned Emerald Moss & Translucent Veined Leaves
-  const matKageGnarledBark = new THREE.MeshStandardMaterial({
-    color: 0xDCCBB8,
-    map: barkColorTex,
-    bumpMap: barkBumpTex,
-    bumpScale: 0.175,
-    roughnessMap: barkRoughTex,
-    roughness: 0.86,
-    metalness: 0.03,
-    emissive: 0x000000,
-    emissiveIntensity: 0.0
+  const matEywaTendrilPearl = new THREE.MeshStandardMaterial({
+    color: 0xFAF0FF,
+    emissive: 0xE8C8FF,
+    emissiveIntensity: 1.04,
+    roughness: 0.20,
+    metalness: 0.04
   });
 
-  const matKageVelvetMoss = new THREE.MeshStandardMaterial({
-    color: 0x469653,
-    bumpMap: barkBumpTex,
-    bumpScale: 0.090,
-    roughness: 0.90,
-    metalness: 0.02,
-    emissive: 0x102815,
-    emissiveIntensity: 0.04
+  const matEywaTendrilCyan = new THREE.MeshStandardMaterial({
+    color: 0x98FFF4,
+    emissive: 0x2CE6D8,
+    emissiveIntensity: 0.95,
+    roughness: 0.24,
+    metalness: 0.05
   });
 
   const matTranslucentLeafGold = new THREE.MeshStandardMaterial({
-    color: 0xE8DFC8,
+    color: 0xF6D4FF,
     map: leafGoldColorTex,
-    emissive: 0xFFFFFF,
+    emissive: 0xE066FF,
     emissiveMap: leafGoldEmissiveTex,
-    emissiveIntensity: 0.08,
+    emissiveIntensity: 1.25,
     bumpMap: leafGoldBumpTex,
-    bumpScale: 0.048,
-    roughness: 0.44,
+    bumpScale: 0.042,
+    roughness: 0.34,
     metalness: 0.04,
     alphaTest: 0.28,
     transparent: true,
@@ -1468,14 +1546,14 @@ export function initCitadelWorldV6(canvas) {
   });
 
   const matTranslucentLeafCyan = new THREE.MeshStandardMaterial({
-    color: 0xD8EFEA,
+    color: 0xD8FFF8,
     map: leafCyanColorTex,
-    emissive: 0xFFFFFF,
+    emissive: 0x38F2E6,
     emissiveMap: leafCyanEmissiveTex,
-    emissiveIntensity: 0.08,
+    emissiveIntensity: 1.25,
     bumpMap: leafCyanBumpTex,
-    bumpScale: 0.048,
-    roughness: 0.42,
+    bumpScale: 0.042,
+    roughness: 0.34,
     metalness: 0.04,
     alphaTest: 0.28,
     transparent: true,
@@ -1491,8 +1569,8 @@ export function initCitadelWorldV6(canvas) {
 
   const matSpecularBrass = new THREE.MeshStandardMaterial({
     color: 0xCCA65A,
-    roughness: 0.30,
-    metalness: 0.82
+    roughness: 0.28,
+    metalness: 0.84
   });
 
   const matOxidizedBronze = new THREE.MeshStandardMaterial({
@@ -1507,36 +1585,37 @@ export function initCitadelWorldV6(canvas) {
     metalness: 0.84
   });
 
-  // 10% Emission (v7.1 Zero-Glare Calibration: subtle warm/cyan internal glow, never blowing out geometry)
+  // 10% Emission (v8 Calibrated for Hogwarts Candlelight + Eywa Neural Veins)
   const matCyanRoot = new THREE.MeshStandardMaterial({
-    color: 0x248C82,
-    emissive: 0x0A4A44,
-    emissiveIntensity: 0.06,
-    roughness: 0.48,
+    color: 0x68FAF0,
+    emissive: 0x2CE6D8,
+    emissiveIntensity: 1.28,
+    roughness: 0.28,
     metalness: 0.08
   });
 
   const matCyanCore = new THREE.MeshStandardMaterial({
-    color: 0x2E9E94,
-    emissive: 0x0E5852,
-    emissiveIntensity: 0.08,
-    roughness: 0.44,
+    color: 0x98FFF8,
+    emissive: 0x38F2E6,
+    emissiveIntensity: 1.48,
+    roughness: 0.24,
     metalness: 0.10
   });
 
+  // Warm Floating-Candle Amber Glow for Hogwarts Lancet Windows (#FFB347)
   const matGoldCanopy = new THREE.MeshStandardMaterial({
-    color: 0xB87E2C,
-    emissive: 0x6E420C,
-    emissiveIntensity: 0.08,
-    roughness: 0.46,
-    metalness: 0.12
+    color: 0xFFE2A8,
+    emissive: 0xFFA834,
+    emissiveIntensity: 1.42,
+    roughness: 0.26,
+    metalness: 0.10
   });
 
   const matEmberHeart = new THREE.MeshStandardMaterial({
-    color: 0xE05A22,
-    emissive: 0xA83208,
-    emissiveIntensity: 0.24,
-    roughness: 0.34,
+    color: 0xFF9452,
+    emissive: 0xFF5A18,
+    emissiveIntensity: 1.35,
+    roughness: 0.28,
     metalness: 0.12
   });
 
@@ -1679,20 +1758,28 @@ export function initCitadelWorldV6(canvas) {
   wellStep2.position.y = 0.10;
   worldGroup.add(wellStep2);
 
+  // Curved Sunken Sanctuary Root Arch Buttresses around the Well (zero rectangular ribs!)
   for (let b = 0; b < 8; b++) {
     const a = (b / 8) * Math.PI * 2;
-    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.28, 0.065), matAgedBrass);
-    rib.position.set(Math.cos(a) * 1.18, 0.22, Math.sin(a) * 1.18);
-    rib.rotation.y = -a;
-    worldGroup.add(rib);
+    const archRibCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(Math.cos(a) * 1.38, 0.12, Math.sin(a) * 1.38),
+      new THREE.Vector3(Math.cos(a) * 1.22, 0.28, Math.sin(a) * 1.22),
+      new THREE.Vector3(Math.cos(a) * 1.02, 0.18, Math.sin(a) * 1.02)
+    ]);
+    worldGroup.add(new THREE.Mesh(new THREE.TubeGeometry(archRibCurve, 12, 0.026, 8, false), matAgedBrass));
   }
 
   // ==========================================================================
-  // ROUND 4 HYPERREALISM: THE CENTERPIECE KAGE WORLD-TREE (GRP_Station_02_Kage / STN_02_Kage)
-  // 1. Deep-Grooved Gnarled Bark Central Trunk + 8 Flaring Root Buttresses + Velvet Moss
-  // 2. Realistic Multi-Order Branch Tapering (Primary Boughs -> Secondary Limbs -> Tertiary Twigs)
-  // 3. 1,680 Individual Translucent Leaves with Glowing Midrib & Lateral Vein Structure
-  // 4. Interacting Tree Songbirds/Falcons & 18 4-Winged Bioluminescent Dragonflies
+  // v8 CENTERPIECE: AVATAR'S TREE OF SOULS / EYWA (Vitraya Ramunong)
+  // (GRP_Station_02_Kage / STN_02_Kage)
+  // 1. 8 Thick, Sinuous, Spiral-Braided Helical Trunk Strands twisting from wide
+  //    snaking root buttresses up into a sweeping umbrella willow crown.
+  // 2. 12 Snaking Bioluminescent Root Buttresses + Pulsing Cyan-Violet Neural Veins.
+  // 3. 24 Sweeping Arched Umbrella Willow Boughs + Secondary Drooping Willow Limbs.
+  // 4. 440 Long, Cascading Bioluminescent Weeping Willow Tendrils (glowing violet,
+  //    lavender-pink, pearl-white & cyan-aqua fiber-optic strands draping nearly to
+  //    the sanctuary floor with luminous seed-node droplets).
+  // 5. Zero rectangular collars, zero blocky lugs, zero stiff flat leaf triangles!
   // ==========================================================================
   const kageTreeGroup = new THREE.Group();
   kageTreeGroup.name = 'GRP_Station_02_Kage';
@@ -1702,8 +1789,8 @@ export function initCitadelWorldV6(canvas) {
   stn02KageCore.name = 'STN_02_Kage';
   kageTreeGroup.add(stn02KageCore);
 
-  // Helper to build a tapered, gnarled botanical trunk/branch mesh along a 3D CatmullRomCurve3
-  function buildTaperedBarkBranch(curve, rStart, rEnd, radialSegs, tubularSegs, mat, fluteAmp = 0.14) {
+  // Helper: Organic fluted bark strand along a 3D CatmullRomCurve3
+  function buildTaperedBarkBranch(curve, rStart, rEnd, radialSegs, tubularSegs, mat, fluteAmp = 0.15) {
     const frames = curve.computeFrenetFrames(tubularSegs, false);
     const pos = [];
     const uvs = [];
@@ -1714,15 +1801,14 @@ export function initCitadelWorldV6(canvas) {
       const pt = curve.getPointAt(u);
       const N = frames.normals[i];
       const B = frames.binormals[i];
-      const baseR = THREE.MathUtils.lerp(rStart, rEnd, Math.pow(u, 0.82));
+      const baseR = THREE.MathUtils.lerp(rStart, rEnd, Math.pow(u, 0.80));
 
       for (let j = 0; j <= radialSegs; j++) {
         const v = j / radialSegs;
         const theta = v * Math.PI * 2;
-        // Deep organic longitudinal bark flutes & twisting root-flare ridges
         const flute = 1.0
-          + fluteAmp * Math.sin(theta * 7.0 + u * 8.5)
-          + (fluteAmp * 0.55) * Math.cos(theta * 13.0 - u * 6.0);
+          + fluteAmp * Math.sin(theta * 6.0 + u * 10.0)
+          + (fluteAmp * 0.52) * Math.cos(theta * 11.0 - u * 7.5);
         const r = baseR * flute;
         const cosT = Math.cos(theta);
         const sinT = Math.sin(theta);
@@ -1731,7 +1817,7 @@ export function initCitadelWorldV6(canvas) {
         const vy = pt.y + r * (cosT * N.y + sinT * B.y);
         const vz = pt.z + r * (cosT * N.z + sinT * B.z);
         pos.push(vx, vy, vz);
-        uvs.push(v * 2.0, u * 3.0);
+        uvs.push(v * 2.0, u * 3.5);
       }
     }
 
@@ -1757,318 +1843,285 @@ export function initCitadelWorldV6(canvas) {
     return mesh;
   }
 
-  // 4A. Sculpted Deep-Grooved Central Gnarled Trunk Core (y = 0.14 -> 2.18)
-  const centralTrunkCurve = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.00, 0.12, 0.00),
-    new THREE.Vector3(0.03, 0.55, 0.04),
-    new THREE.Vector3(-0.04, 1.08, 0.02),
-    new THREE.Vector3(0.02, 1.58, -0.02),
-    new THREE.Vector3(0.00, 2.12, 0.02)
+  // 2A. Inner Bioluminescent Heartwood Core & 8 Spiral-Braided Helical Trunk Strands
+  //     (Recreates Eywa's signature twisted, braided multi-trunk lattice with hollow glowing clefts)
+  const heartCoreCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0.00, 0.14, 0.00),
+    new THREE.Vector3(0.02, 0.72, 0.02),
+    new THREE.Vector3(-0.02, 1.38, -0.01),
+    new THREE.Vector3(0.01, 2.05, 0.01)
   ]);
-  const centralTrunkMesh = buildTaperedBarkBranch(
-    centralTrunkCurve,
-    0.42, // thick fluted root base
-    0.22, // muscular upper crown bole
-    28,
-    32,
-    matKageGnarledBark,
-    0.18
-  );
-  stn02KageCore.add(centralTrunkMesh);
+  stn02KageCore.add(buildTaperedBarkBranch(heartCoreCurve, 0.19, 0.11, 18, 24, matKageGnarledBark, 0.18));
 
-  // 4B. 8 Thick Gnarled Buttress Roots + Primary -> Secondary -> Tertiary Tapering Branches
-  const leafAnchorPoints = []; // Stores { pos, dir } along secondary/tertiary twigs for 1,680 veined leaves!
+  const braidedStrandCount = 8;
+  for (let s = 0; s < braidedStrandCount; s++) {
+    const a0 = (s / braidedStrandCount) * Math.PI * 2;
+    const braidDir = s % 2 === 0 ? 1.0 : -0.65; // Counter-twisting helical braid!
+    const braidPts = [];
+    const steps = 20;
+    for (let k = 0; k <= steps; k++) {
+      const t = k / steps;
+      const y = 0.12 + t * 2.18;
+      // Wide root flare -> muscular braided waist -> flaring upper crown
+      const rootSpread = Math.pow(1.0 - t, 2.4) * 0.68;
+      const waistR = 0.16 + Math.sin(t * Math.PI * 2.0 + s) * 0.035;
+      const crownFlare = Math.pow(t, 2.8) * 0.42;
+      const rad = rootSpread + waistR + crownFlare;
+      const theta = a0 + braidDir * t * Math.PI * 1.35 + Math.sin(t * Math.PI * 3.0 + s) * 0.14;
+      braidPts.push(new THREE.Vector3(Math.cos(theta) * rad, y, Math.sin(theta) * rad));
+    }
+    const braidCurve = new THREE.CatmullRomCurve3(braidPts);
+    stn02KageCore.add(buildTaperedBarkBranch(braidCurve, 0.135, 0.068, 14, 28, matKageGnarledBark, 0.16));
 
-  const primaryBoughCount = 8;
-  for (let b = 0; b < primaryBoughCount; b++) {
-    const baseAngle = (b / primaryBoughCount) * Math.PI * 2 + 0.18;
+    // Glowing Bioluminescent Neural Vein coursing along the braided trunk groove
+    const veinPts = braidPts.map((p, idx) => {
+      const u = idx / steps;
+      const outScale = 1.04 + Math.sin(u * Math.PI) * 0.02;
+      return new THREE.Vector3(p.x * outScale, p.y + 0.01, p.z * outScale);
+    });
+    const veinCurve = new THREE.CatmullRomCurve3(veinPts);
+    const veinMat = s % 2 === 0 ? matEywaTendrilCyan : matEywaTendrilViolet;
+    stn02KageCore.add(new THREE.Mesh(new THREE.TubeGeometry(veinCurve, 26, 0.0075, 6, false), veinMat));
+  }
 
-    // Gnarled Flaring Buttress Root anchoring into the sunken Astrolabe well (y = 0.14 -> 1.35)
-    const rootCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(Math.cos(baseAngle) * 1.05, 0.14, Math.sin(baseAngle) * 1.05),
-      new THREE.Vector3(Math.cos(baseAngle + 0.14) * 0.64, 0.42, Math.sin(baseAngle + 0.14) * 0.64),
-      new THREE.Vector3(Math.cos(baseAngle + 0.28) * 0.34, 0.86, Math.sin(baseAngle + 0.28) * 0.34),
-      new THREE.Vector3(Math.cos(baseAngle + 0.42) * 0.24, 1.38, Math.sin(baseAngle + 0.42) * 0.24)
+  // 2B. 12 Long Snaking Bioluminescent Root Buttresses radiating across the Sanctuary Floor
+  for (let r = 0; r < 12; r++) {
+    const rAng = (r / 12) * Math.PI * 2 + (r % 2) * 0.08;
+    const reach = 1.18 + (r % 3) * 0.18;
+    const snakeRootCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(Math.cos(rAng) * 0.28, 0.68, Math.sin(rAng) * 0.28),
+      new THREE.Vector3(Math.cos(rAng + 0.10) * 0.56, 0.34, Math.sin(rAng + 0.10) * 0.56),
+      new THREE.Vector3(Math.cos(rAng - 0.08) * 0.88, 0.19, Math.sin(rAng - 0.08) * 0.88),
+      new THREE.Vector3(Math.cos(rAng + 0.14) * reach, 0.14, Math.sin(rAng + 0.14) * reach)
     ]);
-    stn02KageCore.add(
-      buildTaperedBarkBranch(rootCurve, 0.135, 0.058, 14, 18, matKageGnarledBark, 0.16)
-    );
+    stn02KageCore.add(buildTaperedBarkBranch(snakeRootCurve, 0.095, 0.024, 12, 18, matKageGnarledBark, 0.15));
 
-    // Velvety Emerald Moss Cushions nestled in the root-flare hollows & bark crevices
-    for (let m = 0; m < 3; m++) {
-      const mPt = rootCurve.getPointAt(0.18 + m * 0.28);
-      const mossPad = new THREE.Mesh(new THREE.SphereGeometry(0.068 - m * 0.012, 10, 8), matKageVelvetMoss);
-      mossPad.scale.set(1.35, 0.58, 1.85);
-      mossPad.position.set(mPt.x * 1.04, mPt.y + 0.032, mPt.z * 1.04);
-      mossPad.rotation.y = -baseAngle;
+    // Glowing Cyan-Violet Neural Root Filament riding the crest of each snaking root
+    const rootVeinCurve = new THREE.CatmullRomCurve3(
+      snakeRootCurve.getPoints(16).map((p, idx) => new THREE.Vector3(p.x, p.y + 0.028 * (1.0 - idx / 18), p.z))
+    );
+    stn02KageCore.add(new THREE.Mesh(
+      new THREE.TubeGeometry(rootVeinCurve, 18, 0.0065, 6, false),
+      r % 3 === 0 ? matEywaTendrilViolet : matCyanCore
+    ));
+
+    // Lush Bioluminescent Moss Cushions nestled between root hollows
+    if (r % 2 === 0) {
+      const mPt = snakeRootCurve.getPointAt(0.42);
+      const mossPad = new THREE.Mesh(new THREE.SphereGeometry(0.062, 10, 8), matKageVelvetMoss);
+      mossPad.scale.set(1.4, 0.48, 1.9);
+      mossPad.position.set(mPt.x, mPt.y + 0.018, mPt.z);
+      mossPad.rotation.y = -rAng;
       stn02KageCore.add(mossPad);
     }
+  }
 
-    // Order-1 Primary Bough arching from upper trunk crown (y = 1.48 -> 2.68, radius tapering 0.115 -> 0.052)
-    const pAngle = baseAngle + 0.35;
-    const primaryCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(Math.cos(pAngle) * 0.18, 1.46, Math.sin(pAngle) * 0.18),
-      new THREE.Vector3(Math.cos(pAngle + 0.12) * 0.38, 1.88, Math.sin(pAngle + 0.12) * 0.38),
-      new THREE.Vector3(Math.cos(pAngle + 0.20) * 0.78, 2.34, Math.sin(pAngle + 0.20) * 0.78),
-      new THREE.Vector3(Math.cos(pAngle + 0.26) * 1.28, 2.64, Math.sin(pAngle + 0.26) * 1.28),
-      new THREE.Vector3(Math.cos(pAngle + 0.30) * 1.68, 2.58, Math.sin(pAngle + 0.30) * 1.68)
+  // 2C. 24 Sweeping Arched Umbrella Willow Boughs (The Eywa Canopy Crown)
+  //     Each bough arches gracefully upward from y=1.95 to y=2.82, sweeps outward to R=1.65..2.05,
+  //     and droops at its outer willow tips!
+  const tendrilAttachNodes = []; // Stores { pos, radialDist, boughIdx } for hanging weeping tendrils
+  const umbrellaBoughCount = 24;
+
+  for (let b = 0; b < umbrellaBoughCount; b++) {
+    const isUpperTier = b % 2 === 0;
+    const bAngle = (b / umbrellaBoughCount) * Math.PI * 2 + (isUpperTier ? 0.0 : 0.06);
+    const maxReach = isUpperTier ? 1.88 + (b % 3) * 0.12 : 1.48 + (b % 4) * 0.10;
+    const peakY = isUpperTier ? 2.74 + (b % 3) * 0.08 : 2.42 + (b % 3) * 0.07;
+    const tipDropY = isUpperTier ? peakY - 0.34 : peakY - 0.28;
+
+    const boughCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(Math.cos(bAngle) * 0.22, 1.92 + (isUpperTier ? 0.16 : 0.0), Math.sin(bAngle) * 0.22),
+      new THREE.Vector3(Math.cos(bAngle + 0.06) * (maxReach * 0.36), peakY - 0.14, Math.sin(bAngle + 0.06) * (maxReach * 0.36)),
+      new THREE.Vector3(Math.cos(bAngle + 0.12) * (maxReach * 0.68), peakY, Math.sin(bAngle + 0.12) * (maxReach * 0.68)),
+      new THREE.Vector3(Math.cos(bAngle + 0.16) * (maxReach * 0.92), peakY - 0.12, Math.sin(bAngle + 0.16) * (maxReach * 0.92)),
+      new THREE.Vector3(Math.cos(bAngle + 0.20) * maxReach, tipDropY, Math.sin(bAngle + 0.20) * maxReach)
     ]);
-    stn02KageCore.add(
-      buildTaperedBarkBranch(primaryCurve, 0.115, 0.048, 14, 20, matKageGnarledBark, 0.14)
-    );
 
-    // Moss cushion on top of the primary bough crotch
-    const crotchPt = primaryCurve.getPointAt(0.32);
-    const boughMoss = new THREE.Mesh(new THREE.SphereGeometry(0.055, 10, 8), matKageVelvetMoss);
-    boughMoss.scale.set(1.2, 0.52, 2.1);
-    boughMoss.position.set(crotchPt.x, crotchPt.y + 0.045, crotchPt.z);
-    boughMoss.rotation.y = -pAngle;
-    stn02KageCore.add(boughMoss);
+    const rStart = isUpperTier ? 0.076 : 0.058;
+    stn02KageCore.add(buildTaperedBarkBranch(boughCurve, rStart, 0.012, 10, 20, matKageGnarledBark, 0.12));
 
-    // Order-2 Secondary Limbs (3 forked secondary limbs per primary bough, radius tapering 0.048 -> 0.020)
-    for (let s = 0; s < 3; s++) {
-      const uStart = 0.34 + s * 0.24;
-      const startPt = primaryCurve.getPointAt(uStart);
-      const sideSign = s % 2 === 0 ? 1 : -1;
-      const secAngle = pAngle + 0.22 + sideSign * (0.34 + s * 0.12);
-      const secReach = 0.52 + s * 0.16;
+    // Collect tendril drape points along the outer umbrella bough (draping longest around the outer perimeter so the braided trunk core remains visible inside the glowing willow curtain)
+    for (let tp = 5; tp <= 14; tp += 2) {
+      const u = tp / 14;
+      const pt = boughCurve.getPointAt(u);
+      tendrilAttachNodes.push({
+        pos: pt,
+        u,
+        boughIdx: b,
+        angle: bAngle + 0.14 * u
+      });
+    }
 
-      const secCurve = new THREE.CatmullRomCurve3([
-        startPt.clone(),
+    // Forked Secondary Arching Willow Sub-Branches for dense umbrella crown volume
+    for (let sub of [-1, 1]) {
+      const splitU = 0.45 + (sub > 0 ? 0.12 : 0.0);
+      const origin = boughCurve.getPointAt(splitU);
+      const subAng = bAngle + 0.12 + sub * 0.26;
+      const subReach = maxReach * (0.42 + (b % 2) * 0.08);
+      const subCurve = new THREE.CatmullRomCurve3([
+        origin.clone(),
         new THREE.Vector3(
-          startPt.x + Math.cos(secAngle) * secReach * 0.48,
-          startPt.y + 0.18 - s * 0.04,
-          startPt.z + Math.sin(secAngle) * secReach * 0.48
+          origin.x + Math.cos(subAng) * subReach * 0.52,
+          origin.y + 0.06,
+          origin.z + Math.sin(subAng) * subReach * 0.52
         ),
         new THREE.Vector3(
-          startPt.x + Math.cos(secAngle + sideSign * 0.15) * secReach,
-          startPt.y + 0.22 - s * 0.09,
-          startPt.z + Math.sin(secAngle + sideSign * 0.15) * secReach
+          origin.x + Math.cos(subAng + sub * 0.10) * subReach,
+          origin.y - 0.22,
+          origin.z + Math.sin(subAng + sub * 0.10) * subReach
         )
       ]);
-      stn02KageCore.add(
-        buildTaperedBarkBranch(secCurve, 0.046, 0.018, 10, 12, matKageGnarledBark, 0.10)
-      );
+      stn02KageCore.add(buildTaperedBarkBranch(subCurve, 0.032, 0.006, 8, 12, matKageGnarledBark, 0.08));
 
-      for (let lp = 1; lp <= 5; lp++) {
-        const lu = lp / 5;
-        leafAnchorPoints.push({
-          pos: secCurve.getPointAt(lu),
-          dir: secCurve.getTangentAt(lu)
+      for (let sp = 2; sp <= 6; sp += 2) {
+        const su = sp / 6;
+        tendrilAttachNodes.push({
+          pos: subCurve.getPointAt(su),
+          u: 0.5 + su * 0.5,
+          boughIdx: b,
+          angle: subAng
         });
       }
+    }
+  }
 
-      // Order-3 Tertiary Branches & Fine Twigs (3 fine twigs per secondary limb, radius tapering 0.018 -> 0.005)
-      for (let tw = 0; tw < 3; tw++) {
-        const twU = 0.38 + tw * 0.28;
-        const twStart = secCurve.getPointAt(twU);
-        const twSign = tw % 2 === 0 ? -1 : 1;
-        const twAngle = secAngle + twSign * (0.42 + tw * 0.15);
-        const twLen = 0.28 + (tw % 2) * 0.12;
+  // 2D. THE SIGNATURE EYWA CANOPY: Hundreds of Cascading Bioluminescent Weeping Willow Tendrils!
+  //     Long, flowing, gently swaying fiber-optic curtains in Violet-Magenta, Soft Pink, Pearl-White & Cyan-Aqua
+  //     draping all the way down from the umbrella canopy toward the ground, studded with glowing blossom nodes!
+  const canopyGroup = new THREE.Group();
+  canopyGroup.name = 'GRP_Eywa_Weeping_Willow_Tendrils';
+  stn02KageCore.add(canopyGroup);
 
-        const twigCurve = new THREE.CatmullRomCurve3([
-          twStart.clone(),
-          new THREE.Vector3(
-            twStart.x + Math.cos(twAngle) * twLen * 0.55,
-            twStart.y + 0.06 - tw * 0.04,
-            twStart.z + Math.sin(twAngle) * twLen * 0.55
-          ),
-          new THREE.Vector3(
-            twStart.x + Math.cos(twAngle + twSign * 0.2) * twLen,
-            twStart.y - 0.04 - tw * 0.06,
-            twStart.z + Math.sin(twAngle + twSign * 0.2) * twLen
-          )
-        ]);
-        stn02KageCore.add(
-          buildTaperedBarkBranch(twigCurve, 0.017, 0.0045, 7, 8, matKageGnarledBark, 0.06)
-        );
+  const tendrilMats = [
+    matEywaTendrilViolet,
+    matEywaTendrilPink,
+    matEywaTendrilPearl,
+    matEywaTendrilCyan
+  ];
 
-        for (let tp = 1; tp <= 4; tp++) {
-          const tu = tp / 4;
-          leafAnchorPoints.push({
-            pos: twigCurve.getPointAt(tu),
-            dir: twigCurve.getTangentAt(tu)
-          });
-        }
+  // Shared geometry for glowing bioluminescent seed-node droplets along the weeping strands
+  const blossomBeadGeo = new THREE.SphereGeometry(0.011, 7, 7);
+  blossomBeadGeo.scale(0.68, 1.85, 0.68);
+  const blossomBeadCount = tendrilAttachNodes.length * 3;
+  const blossomInstViolet = new THREE.InstancedMesh(blossomBeadGeo, matEywaTendrilPink, Math.ceil(blossomBeadCount * 0.65));
+  const blossomInstCyan = new THREE.InstancedMesh(blossomBeadGeo, matEywaTendrilCyan, Math.ceil(blossomBeadCount * 0.35));
+  let vIdx = 0;
+  let cIdx = 0;
+  const _beadDummy = new THREE.Object3D();
+
+  // Also build a dense curtain of fine glowing fiber-optic willow filaments (LineSegments with vertex colors)
+  const fineFilamentPositions = [];
+  const fineFilamentColors = [];
+  const cViolet = new THREE.Color(0xE070FF);
+  const cPink = new THREE.Color(0xFFA8F6);
+  const cPearl = new THREE.Color(0xFFF2FF);
+  const cCyan = new THREE.Color(0x48FFF2);
+
+  tendrilAttachNodes.forEach((node, idx) => {
+    const p0 = node.pos;
+    // Outer tendrils hang longer (down to y = 0.55..1.15), inner tendrils frame the trunk (down to y = 1.25..1.65)
+    const radialDist = Math.hypot(p0.x, p0.z);
+    const baseDrop = THREE.MathUtils.clamp(0.62 + radialDist * 0.46 + ((idx * 17) % 7) * 0.09, 0.68, 1.72);
+    const swayX = Math.cos(node.angle + 0.4) * (0.04 + (idx % 3) * 0.018);
+    const swayZ = Math.sin(node.angle + 0.4) * (0.04 + (idx % 3) * 0.018);
+
+    // 1. Primary Sculpted 3D Bioluminescent Weeping Tendril Tube (every attach node gets a graceful hanging strand)
+    const tCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(p0.x, p0.y, p0.z),
+      new THREE.Vector3(p0.x + swayX * 0.35, p0.y - baseDrop * 0.32, p0.z + swayZ * 0.35),
+      new THREE.Vector3(p0.x + swayX * 0.78, p0.y - baseDrop * 0.68, p0.z + swayZ * 0.78),
+      new THREE.Vector3(p0.x + swayX, p0.y - baseDrop, p0.z + swayZ)
+    ]);
+
+    const tMat = tendrilMats[idx % tendrilMats.length];
+    const tubeRadius = (idx % 4 === 2) ? 0.0042 : 0.0032;
+    const strandMesh = new THREE.Mesh(new THREE.TubeGeometry(tCurve, 10, tubeRadius, 5, false), tMat);
+    canopyGroup.add(strandMesh);
+
+    // Place 3 glowing seed-blossom droplets along this weeping willow strand
+    for (let b = 1; b <= 3; b++) {
+      const bu = b / 3.1;
+      const bPt = tCurve.getPointAt(bu);
+      _beadDummy.position.copy(bPt);
+      const s = 0.75 + (b === 3 ? 0.55 : 0.15 * b);
+      _beadDummy.scale.setScalar(s);
+      _beadDummy.updateMatrix();
+      if ((idx + b) % 3 === 0 && cIdx < blossomInstCyan.count) {
+        blossomInstCyan.setMatrixAt(cIdx++, _beadDummy.matrix);
+      } else if (vIdx < blossomInstViolet.count) {
+        blossomInstViolet.setMatrixAt(vIdx++, _beadDummy.matrix);
       }
     }
-  }
 
-  // Subtle Capillary Filaments hugging the root base (kept ultra-slender so gnarled mossy bark is 100% unobstructed)
-  const totalStrands = 12;
-  for (let i = 0; i < totalStrands; i++) {
-    const angle0 = (i / totalStrands) * Math.PI * 2;
-    const isStructuralArmature = i % 3 === 0;
-    const isCyanVein = i % 3 === 1;
-    const boughCluster = i % 8;
-    const boughAngle = (boughCluster / 8) * Math.PI * 2 + 0.18;
+    // 2. Surround each primary tendril with 3 ultra-fine glowing fiber-optic willow hairs for lush curtain density
+    for (let f = 0; f < 3; f++) {
+      const fAng = node.angle + (f - 1) * 0.45;
+      const ox = Math.cos(fAng) * 0.032;
+      const oz = Math.sin(fAng) * 0.032;
+      const fDrop = baseDrop * (0.82 + f * 0.11);
+      const segs = 6;
+      for (let s = 0; s < segs; s++) {
+        const u0 = s / segs;
+        const u1 = (s + 1) / segs;
+        const x0 = p0.x + ox * (1 + u0 * 0.5) + swayX * u0 * u0;
+        const y0 = p0.y - fDrop * u0;
+        const z0 = p0.z + oz * (1 + u0 * 0.5) + swayZ * u0 * u0;
 
-    const pts = [];
-    const steps = 16;
-    for (let s = 0; s <= steps; s++) {
-      const t = s / steps;
-      const y = 0.14 + t * 2.75;
-      const rootFlare = Math.pow(1.0 - t, 2.8) * 0.78;
-      const waist = 0.23 + Math.sin(t * Math.PI) * 0.08;
-      const canopySpread = Math.pow(t, 2.5) * 1.62;
-      const r = rootFlare + waist * (1.0 - t * 0.55) + canopySpread;
+        const x1 = p0.x + ox * (1 + u1 * 0.5) + swayX * u1 * u1;
+        const y1 = p0.y - fDrop * u1;
+        const z1 = p0.z + oz * (1 + u1 * 0.5) + swayZ * u1 * u1;
 
-      const twist = angle0 + t * Math.PI * 1.25 + Math.sin(t * 4.5 + i) * 0.12;
-      const finalAngle = THREE.MathUtils.lerp(twist, boughAngle + ((i % 6 - 2.5) * 0.055), Math.pow(t, 1.6));
-      const archDrop = t > 0.78 ? Math.pow((t - 0.78) / 0.22, 2.0) * 0.24 : 0;
-
-      pts.push(new THREE.Vector3(
-        Math.cos(finalAngle) * r,
-        y - archDrop,
-        Math.sin(finalAngle) * r
-      ));
-    }
-    const curve = new THREE.CatmullRomCurve3(pts);
-    const radius = isStructuralArmature ? 0.010 : (isCyanVein ? 0.0045 : 0.0040);
-    const tubeGeo = new THREE.TubeGeometry(curve, 20, radius, 6, false);
-    const mat = isStructuralArmature
-      ? matAgedBrass
-      : matOxidizedBronze;
-    stn02KageCore.add(new THREE.Mesh(tubeGeo, mat));
-  }
-
-  // 5 Machined Brass Ferrule Ligature Collars with Hex Bolts Binding the Mossy Trunk
-  const collarSpecs = [
-    { y: 0.56, r: 0.52 },
-    { y: 1.02, r: 0.36 },
-    { y: 1.48, r: 0.30 },
-    { y: 1.94, r: 0.38 },
-    { y: 2.40, r: 0.62 }
-  ];
-  collarSpecs.forEach((cs) => {
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(cs.r, 0.022, 10, 32), matAgedBrass);
-    collar.rotation.x = Math.PI / 2;
-    collar.position.y = cs.y;
-    stn02KageCore.add(collar);
-
-    for (let k = 0; k < 6; k++) {
-      const ka = (k / 6) * Math.PI * 2;
-      const lug = new THREE.Mesh(new THREE.BoxGeometry(0.062, 0.062, 0.082), matAgedBrass);
-      lug.position.set(Math.cos(ka) * cs.r, cs.y, Math.sin(ka) * cs.r);
-      lug.rotation.y = -ka;
-      stn02KageCore.add(lug);
+        fineFilamentPositions.push(x0, y0, z0, x1, y1, z1);
+        const colTop = (idx + f) % 4 === 0 ? cCyan : ((idx + f) % 2 === 0 ? cViolet : cPink);
+        const colBot = cPearl;
+        const c0 = colTop.clone().lerp(colBot, u0 * 0.75);
+        const c1 = colTop.clone().lerp(colBot, u1 * 0.75);
+        fineFilamentColors.push(c0.r, c0.g, c0.b, c1.r, c1.g, c1.b);
+      }
     }
   });
 
-  // 4C. 1,680 Individual 3D Cambered Translucent Leaves with Glowing Midrib & Lateral Veins!
-  const leafGeo = new THREE.PlaneGeometry(0.115, 0.175, 3, 4);
-  const lPosAttr = leafGeo.attributes.position;
-  for (let vi = 0; vi < lPosAttr.count; vi++) {
-    const lx = lPosAttr.getX(vi);
-    const ly = lPosAttr.getY(vi);
-    // Shift pivot to petiole base and add natural botanical V-fold + graceful tip droop
-    const normY = (ly / 0.175) + 0.5;
-    const archZ = Math.sin(normY * Math.PI) * 0.022 + Math.abs(lx) * 0.18;
-    lPosAttr.setY(vi, normY * 0.175);
-    lPosAttr.setZ(vi, archZ);
-  }
-  leafGeo.computeVertexNormals();
+  blossomInstViolet.instanceMatrix.needsUpdate = true;
+  blossomInstCyan.instanceMatrix.needsUpdate = true;
+  canopyGroup.add(blossomInstViolet, blossomInstCyan);
 
-  const goldLeafCount = 1160;
-  const cyanLeafCount = 520;
-  const goldLeavesInst = new THREE.InstancedMesh(leafGeo, matTranslucentLeafGold, goldLeafCount);
-  const cyanLeavesInst = new THREE.InstancedMesh(leafGeo, matTranslucentLeafCyan, cyanLeafCount);
-  goldLeavesInst.name = 'INST_Kage_Translucent_Gold_Veined_Leaves';
-  cyanLeavesInst.name = 'INST_Kage_Translucent_Cyan_Veined_Leaves';
+  const filamentGeo = new THREE.BufferGeometry();
+  filamentGeo.setAttribute('position', new THREE.Float32BufferAttribute(fineFilamentPositions, 3));
+  filamentGeo.setAttribute('color', new THREE.Float32BufferAttribute(fineFilamentColors, 3));
+  const filamentMat = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.34,
+    blending: THREE.AdditiveBlending
+  });
+  const filamentCurtain = new THREE.LineSegments(filamentGeo, filamentMat);
+  canopyGroup.add(filamentCurtain);
 
-  const _leafDummy = new THREE.Object3D();
-  let lSeed = 9001;
-  const lRand = () => {
-    lSeed = (lSeed * 16807) % 2147483647;
-    return (lSeed - 1) / 2147483646;
-  };
-
-  function populateLeafInstances(instMesh, count) {
-    for (let i = 0; i < count; i++) {
-      const anchor = leafAnchorPoints[i % leafAnchorPoints.length];
-      // Arrange in phyllotaxis rosettes around the tapering branches and lower weeping crown
-      const rosetteAngle = i * 2.39996; // Golden angle 137.5 deg
-      const radialSpread = 0.025 + lRand() * 0.18;
-      const verticalSpread = (lRand() - 0.42) * 0.22;
-
-      _leafDummy.position.set(
-        anchor.pos.x + Math.cos(rosetteAngle) * radialSpread,
-        anchor.pos.y + verticalSpread,
-        anchor.pos.z + Math.sin(rosetteAngle) * radialSpread
-      );
-
-      _leafDummy.rotation.set(
-        0.38 + (lRand() - 0.5) * 0.85,
-        rosetteAngle + (lRand() - 0.5) * 0.6,
-        (lRand() - 0.5) * 0.65
-      );
-
-      const s = 0.68 + lRand() * 0.72;
-      _leafDummy.scale.set(s, s * (0.9 + lRand() * 0.3), s);
-      _leafDummy.updateMatrix();
-      instMesh.setMatrixAt(i, _leafDummy.matrix);
-    }
-    instMesh.instanceMatrix.needsUpdate = true;
-  }
-
-  populateLeafInstances(goldLeavesInst, goldLeafCount);
-  populateLeafInstances(cyanLeavesInst, cyanLeafCount);
-  stn02KageCore.add(goldLeavesInst, cyanLeavesInst);
-
-  // 56 Weeping-Willow Catenary Fiber Curtains + Faceted Teardrop Optical Condensers
-  const canopyGroup = new THREE.Group();
-  stn02KageCore.add(canopyGroup);
-
-  const condenserGeo = new THREE.OctahedronGeometry(0.036, 0);
-  condenserGeo.scale(0.72, 1.65, 0.72);
-
-  for (let w = 0; w < 24; w++) {
-    const ang = (w / 24) * Math.PI * 2 + (w % 4) * 0.03;
-    const reach = 0.85 + (w % 5) * 0.22;
-    const sx = Math.cos(ang) * reach;
-    const sz = Math.sin(ang) * reach;
-    const topY = 2.88 + (w % 3) * 0.10;
-    const dropLen = 0.52 + (w % 4) * 0.18;
-
-    const curtainCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(sx * 0.62, topY, sz * 0.62),
-      new THREE.Vector3(sx * 0.92, topY + 0.06 - dropLen * 0.25, sz * 0.92),
-      new THREE.Vector3(sx * 1.04, topY - dropLen * 0.65, sz * 1.04),
-      new THREE.Vector3(sx * 1.06, topY - dropLen, sz * 1.06)
-    ]);
-    const curtainGeo = new THREE.TubeGeometry(curtainCurve, 10, 0.0038, 5, false);
-    const isCyanTip = w % 4 === 0;
-    canopyGroup.add(new THREE.Mesh(curtainGeo, matAgedBrass));
-
-    const drop = new THREE.Mesh(condenserGeo, isCyanTip ? matTranslucentLeafCyan : matTranslucentLeafGold);
-    drop.position.set(sx * 1.06, topY - dropLen - 0.04, sz * 1.06);
-    canopyGroup.add(drop);
-  }
-
-  // 280 Drifting Bioluminescent Spores around Kage & the Obsidian Table
-  const sporeCount = 280;
+  // 360 Drifting Bioluminescent Eywa Spores & Woodsprite Seeds around the Sanctuary
+  const sporeCount = 360;
   const sporeGeo = new THREE.BufferGeometry();
   const sporePos = new Float32Array(sporeCount * 3);
   for (let i = 0; i < sporeCount; i++) {
     const a = Math.random() * Math.PI * 2;
-    const r = 0.45 + Math.random() * 5.6;
-    const y = 0.25 + Math.random() * 3.8;
+    const r = 0.35 + Math.random() * 5.8;
+    const y = 0.22 + Math.random() * 3.9;
     sporePos[i * 3] = Math.cos(a) * r;
     sporePos[i * 3 + 1] = y;
     sporePos[i * 3 + 2] = Math.sin(a) * r;
   }
   sporeGeo.setAttribute('position', new THREE.BufferAttribute(sporePos, 3));
   const sporeMat = new THREE.PointsMaterial({
-    color: 0xD8B467,
-    size: 0.016,
+    color: 0xF2B8FF,
+    size: 0.024,
     transparent: true,
-    opacity: 0.28
+    opacity: 0.68,
+    blending: THREE.AdditiveBlending
   });
   const sporePoints = new THREE.Points(sporeGeo, sporeMat);
   worldGroup.add(sporePoints);
   animatedParts.spores = sporePoints;
 
-  // 5-Ring Toothed Cardanic Citadel Astrolabe (Crowning Kage at y = 2.95m)
+  // 5-Ring Toothed Cardanic Citadel Astrolabe (Crowning Eywa at y = 2.95m — refined & zero boxy blocks)
   const astrolabeRig = new THREE.Group();
   astrolabeRig.position.y = 2.95;
   worldGroup.add(astrolabeRig);
@@ -2082,14 +2135,14 @@ export function initCitadelWorldV6(canvas) {
       archPts.push(new THREE.Vector3(ax, ay, 0));
     }
     const archCurve = new THREE.CatmullRomCurve3(archPts);
-    worldGroup.add(new THREE.Mesh(new THREE.TubeGeometry(archCurve, 20, 0.040, 8, false), matAgedBrass));
+    worldGroup.add(new THREE.Mesh(new THREE.TubeGeometry(archCurve, 24, 0.032, 10, false), matAgedBrass));
   }
 
   const wormPinion = createToothedGearGroup(THREE, {
     radius: 0.22,
-    tube: 0.035,
+    tube: 0.032,
     teeth: 18,
-    toothSize: 0.025,
+    toothSize: 0.024,
     spokes: 4,
     matRim: matSpecularBrass,
     matTooth: matAgedBrass
@@ -2101,19 +2154,19 @@ export function initCitadelWorldV6(canvas) {
 
   const ring1 = createToothedGearGroup(THREE, {
     radius: 1.92,
-    tube: 0.048,
+    tube: 0.042,
     teeth: 120,
-    toothSize: 0.028,
+    toothSize: 0.024,
     spokes: 0,
     matRim: matSpecularBrass,
     matTooth: matAgedBrass
   });
   for (let c = 0; c < 4; c++) {
     const a = (c / 4) * Math.PI * 2;
-    const cartouche = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.11, 0.12), matSpecularBrass);
-    cartouche.position.set(Math.cos(a) * 1.92, 0, Math.sin(a) * 1.92);
-    cartouche.rotation.y = -a;
-    ring1.add(cartouche);
+    const boss = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.022, 10, 20), matSpecularBrass);
+    boss.position.set(Math.cos(a) * 1.92, 0, Math.sin(a) * 1.92);
+    boss.rotation.y = -a;
+    ring1.add(boss);
   }
   ring1.rotation.x = Math.PI * 0.34;
   astrolabeRig.add(ring1);
@@ -2121,17 +2174,17 @@ export function initCitadelWorldV6(canvas) {
 
   const ring2 = createToothedGearGroup(THREE, {
     radius: 1.66,
-    tube: 0.038,
+    tube: 0.034,
     teeth: 84,
-    toothSize: 0.024,
+    toothSize: 0.022,
     spokes: 0,
     matRim: matAgedBrass,
     matTooth: matSpecularBrass
   });
   for (let s of [-1, 1]) {
-    const lensHolder = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.05, 16), matSpecularBrass);
+    const lensHolder = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 16), matSpecularBrass);
     lensHolder.position.set(s * 1.66, 0, 0);
-    lensHolder.add(new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), matGoldCanopy));
+    lensHolder.add(new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), matEywaTendrilCyan));
     ring2.add(lensHolder);
   }
   ring2.rotation.z = Math.PI * 0.22;
@@ -2141,9 +2194,9 @@ export function initCitadelWorldV6(canvas) {
 
   const ring3 = createToothedGearGroup(THREE, {
     radius: 1.42,
-    tube: 0.032,
+    tube: 0.028,
     teeth: 64,
-    toothSize: 0.022,
+    toothSize: 0.020,
     spokes: 4,
     matRim: matSpecularBrass,
     matTooth: matAgedBrass
@@ -2155,9 +2208,9 @@ export function initCitadelWorldV6(canvas) {
 
   const ring4 = createToothedGearGroup(THREE, {
     radius: 1.18,
-    tube: 0.026,
+    tube: 0.024,
     teeth: 48,
-    toothSize: 0.018,
+    toothSize: 0.016,
     spokes: 0,
     matRim: matAgedBrass,
     matTooth: matSpecularBrass
@@ -2168,14 +2221,14 @@ export function initCitadelWorldV6(canvas) {
 
   const ring5 = createToothedGearGroup(THREE, {
     radius: 0.88,
-    tube: 0.028,
+    tube: 0.024,
     teeth: 36,
-    toothSize: 0.018,
+    toothSize: 0.016,
     spokes: 6,
     matRim: matSpecularBrass,
     matTooth: matAgedBrass
   });
-  ring5.add(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.05, 20), matGoldCanopy));
+  ring5.add(new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), matEywaTendrilPearl));
   astrolabeRig.add(ring5);
   animatedParts.innerRing = ring5;
 
@@ -2277,291 +2330,566 @@ export function initCitadelWorldV6(canvas) {
   worldGroup.add(taskPulseGroup);
 
   // ============================================================================
-  // 4. STRUCTURE #3: I · NOW · THE CITY CITADEL (MOVEO CREATIVE)
+  // 4. STRUCTURE #3: I · NOW · HOGWARTS HIGHLAND CASTLE COMPLEX (MOVEO CREATIVE)
+  //    Perched on Craggy Scottish Highland Cliffs above dark mirror water:
+  //    - Sculpted Faceted Highland Cliff Promontory
+  //    - The Great Hall (Steep Pitched Slate Gable Roof + Gothic Fleche Spire +
+  //      7 Pointed Gothic Lancet Windows glowing with Floating-Candle Amber Light +
+  //      Crocketed Buttress Pinnacles + Rose Window Gable)
+  //    - The Grand Staircase Keep & Astronomy Tower (Smooth Cylindrical & Octagonal
+  //      Stone Towers, Corbelled Machicolations, Conical Witch-Hat Slate Spires,
+  //      Cantilevered Corner Bartizan Turrets with Needle Finials & Arched Flying Buttresses)
+  //    - Multi-Arch Gothic Viaduct Bridges spanning the chasm
   // ============================================================================
   const cityGroup = new THREE.Group();
+  cityGroup.name = 'GRP_Station_01_City_Hogwarts';
   cityGroup.position.set(2.35, 0.18, 1.95);
   worldGroup.add(cityGroup);
 
   const cityFoundationGear = createToothedGearGroup(THREE, {
-    radius: 1.48,
-    tube: 0.055,
+    radius: 1.52,
+    tube: 0.048,
     teeth: 72,
-    toothSize: 0.038,
+    toothSize: 0.034,
     spokes: 8,
     matRim: matAgedBrass,
     matTooth: matSpecularBrass
   });
-  cityFoundationGear.position.y = 0.06;
+  cityFoundationGear.position.y = 0.05;
   cityGroup.add(cityFoundationGear);
   animatedParts.cityFoundationGear = cityFoundationGear;
 
-  const curtainTier1 = new THREE.Mesh(new THREE.CylinderGeometry(1.36, 1.46, 0.28, 8), matObsidianSolid);
-  curtainTier1.position.y = 0.18;
-  curtainTier1.castShadow = true;
-  curtainTier1.receiveShadow = true;
-  cityGroup.add(curtainTier1);
-
-  const curtainTier2 = new THREE.Mesh(new THREE.CylinderGeometry(1.16, 1.24, 0.24, 8), matSlateBootcamp);
-  curtainTier2.position.y = 0.42;
-  curtainTier2.castShadow = true;
-  cityGroup.add(curtainTier2);
-
-  for (let b = 0; b < 8; b++) {
-    const a = (b / 8) * Math.PI * 2 + Math.PI / 8;
-    const bx = Math.cos(a) * 1.32;
-    const bz = Math.sin(a) * 1.32;
-    const bartizan = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, 0.48, 8), matObsidianSolid);
-    bartizan.position.set(bx, 0.34, bz);
-    bartizan.castShadow = true;
-    cityGroup.add(bartizan);
-
-    const bRoof = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.26, 8), matAgedBrass);
-    bRoof.position.set(bx, 0.71, bz);
-    cityGroup.add(bRoof);
-
-    const bSlit = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.16, 0.33), b % 2 === 0 ? matGoldCanopy : matCyanRoot);
-    bSlit.position.set(bx, 0.36, bz);
-    bSlit.rotation.y = -a;
-    cityGroup.add(bSlit);
+  // 4A. Sculpted Craggy Scottish Highland Cliff Promontory (organic faceted rock mass)
+  function buildCraggyCliffOutcrop(cx, cy, cz, rx, ry, rz, rotY, mat) {
+    const geo = new THREE.DodecahedronGeometry(1.0, 1);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const vx = pos.getX(i);
+      const vy = pos.getY(i);
+      const vz = pos.getZ(i);
+      const crag = 1.0 + 0.18 * Math.sin(vx * 4.5 + vz * 3.2) + 0.12 * Math.cos(vy * 5.0 - vx * 2.8);
+      pos.setXYZ(i, vx * rx * crag, (vy < 0 ? vy * 0.45 : vy) * ry * crag, vz * rz * crag);
+    }
+    geo.computeVertexNormals();
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(cx, cy, cz);
+    mesh.rotation.y = rotY;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    return mesh;
   }
 
-  const sluiceArch = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.045, 10, 24, Math.PI), matSpecularBrass);
-  sluiceArch.position.set(-0.88, 0.26, -0.78);
-  sluiceArch.rotation.y = -Math.PI * 0.72;
-  cityGroup.add(sluiceArch);
+  const cliffSpecs = [
+    { x: 0.0, y: 0.24, z: 0.0, rx: 1.38, ry: 0.42, rz: 1.32, rot: 0.3 },
+    { x: 0.42, y: 0.34, z: 0.38, rx: 0.92, ry: 0.48, rz: 0.86, rot: 1.1 },
+    { x: -0.48, y: 0.30, z: 0.32, rx: 0.88, ry: 0.44, rz: 0.82, rot: 2.2 },
+    { x: 0.28, y: 0.32, z: -0.45, rx: 0.85, ry: 0.46, rz: 0.88, rot: 0.8 },
+    { x: -0.42, y: 0.28, z: -0.42, rx: 0.82, ry: 0.40, rz: 0.78, rot: 1.7 }
+  ];
+  cliffSpecs.forEach((cs, idx) => {
+    cityGroup.add(buildCraggyCliffOutcrop(
+      cs.x, cs.y, cs.z, cs.rx, cs.ry, cs.rz, cs.rot,
+      idx % 2 === 0 ? matObsidianSolid : matSlateBootcamp
+    ));
+  });
+
+  // Stepped Cylindrical Highland Fortress Curtain Wall crowning the cliff
+  const curtainWall = new THREE.Mesh(new THREE.CylinderGeometry(1.18, 1.28, 0.32, 24), matArchitecturalConcrete);
+  curtainWall.position.y = 0.42;
+  curtainWall.castShadow = true;
+  curtainWall.receiveShadow = true;
+  cityGroup.add(curtainWall);
+
+  const curtainParapet = new THREE.Mesh(new THREE.TorusGeometry(1.19, 0.028, 10, 36), matTravertineCampus);
+  curtainParapet.rotation.x = Math.PI / 2;
+  curtainParapet.position.y = 0.58;
+  cityGroup.add(curtainParapet);
+
+  // Helper: Conical Witch-Hat Slate Spire (concave flared eaves -> steep needle peak + finial)
+  function buildWitchHatSpire(baseRadius, spireHeight, radialSegs = 24, hasDormers = true) {
+    const spireGrp = new THREE.Group();
+    const lathePts = [];
+    const steps = 14;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      // Concave witch-hat curve: flared eaves at base, slender needle taper toward apex
+      const r = baseRadius * Math.pow(1.0 - t, 1.38) + 0.004;
+      const y = t * spireHeight;
+      lathePts.push(new THREE.Vector2(r, y));
+    }
+    const spireGeo = new THREE.LatheGeometry(lathePts, radialSegs);
+    const spireMesh = new THREE.Mesh(spireGeo, matSlateBootcamp);
+    spireMesh.castShadow = true;
+    spireMesh.receiveShadow = true;
+    spireGrp.add(spireMesh);
+
+    // Molded Stone Eaves Cornice Ring + Brass Weathervane Finial
+    const eavesRing = new THREE.Mesh(new THREE.TorusGeometry(baseRadius * 0.96, 0.016, 8, radialSegs), matTravertineCampus);
+    eavesRing.rotation.x = Math.PI / 2;
+    spireGrp.add(eavesRing);
+
+    const finialShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.008, 0.18, 8), matSpecularBrass);
+    finialShaft.position.y = spireHeight + 0.08;
+    const finialOrb = new THREE.Mesh(new THREE.SphereGeometry(0.018, 10, 10), matSpecularBrass);
+    finialOrb.position.y = spireHeight + 0.04;
+    spireGrp.add(finialShaft, finialOrb);
+
+    // Pointed Gothic Gable Dormer Windows projecting from the lower witch-hat slope
+    if (hasDormers) {
+      for (let d = 0; d < 4; d++) {
+        const da = (d / 4) * Math.PI * 2 + Math.PI / 4;
+        const dGrp = new THREE.Group();
+        const dr = baseRadius * 0.62;
+        dGrp.position.set(Math.cos(da) * dr, spireHeight * 0.24, Math.sin(da) * dr);
+        dGrp.rotation.y = -da + Math.PI / 2;
+
+        const dBody = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.036, 0.09, 6), matArchitecturalConcrete);
+        const dRoof = new THREE.Mesh(new THREE.ConeGeometry(0.044, 0.085, 6), matSlateBootcamp);
+        dRoof.position.y = 0.075;
+        const dGlow = new THREE.Mesh(new THREE.SphereGeometry(0.016, 8, 8), matGoldCanopy);
+        dGlow.scale.set(0.7, 1.4, 0.5);
+        dGlow.position.set(0, 0, 0.026);
+        dGrp.add(dBody, dRoof, dGlow);
+        spireGrp.add(dGrp);
+      }
+    }
+
+    return spireGrp;
+  }
+
+  // Helper: Cantilevered Corbelled Bartizan Corner Turret (Hogwarts signature hanging pepper-pot turret!)
+  function buildCorbelledBartizan(radius, bodyHeight, spireHeight) {
+    const bGrp = new THREE.Group();
+
+    // Inverted Stepped Conical Stone Corbel Bracket Base tapering to a point below
+    const corbelCone = new THREE.Mesh(
+      new THREE.ConeGeometry(radius * 1.04, radius * 2.35, 16),
+      matTravertineCampus
+    );
+    corbelCone.rotation.x = Math.PI; // Point downward!
+    corbelCone.position.y = -radius * 1.15;
+    bGrp.add(corbelCone);
+
+    const corbelRing = new THREE.Mesh(new THREE.TorusGeometry(radius * 1.02, 0.012, 8, 16), matTravertineCampus);
+    corbelRing.rotation.x = Math.PI / 2;
+    bGrp.add(corbelRing);
+
+    // Cylindrical Stone Turret Drum
+    const drum = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius * 1.02, bodyHeight, 18),
+      matArchitecturalConcrete
+    );
+    drum.position.y = bodyHeight * 0.5;
+    drum.castShadow = true;
+    drum.receiveShadow = true;
+    bGrp.add(drum);
+
+    // 2 Warm Candlelit Pointed Lancet Windows on the bartizan drum
+    for (let w = 0; w < 2; w++) {
+      const wa = (w - 0.5) * 1.1;
+      const win = createDetailedWindowAssembly(THREE, {
+        width: radius * 0.62,
+        height: bodyHeight * 0.52,
+        matStoneFrame: matTravertineCampus,
+        matMullion: matSpecularBrass,
+        matGlow: matGoldCanopy
+      });
+      win.position.set(Math.sin(wa) * (radius + 0.004), bodyHeight * 0.52, Math.cos(wa) * (radius + 0.004));
+      win.rotation.y = wa;
+      bGrp.add(win);
+    }
+
+    // Witch-Hat Conical Slate Roof
+    const spire = buildWitchHatSpire(radius * 1.14, spireHeight, 18, false);
+    spire.position.y = bodyHeight;
+    bGrp.add(spire);
+
+    return bGrp;
+  }
+
+  // Helper: Build Cylindrical / Octagonal Hogwarts Tower (Grand Staircase Keep, Astronomy Tower, Bell Towers)
+  function buildHogwartsTower({
+    x, z, radius, height, spireH, radialSegs = 24,
+    isHero = false, bartizanCount = 2
+  }) {
+    const tGrp = new THREE.Group();
+    tGrp.position.set(x, 0.52, z);
+
+    const lowerH = height * 0.58;
+    const upperH = height * 0.42;
+    const upperR = radius * 0.88;
+
+    // 1. Battered Plinth Base & Lower Cylindrical/Octagonal Stone Drum
+    const plinth = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius * 1.04, radius * 1.14, 0.18, radialSegs),
+      matObsidianSolid
+    );
+    plinth.position.y = 0.09;
+    plinth.castShadow = true;
+    plinth.receiveShadow = true;
+    tGrp.add(plinth);
+
+    const lowerDrum = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius * 1.04, lowerH, radialSegs),
+      matArchitecturalConcrete
+    );
+    lowerDrum.position.y = lowerH * 0.5;
+    lowerDrum.castShadow = true;
+    lowerDrum.receiveShadow = true;
+    tGrp.add(lowerDrum);
+
+    // Molded Stone Stringcourse Belt Ring
+    const beltRing = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 1.03, 0.022, 10, radialSegs),
+      matTravertineCampus
+    );
+    beltRing.rotation.x = Math.PI / 2;
+    beltRing.position.y = lowerH;
+    tGrp.add(beltRing);
+
+    // 2. Upper Cylindrical/Octagonal Stone Belfry Drum
+    const upperDrum = new THREE.Mesh(
+      new THREE.CylinderGeometry(upperR, radius * 0.94, upperH, radialSegs),
+      matArchitecturalConcrete
+    );
+    upperDrum.position.y = lowerH + upperH * 0.5;
+    upperDrum.castShadow = true;
+    upperDrum.receiveShadow = true;
+    tGrp.add(upperDrum);
+
+    // 3. Slender Vertical Gothic Pilaster Buttress Ribs with Pointed Pinnacles around the drum
+    const ribCount = isHero ? 8 : 6;
+    for (let b = 0; b < ribCount; b++) {
+      const ba = (b / ribCount) * Math.PI * 2;
+      const rib = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.016, 0.024, height * 0.94, 8),
+        matTravertineCampus
+      );
+      rib.position.set(Math.cos(ba) * (radius * 0.98), height * 0.47, Math.sin(ba) * (radius * 0.98));
+      tGrp.add(rib);
+
+      const pinnacle = new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.16, 8), matTravertineCampus);
+      pinnacle.position.set(Math.cos(ba) * (radius * 0.98), height + 0.06, Math.sin(ba) * (radius * 0.98));
+      tGrp.add(pinnacle);
+    }
+
+    // 4. Rhythmically Spaced Pointed Gothic Lancet Windows around the curved facade
+    const winTiers = isHero ? 4 : 3;
+    const winPerTier = isHero ? 8 : 6;
+    for (let r = 0; r < winTiers; r++) {
+      const wy = 0.22 + (r / winTiers) * (height - 0.34);
+      const curR = wy < lowerH ? radius : upperR;
+      for (let c = 0; c < winPerTier; c++) {
+        const wa = (c / winPerTier) * Math.PI * 2 + (r % 2) * (Math.PI / winPerTier);
+        const winW = isHero ? 0.088 : 0.072;
+        const winH = isHero ? 0.175 : 0.140;
+        const wAsm = createDetailedWindowAssembly(THREE, {
+          width: winW,
+          height: winH,
+          matStoneFrame: matTravertineCampus,
+          matMullion: matSpecularBrass,
+          matGlow: matGoldCanopy
+        });
+        wAsm.position.set(
+          Math.sin(wa) * (curR + 0.005),
+          wy,
+          Math.cos(wa) * (curR + 0.005)
+        );
+        wAsm.rotation.y = wa;
+        tGrp.add(wAsm);
+      }
+    }
+
+    // 5. Corbelled Machicolation Parapet Ring at top of tower
+    const parapetRing = new THREE.Mesh(
+      new THREE.CylinderGeometry(upperR * 1.10, upperR * 1.02, 0.08, radialSegs),
+      matTravertineCampus
+    );
+    parapetRing.position.y = height;
+    tGrp.add(parapetRing);
+
+    // 6. Protruding Cantilevered Bartizan Corner Turrets (Iconic Hogwarts silhouette!)
+    for (let bt = 0; bt < bartizanCount; bt++) {
+      const bAng = (bt / bartizanCount) * Math.PI * 2 + 0.55;
+      const bTurret = buildCorbelledBartizan(
+        isHero ? 0.105 : 0.082,
+        isHero ? 0.42 : 0.32,
+        isHero ? 0.44 : 0.34
+      );
+      bTurret.position.set(
+        Math.cos(bAng) * (upperR * 1.02),
+        height * (0.64 + (bt % 2) * 0.14),
+        Math.sin(bAng) * (upperR * 1.02)
+      );
+      bTurret.rotation.y = -bAng + Math.PI / 2;
+      tGrp.add(bTurret);
+    }
+
+    // 7. Soaring Conical Witch-Hat Slate Spire
+    const mainSpire = buildWitchHatSpire(upperR * 1.12, spireH, radialSegs, isHero || spireH > 0.55);
+    mainSpire.position.y = height + 0.04;
+    tGrp.add(mainSpire);
+
+    return tGrp;
+  }
+
+  // 4B. THE HOGWARTS GREAT HALL (Front-Right Promontory overlooking the Lake/Camera!)
+  //     Features: Steep-pitched slate gable roof, 7 tall pointed Gothic lancet bays separated by
+  //     pinnacled buttresses, front Gothic Rose Window gable, and slender central Fleche Spire!
+  function buildHogwartsGreatHall() {
+    const hallGrp = new THREE.Group();
+    hallGrp.position.set(0.46, 0.52, 0.54);
+    hallGrp.rotation.y = Math.PI * 0.22; // Angled toward the camera & lake for maximum silhouette drama!
+
+    const hallW = 0.52;
+    const hallH = 0.68;
+    const hallL = 1.08;
+
+    // Chamfered Gothic Stone Nave (8-sided elongated octagonal prism — zero raw 4-sided BoxGeometry!)
+    const naveShape = new THREE.Shape();
+    const hw = hallW * 0.5;
+    const hl = hallL * 0.5;
+    const ch = 0.045;
+    naveShape.moveTo(-hw + ch, -hl);
+    naveShape.lineTo(hw - ch, -hl);
+    naveShape.lineTo(hw, -hl + ch);
+    naveShape.lineTo(hw, hl - ch);
+    naveShape.lineTo(hw - ch, hl);
+    naveShape.lineTo(-hw + ch, hl);
+    naveShape.lineTo(-hw, hl - ch);
+    naveShape.lineTo(-hw, -hl + ch);
+    naveShape.closePath();
+
+    const naveGeo = new THREE.ExtrudeGeometry(naveShape, { depth: hallH, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.012, bevelSegments: 2 });
+    naveGeo.rotateX(-Math.PI / 2);
+    const naveMesh = new THREE.Mesh(naveGeo, matArchitecturalConcrete);
+    naveMesh.castShadow = true;
+    naveMesh.receiveShadow = true;
+    hallGrp.add(naveMesh);
+
+    // Steep-Pitched Gothic Slate Gable Roof (3-sided triangular prism extruded along hallL)
+    const roofPeakH = 0.48;
+    const gableShape = new THREE.Shape();
+    gableShape.moveTo(-hw * 1.12, 0);
+    gableShape.lineTo(hw * 1.12, 0);
+    gableShape.quadraticCurveTo(hw * 0.52, roofPeakH * 0.55, 0, roofPeakH);
+    gableShape.quadraticCurveTo(-hw * 0.52, roofPeakH * 0.55, -hw * 1.12, 0);
+    gableShape.closePath();
+
+    const roofGeo = new THREE.ExtrudeGeometry(gableShape, { depth: hallL + 0.06, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 });
+    const roofMesh = new THREE.Mesh(roofGeo, matSlateBootcamp);
+    roofMesh.position.set(0, hallH, -hl - 0.03);
+    roofMesh.castShadow = true;
+    roofMesh.receiveShadow = true;
+    hallGrp.add(roofMesh);
+
+    // Ornate Gothic Ridge Cresting + Soaring Central Fleche Louver Spire on the Great Hall Roof
+    const ridgeBar = new THREE.Mesh(new THREE.CylinderGeometry(0.010, 0.010, hallL + 0.08, 8), matSpecularBrass);
+    ridgeBar.rotation.x = Math.PI / 2;
+    ridgeBar.position.set(0, hallH + roofPeakH + 0.01, 0);
+    hallGrp.add(ridgeBar);
+
+    const flecheBase = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.062, 0.24, 8), matTravertineCampus);
+    flecheBase.position.set(0, hallH + roofPeakH + 0.08, -0.05);
+    const flecheSpire = buildWitchHatSpire(0.068, 0.46, 12, false);
+    flecheSpire.position.set(0, hallH + roofPeakH + 0.20, -0.05);
+    hallGrp.add(flecheBase, flecheSpire);
+
+    // 6 Bays of Tall Pointed Gothic Lancet Windows + Crocketed Stone Buttresses & Pinnacles along both sides
+    const bays = 6;
+    for (let b = 0; b <= bays; b++) {
+      const bz = -hl + 0.08 + (b / bays) * (hallL - 0.16);
+      for (let sideX of [-1, 1]) {
+        // Stepped Gothic Buttress Pier + Pointed Pinnacle Finial
+        const buttressPier = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.034, hallH + 0.06, 6), matTravertineCampus);
+        buttressPier.position.set(sideX * (hw + 0.018), (hallH + 0.06) * 0.5, bz);
+        const pinnacle = new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.18, 6), matTravertineCampus);
+        pinnacle.position.set(sideX * (hw + 0.018), hallH + 0.15, bz);
+        hallGrp.add(buttressPier, pinnacle);
+
+        // Tall Pointed Great Hall Lancet Window in each bay between buttresses
+        if (b < bays) {
+          const wz = bz + (hallL - 0.16) / (bays * 2);
+          const lancet = createDetailedWindowAssembly(THREE, {
+            width: 0.105,
+            height: 0.42,
+            matStoneFrame: matTravertineCampus,
+            matMullion: matSpecularBrass,
+            matGlow: matGoldCanopy
+          });
+          lancet.position.set(sideX * (hw + 0.005), hallH * 0.52, wz);
+          lancet.rotation.y = sideX * (Math.PI / 2);
+          hallGrp.add(lancet);
+        }
+      }
+    }
+
+    // Grand Front Gable Pointed Window + Glowing Gothic Rose Window + Twin Gable Turrets
+    const frontGreatWindow = createDetailedWindowAssembly(THREE, {
+      width: 0.24,
+      height: 0.48,
+      matStoneFrame: matTravertineCampus,
+      matMullion: matSpecularBrass,
+      matGlow: matGoldCanopy
+    });
+    frontGreatWindow.position.set(0, hallH * 0.50, hl + 0.016);
+    hallGrp.add(frontGreatWindow);
+
+    const roseRim = new THREE.Mesh(new THREE.TorusGeometry(0.095, 0.014, 10, 24), matTravertineCampus);
+    roseRim.position.set(0, hallH + roofPeakH * 0.42, hl + 0.036);
+    const rosePane = new THREE.Mesh(new THREE.CircleGeometry(0.088, 20), matGoldCanopy);
+    rosePane.position.set(0, hallH + roofPeakH * 0.42, hl + 0.032);
+    hallGrp.add(roseRim, rosePane);
+
+    for (let sideX of [-1, 1]) {
+      const gableTurret = buildCorbelledBartizan(0.062, 0.36, 0.34);
+      gableTurret.position.set(sideX * (hw + 0.02), hallH * 0.72, hl);
+      hallGrp.add(gableTurret);
+    }
+
+    return hallGrp;
+  }
+
+  cityGroup.add(buildHogwartsGreatHall());
+
+  // 4C. THE GRAND STAIRCASE KEEP & ASTRONOMY TOWER + CLUSTERED HOGWARTS TURRETS
+  const grandKeep = buildHogwartsTower({
+    x: -0.06,
+    z: -0.06,
+    radius: 0.36,
+    height: 2.18,
+    spireH: 0.88,
+    radialSegs: 28,
+    isHero: true,
+    bartizanCount: 4
+  });
+  cityGroup.add(grandKeep);
+
+  // Subtle Rotating Astrolabe Ring crowning the Astronomy / Grand Keep Spire
+  const heliostatGroup = new THREE.Group();
+  heliostatGroup.position.set(-0.06, 3.68, -0.06);
+  const helioRing = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.014, 10, 32), matSpecularBrass);
+  const helioOrb = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 16), matGoldCanopy);
+  heliostatGroup.add(helioRing, helioOrb);
+  cityGroup.add(heliostatGroup);
+  animatedParts.cityHeliostat = heliostatGroup;
+
+  // 8 Curved Stone Gothic Flying Buttresses bracing the Grand Keep (CatmullRomCurve3 — zero rectangular bars!)
+  for (let fb = 0; fb < 8; fb++) {
+    const a = (fb / 8) * Math.PI * 2;
+    const fbCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.06 + Math.cos(a) * 0.35, 1.72, -0.06 + Math.sin(a) * 0.35),
+      new THREE.Vector3(-0.06 + Math.cos(a) * 0.56, 1.54, -0.06 + Math.sin(a) * 0.56),
+      new THREE.Vector3(-0.06 + Math.cos(a) * 0.72, 1.12, -0.06 + Math.sin(a) * 0.72)
+    ]);
+    cityGroup.add(new THREE.Mesh(new THREE.TubeGeometry(fbCurve, 12, 0.022, 8, false), matTravertineCampus));
+  }
+
+  // Clustered Hogwarts Towers (Astronomy Tower, Gryffindor Tower, Ravenclaw Tower, Bell Towers, Clock Tower)
+  const hogwartsTowers = [
+    { x: -0.58, z: 0.36, radius: 0.22, height: 1.78, spireH: 0.72, radialSegs: 24, bartizanCount: 3, bridge: true },  // Astronomy Tower
+    { x: 0.56,  z: -0.44, radius: 0.21, height: 1.66, spireH: 0.68, radialSegs: 24, bartizanCount: 2, bridge: true }, // Gryffindor Tower
+    { x: -0.52, z: -0.52, radius: 0.19, height: 1.52, spireH: 0.64, radialSegs: 16, bartizanCount: 2, bridge: true }, // Ravenclaw Octagonal Tower
+    { x: -0.14, z: 0.68, radius: 0.17, height: 1.38, spireH: 0.56, radialSegs: 20, bartizanCount: 2, bridge: true },  // Viaduct Gatehouse Tower
+    { x: -0.84, z: -0.08, radius: 0.15, height: 1.18, spireH: 0.48, radialSegs: 16, bartizanCount: 1, bridge: false },
+    { x: 0.84,  z: 0.06, radius: 0.15, height: 1.22, spireH: 0.50, radialSegs: 16, bartizanCount: 1, bridge: false },
+    { x: 0.12,  z: -0.82, radius: 0.16, height: 1.14, spireH: 0.46, radialSegs: 16, bartizanCount: 1, bridge: false }
+  ];
+
+  hogwartsTowers.forEach((ht) => {
+    cityGroup.add(buildHogwartsTower(ht));
+    if (ht.bridge) {
+      // Arched Stone Gothic Sky-Bridge connecting tower to Grand Keep
+      const bridgeMidX = (ht.x - 0.06) * 0.5;
+      const bridgeMidZ = (ht.z - 0.06) * 0.5;
+      const bridgeCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.06, 1.36, -0.06),
+        new THREE.Vector3(bridgeMidX, 1.48, bridgeMidZ),
+        new THREE.Vector3(ht.x, 1.32, ht.z)
+      ]);
+      cityGroup.add(new THREE.Mesh(new THREE.TubeGeometry(bridgeCurve, 12, 0.038, 8, false), matTravertineCampus));
+    }
+  });
+
+  // 4D. THE ICONIC HOGWARTS MULTI-ARCH VIADUCT BRIDGE (Spanning the Chasm toward the Central Sanctuary!)
+  function buildHogwartsViaduct(startVec, endVec, archCount, deckY) {
+    const vGrp = new THREE.Group();
+    const dir = new THREE.Vector3().subVectors(endVec, startVec);
+    const totalLen = dir.length();
+    const angle = Math.atan2(dir.x, dir.z);
+
+    // Roadway Deck & Twin Stone Parapet Walls (Cylindrical/Tube mouldings)
+    const deckCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(startVec.x, deckY, startVec.z),
+      new THREE.Vector3((startVec.x + endVec.x) * 0.5, deckY + 0.02, (startVec.z + endVec.z) * 0.5),
+      new THREE.Vector3(endVec.x, deckY, endVec.z)
+    ]);
+    vGrp.add(new THREE.Mesh(new THREE.TubeGeometry(deckCurve, 20, 0.055, 8, false), matTravertineCampus));
+
+    const spanStep = totalLen / archCount;
+    for (let i = 0; i <= archCount; i++) {
+      const u = i / archCount;
+      const px = THREE.MathUtils.lerp(startVec.x, endVec.x, u);
+      const pz = THREE.MathUtils.lerp(startVec.z, endVec.z, u);
+
+      // Tall Tapered Octagonal Stone Viaduct Pier rising from the chasm floor
+      const pierH = deckY + 0.06;
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.052, pierH, 8), matArchitecturalConcrete);
+      pier.position.set(px, pierH * 0.5 - 0.04, pz);
+      pier.castShadow = true;
+      pier.receiveShadow = true;
+      vGrp.add(pier);
+
+      // Pointed Gothic Viaduct Arch spanning between piers
+      if (i < archCount) {
+        const uNext = (i + 1) / archCount;
+        const nx = THREE.MathUtils.lerp(startVec.x, endVec.x, uNext);
+        const nz = THREE.MathUtils.lerp(startVec.z, endVec.z, uNext);
+        const mx = (px + nx) * 0.5;
+        const mz = (pz + nz) * 0.5;
+        const archCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(px, deckY - 0.22, pz),
+          new THREE.Vector3(mx, deckY - 0.02, mz),
+          new THREE.Vector3(nx, deckY - 0.22, nz)
+        ]);
+        vGrp.add(new THREE.Mesh(new THREE.TubeGeometry(archCurve, 12, 0.024, 8, false), matTravertineCampus));
+      }
+    }
+    return vGrp;
+  }
+
+  // Primary Viaduct Bridge spanning from Hogwarts Gatehouse across the gorge toward the Sanctuary
+  cityGroup.add(buildHogwartsViaduct(
+    new THREE.Vector3(-0.35, 0, -0.35),
+    new THREE.Vector3(-1.35, 0, -1.15),
+    5,
+    0.68
+  ));
+
+  // Secondary Viaduct Causeway along the SE Highland Cliff (directly visible in ?view=closeup!)
+  cityGroup.add(buildHogwartsViaduct(
+    new THREE.Vector3(0.48, 0, 0.62),
+    new THREE.Vector3(1.18, 0, 0.96),
+    4,
+    0.58
+  ));
 
   const escapementBridge = new THREE.Group();
   escapementBridge.position.set(-0.75, 0.62, -0.68);
   escapementBridge.rotation.y = -Math.PI * 0.72;
-  const escBeam = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.045, 0.065), matSpecularBrass);
   const escGear = createToothedGearGroup(THREE, {
-    radius: 0.18,
-    tube: 0.025,
+    radius: 0.16,
+    tube: 0.022,
     teeth: 20,
-    toothSize: 0.02,
+    toothSize: 0.018,
     spokes: 4,
     matRim: matSpecularBrass,
     matTooth: matAgedBrass
   });
   escGear.rotation.x = Math.PI / 2;
-  escapementBridge.add(escBeam, escGear);
+  escapementBridge.add(escGear);
   cityGroup.add(escapementBridge);
   animatedParts.cityEscapement = escapementBridge;
-
-  function buildCitadelTower({ x, z, w, h, spireH, isHero = false }) {
-    const tGrp = new THREE.Group();
-    tGrp.position.set(x, 0.48, z);
-
-    const lowerH = h * 0.58;
-    const upperH = h * 0.42;
-    // Lower battered stone & board-formed concrete keep body
-    const lowerBody = new THREE.Mesh(new THREE.BoxGeometry(w, lowerH, w), isHero ? matArchitecturalConcrete : matObsidianSolid);
-    lowerBody.position.y = lowerH / 2;
-    lowerBody.castShadow = true;
-    lowerBody.receiveShadow = true;
-    tGrp.add(lowerBody);
-
-    // Chiseled limestone & brass belt course
-    const waistCornice = new THREE.Mesh(new THREE.BoxGeometry(w + 0.09, 0.065, w + 0.09), matTravertineCampus);
-    waistCornice.position.y = lowerH;
-    tGrp.add(waistCornice);
-
-    const upperW = w * 0.85;
-    const upperBody = new THREE.Mesh(new THREE.BoxGeometry(upperW, upperH, upperW), matSlateBootcamp);
-    upperBody.position.y = lowerH + upperH / 2;
-    upperBody.castShadow = true;
-    upperBody.receiveShadow = true;
-    tGrp.add(upperBody);
-
-    // Alternating protruding corner Quoin Stones (rusticated ashlar corner blocks)
-    const quoinCourses = isHero ? 14 : 9;
-    for (let q = 0; q < quoinCourses; q++) {
-      const qy = 0.07 + (q / quoinCourses) * (h - 0.12);
-      const isUpper = qy > lowerH;
-      const curW = isUpper ? upperW : w;
-      const qLong = (q % 2 === 0) ? 0.095 : 0.062;
-      const qShort = (q % 2 === 0) ? 0.062 : 0.095;
-      const qHeight = (h / quoinCourses) * 0.76;
-      const quoinMat = q % 3 === 0 ? matTravertineCampus : matArchitecturalConcrete;
-
-      for (let cx of [-1, 1]) {
-        for (let cz of [-1, 1]) {
-          const quoin = new THREE.Mesh(new THREE.BoxGeometry(qLong, qHeight, qShort), quoinMat);
-          quoin.position.set(cx * (curW * 0.5 + 0.008), qy, cz * (curW * 0.5 + 0.008));
-          quoin.castShadow = true;
-          tGrp.add(quoin);
-        }
-      }
-    }
-
-    // 4-Layer 3D Mullioned Gothic Window Assemblies on all 4 facades
-    const cols = isHero ? 3 : 2;
-    const rows = isHero ? 4 : 3;
-    for (let r = 0; r < rows; r++) {
-      const wy = 0.22 + (r / rows) * (h - 0.36);
-      const curW = wy < lowerH ? w : upperW;
-      for (let c = 0; c < cols; c++) {
-        const offset = (c - (cols - 1) / 2) * (curW * 0.31);
-        const winMat = (r + c) % 3 === 0 ? matCyanRoot : matGoldCanopy;
-        const winW = isHero ? 0.092 : 0.076;
-        const winH = isHero ? 0.165 : 0.135;
-
-        // +Z and -Z facades
-        for (let sideZ of [-1, 1]) {
-          const wAsm = createDetailedWindowAssembly(THREE, {
-            width: winW,
-            height: winH,
-            matStoneFrame: matTravertineCampus,
-            matMullion: matSpecularBrass,
-            matGlow: winMat
-          });
-          wAsm.position.set(offset, wy, sideZ * (curW * 0.5 + 0.006));
-          if (sideZ < 0) wAsm.rotation.y = Math.PI;
-          tGrp.add(wAsm);
-        }
-        // +X and -X facades
-        for (let sideX of [-1, 1]) {
-          const wAsm = createDetailedWindowAssembly(THREE, {
-            width: winW,
-            height: winH,
-            matStoneFrame: matTravertineCampus,
-            matMullion: matSpecularBrass,
-            matGlow: winMat
-          });
-          wAsm.position.set(sideX * (curW * 0.5 + 0.006), wy, offset);
-          wAsm.rotation.y = sideX * (Math.PI / 2);
-          tGrp.add(wAsm);
-        }
-      }
-    }
-
-    // Machicolation Corbel Brackets + Crenellated Battlement Parapet (individual Merlons & Crenels)
-    const crown = new THREE.Mesh(new THREE.BoxGeometry(upperW + 0.11, 0.065, upperW + 0.11), matArchitecturalConcrete);
-    crown.position.y = h;
-    tGrp.add(crown);
-
-    const merlonCount = isHero ? 5 : 4;
-    const pSpan = upperW + 0.10;
-    for (let m = 0; m < merlonCount; m++) {
-      const mOff = (m / (merlonCount - 1) - 0.5) * (pSpan - 0.07);
-      for (let side of [-1, 1]) {
-        // Z-side merlons + corbels
-        const merlonZ = new THREE.Mesh(new THREE.BoxGeometry(0.062, 0.085, 0.038), matTravertineCampus);
-        merlonZ.position.set(mOff, h + 0.072, side * (pSpan * 0.5));
-        const corbelZ = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.055, 0.042), matAgedBrass);
-        corbelZ.position.set(mOff, h - 0.045, side * (pSpan * 0.5 + 0.01));
-        // X-side merlons + corbels
-        const merlonX = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.085, 0.062), matTravertineCampus);
-        merlonX.position.set(side * (pSpan * 0.5), h + 0.072, mOff);
-        const corbelX = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.055, 0.036), matAgedBrass);
-        corbelX.position.set(side * (pSpan * 0.5 + 0.01), h - 0.045, mOff);
-        tGrp.add(merlonZ, corbelZ, merlonX, corbelX);
-      }
-    }
-
-    // 12-Course Shingled Conical Spire (tiered overlapping slate, copper & brass roof courses)
-    const shingleCourses = 12;
-    const baseConeR = upperW * 0.55;
-    for (let sc = 0; sc < shingleCourses; sc++) {
-      const t0 = sc / shingleCourses;
-      const t1 = (sc + 1) / shingleCourses;
-      const rBot = baseConeR * (1.0 - t0 * 0.92);
-      const rTop = baseConeR * (1.0 - t1 * 0.92);
-      const cH = (spireH / shingleCourses) * 1.18;
-      const cY = h + 0.04 + t0 * spireH + cH * 0.5;
-      const courseMat = sc % 3 === 0
-        ? matSpecularBrass
-        : (sc % 2 === 0 ? matSlateBootcamp : matWorkshopCopper);
-      const courseCone = new THREE.Mesh(
-        new THREE.CylinderGeometry(rTop, rBot, cH, 8 + (sc % 2) * 4),
-        courseMat
-      );
-      courseCone.position.y = cY;
-      courseCone.rotation.y = sc * 0.39;
-      courseCone.castShadow = true;
-      tGrp.add(courseCone);
-    }
-
-    for (let px of [-1, 1]) {
-      for (let pz of [-1, 1]) {
-        const pin = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.25, 4), matSpecularBrass);
-        pin.position.set(px * (upperW * 0.48), h + 0.14, pz * (upperW * 0.48));
-        tGrp.add(pin);
-
-        // ROUND 3 MICRO-PROP: Carved Stone Gargoyle Waterspout projecting from each upper parapet corner
-        const gargoyleSpout = new THREE.Mesh(
-          new THREE.ConeGeometry(0.022, 0.125, 5),
-          matTravertineCampus
-        );
-        gargoyleSpout.rotation.z = -px * Math.PI * 0.42;
-        gargoyleSpout.rotation.y = pz > 0 ? 0.35 : -0.35;
-        gargoyleSpout.position.set(px * (upperW * 0.56), h - 0.02, pz * (upperW * 0.56));
-        tGrp.add(gargoyleSpout);
-      }
-    }
-
-    // ROUND 3 MICRO-PROP: Wrought-Iron & Brass Wall Sconces with Glowing Warm Lanterns on Hero Keep & Major Towers
-    if (isHero || h > 1.35) {
-      for (let sideZ of [-1, 1]) {
-        for (let sx of [-1, 1]) {
-          const sconceGrp = new THREE.Group();
-          sconceGrp.position.set(sx * (w * 0.36), lowerH * 0.62, sideZ * (w * 0.5 + 0.022));
-          const arm = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.055), matAgedBrass);
-          const lanternCage = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.014, 0.042, 6), matGoldCanopy);
-          lanternCage.position.set(0, -0.022, sideZ * 0.020);
-          sconceGrp.add(arm, lanternCage);
-          tGrp.add(sconceGrp);
-        }
-      }
-    }
-
-    return tGrp;
-  }
-
-  const centralKeep = buildCitadelTower({ x: 0, z: 0, w: 0.68, h: 2.15, spireH: 0.55, isHero: true });
-  cityGroup.add(centralKeep);
-
-  const heliostatGroup = new THREE.Group();
-  heliostatGroup.position.set(0, 3.28, 0);
-  const helioRing = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.022, 10, 32), matSpecularBrass);
-  const helioMirror = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.025, 24), matGoldCanopy);
-  helioMirror.rotation.x = Math.PI * 0.32;
-  heliostatGroup.add(helioRing, helioMirror);
-  cityGroup.add(heliostatGroup);
-  animatedParts.cityHeliostat = heliostatGroup;
-
-  for (let fb = 0; fb < 8; fb++) {
-    const a = (fb / 8) * Math.PI * 2;
-    const buttress = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.055, 0.045), matAgedBrass);
-    buttress.position.set(Math.cos(a) * 0.52, 1.45, Math.sin(a) * 0.52);
-    buttress.rotation.y = -a;
-    buttress.rotation.z = -0.52;
-    cityGroup.add(buttress);
-  }
-
-  const cityTowers = [
-    { x: -0.64, z: 0.48, w: 0.40, h: 1.48, spireH: 0.45, bridge: true },
-    { x: 0.64, z: 0.48, w: 0.42, h: 1.62, spireH: 0.48, bridge: true },
-    { x: -0.58, z: -0.56, w: 0.38, h: 1.36, spireH: 0.42, bridge: true },
-    { x: 0.58, z: -0.56, w: 0.38, h: 1.44, spireH: 0.44, bridge: true },
-    { x: 0.0, z: 0.82, w: 0.32, h: 1.08, spireH: 0.34, bridge: false },
-    { x: -0.86, z: -0.04, w: 0.30, h: 1.02, spireH: 0.32, bridge: false },
-    { x: 0.86, z: -0.04, w: 0.30, h: 1.05, spireH: 0.32, bridge: false },
-    { x: 0.0, z: -0.84, w: 0.32, h: 0.98, spireH: 0.30, bridge: false }
-  ];
-
-  cityTowers.forEach((ct) => {
-    cityGroup.add(buildCitadelTower(ct));
-    if (ct.bridge) {
-      const dist = Math.hypot(ct.x, ct.z);
-      const bridgeAngle = Math.atan2(ct.x, ct.z);
-      const skyBridge = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.08, dist), matSpecularBrass);
-      skyBridge.position.set(ct.x * 0.5, 1.42, ct.z * 0.5);
-      skyBridge.rotation.y = bridgeAngle;
-      cityGroup.add(skyBridge);
-    }
-  });
 
   // ============================================================================
   // 5. STRUCTURE #4: II · THE WORKSHOP (COPPER FOUNDRY & 4 CRAFT ALCOVES)
@@ -2713,7 +3041,7 @@ export function initCitadelWorldV6(canvas) {
   campusGroup.add(campusGear);
   animatedParts.campusGear = campusGear;
 
-  const campusPlinth = new THREE.Mesh(new THREE.BoxGeometry(1.72, 0.22, 1.36), matTravertineCampus);
+  const campusPlinth = new THREE.Mesh(new THREE.CylinderGeometry(1.16, 1.26, 0.22, 12), matTravertineCampus);
   campusPlinth.position.y = 0.20;
   campusPlinth.receiveShadow = true;
   campusGroup.add(campusPlinth);
@@ -2729,28 +3057,31 @@ export function initCitadelWorldV6(canvas) {
     campusGroup.add(tierBench);
   }
 
-  const chalkboard = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.42, 0.06), matObsidianSolid);
-  chalkboard.position.set(0, 0.54, -0.48);
-  const chalkFrame = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.48, 0.04), matSpecularBrass);
-  chalkFrame.position.set(0, 0.54, -0.49);
-  const chalkGlow = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.03, 0.07), matCyanRoot);
-  chalkGlow.position.set(0, 0.54, -0.48);
-  campusGroup.add(chalkboard, chalkFrame, chalkGlow);
+  // Arched Gothic Lectern & Cloister Colonnade on the Campus Acropolis
+  const lecternArch = createDetailedWindowAssembly(THREE, {
+    width: 0.42,
+    height: 0.48,
+    matStoneFrame: matTravertineCampus,
+    matMullion: matSpecularBrass,
+    matGlow: matCyanRoot
+  });
+  lecternArch.position.set(0, 0.56, -0.48);
+  campusGroup.add(lecternArch);
 
-  for (let c = 0; c < 14; c++) {
-    const isFront = c < 7;
-    const idx = c % 7;
-    const cx = -0.72 + idx * 0.24;
-    const cz = isFront ? 0.52 : -0.56;
-    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.058, 0.68, 16), matTravertineCampus);
+  for (let c = 0; c < 12; c++) {
+    const ca = (c / 12) * Math.PI * 2;
+    const cx = Math.cos(ca) * 0.88;
+    const cz = Math.sin(ca) * 0.88;
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.68, 16), matTravertineCampus);
     col.position.set(cx, 0.65, cz);
     col.castShadow = true;
-    const cap = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.05, 0.13), matAgedBrass);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.048, 0.06, 8), matAgedBrass);
     cap.position.set(cx, 1.00, cz);
     campusGroup.add(col, cap);
   }
 
-  const entablature = new THREE.Mesh(new THREE.BoxGeometry(1.66, 0.10, 1.24), matAgedBrass);
+  const entablature = new THREE.Mesh(new THREE.TorusGeometry(0.88, 0.055, 10, 36), matAgedBrass);
+  entablature.rotation.x = Math.PI / 2;
   entablature.position.y = 1.06;
   entablature.castShadow = true;
   campusGroup.add(entablature);
@@ -2767,7 +3098,7 @@ export function initCitadelWorldV6(canvas) {
   campusGroup.add(campusLantern);
 
   // ============================================================================
-  // 7. STRUCTURE #5B: IV · 2021 BOOTCAMP (COLUMNAR BASALT CLIFFS & FRESNEL LIGHTHOUSE)
+  // 7. STRUCTURE #5B: IV · 2021 BOOTCAMP (CRAGGY BASALT CLIFFS, VIADUCT & FRESNEL LIGHTHOUSE)
   // ============================================================================
   const bootcampGroup = new THREE.Group();
   bootcampGroup.position.set(2.75, 0.18, -2.25);
@@ -2777,20 +3108,27 @@ export function initCitadelWorldV6(canvas) {
     const a = (b / 28) * Math.PI * 2;
     const dist = 0.18 + (b % 4) * 0.24;
     const bh = 0.28 + (1.1 - dist) * 0.42 + (b % 3) * 0.09;
-    const hexCol = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.16, bh, 6), matSlateBootcamp);
+    const hexCol = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.16, bh, 7), matSlateBootcamp);
     hexCol.position.set(Math.cos(a) * dist, bh / 2, Math.sin(a) * dist);
     hexCol.castShadow = true;
     hexCol.receiveShadow = true;
     bootcampGroup.add(hexCol);
   }
 
+  // Arched Gothic Stone Viaduct Causeway leading up to the Cliff Lighthouse
+  bootcampGroup.add(buildHogwartsViaduct(
+    new THREE.Vector3(-0.95, 0, 0.65),
+    new THREE.Vector3(-0.12, 0, 0.05),
+    4,
+    0.54
+  ));
+
   for (let st = 0; st < 16; st++) {
     const sa = st * 0.18;
     const sr = 0.92 - st * 0.025;
     const sy = 0.08 + st * 0.038;
-    const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, 0.09), matSpecularBrass);
+    const stepMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.032, 8), matTravertineCampus);
     stepMesh.position.set(Math.cos(sa) * sr, sy, Math.sin(sa) * sr);
-    stepMesh.rotation.y = -sa;
     bootcampGroup.add(stepMesh);
   }
 
@@ -3168,30 +3506,30 @@ export function initCitadelWorldV6(canvas) {
     kageTreeBirds.push({ ...kb, basePos: ks.pos.clone(), perched: ks.perched, phase: ks.phase });
   });
 
-  // 18 Delicate 4-Winged Bioluminescent Dragonflies darting among the Kage World-Tree's mossy bark & veined leaves
-  const matDragonflyWing = new THREE.MeshStandardMaterial({
-    color: 0xB8E6DF,
-    emissive: 0x167A72,
-    emissiveIntensity: 0.08,
+  // 22 Drifting Bioluminescent Pandora Woodsprites (Atokirina') floating around the Tree of Eywa
+  const matWoodspriteBell = new THREE.MeshStandardMaterial({
+    color: 0xFFF0FF,
+    emissive: 0xE882FF,
+    emissiveIntensity: 1.55,
     transparent: true,
-    opacity: 0.58,
-    roughness: 0.32,
-    metalness: 0.10,
+    opacity: 0.86,
+    roughness: 0.18,
+    metalness: 0.04,
     side: THREE.DoubleSide
   });
 
   const kageDragonflies = [];
-  for (let d = 0; d < 8; d++) {
-    const isGoldInsect = d % 2 === 0;
+  for (let d = 0; d < 22; d++) {
+    const isCyanSprite = d % 3 === 0;
     const df = createLuminousDragonfly(THREE, {
-      matBody: matOxidizedBronze,
-      matGlow: isGoldInsect ? matGoldCanopy : matCyanRoot,
-      matWing: matDragonflyWing,
-      scale: 0.52 + (d % 3) * 0.10
+      matBody: matEywaTendrilPearl,
+      matGlow: isCyanSprite ? matEywaTendrilCyan : matEywaTendrilPearl,
+      matWing: matWoodspriteBell,
+      scale: 0.68 + (d % 4) * 0.14
     });
-    const angle = (d / 8) * Math.PI * 2 + 0.45;
-    const radius = 0.58 + (d % 3) * 0.24;
-    const height = 1.25 + (d % 4) * 0.26;
+    const angle = (d / 22) * Math.PI * 2 + 0.25;
+    const radius = 0.42 + (d % 5) * 0.28;
+    const height = 0.72 + (d % 6) * 0.34;
     df.dfGroup.position.set(Math.cos(angle) * radius, height, Math.sin(angle) * radius);
     kageFaunaGroup.add(df.dfGroup);
     kageDragonflies.push({
@@ -3199,8 +3537,8 @@ export function initCitadelWorldV6(canvas) {
       baseAngle: angle,
       baseRadius: radius,
       baseY: height,
-      speed: 0.45 + (d % 4) * 0.15,
-      phase: d * 0.85
+      speed: 0.28 + (d % 4) * 0.08,
+      phase: d * 0.65
     });
   }
 
@@ -3210,30 +3548,30 @@ export function initCitadelWorldV6(canvas) {
   // Winds physically through the scene:
   // 0.00 Overview -> 0.20 City Keep & Feathered Falcons -> 0.50 Kage World-Tree Centerpiece -> 0.70 Workshop -> 0.90 Bootcamp
   const masterCameraRail = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.15, 4.55, 8.85),   // idx 0 (t=0.00) Grand Astrolabe Overview
-    new THREE.Vector3(1.85, 2.75, 5.25),   // idx 1 (t=0.10) swooping down toward The City approach
-    new THREE.Vector3(3.68, 2.12, 3.62),   // idx 2 (t=0.20) City Bricks, Windows, Sconces & Hero Feathered Falcons Close-Up
-    new THREE.Vector3(2.55, 2.18, 2.25),   // idx 3 (t=0.30) threading beside the Keep & flying buttresses
-    new THREE.Vector3(1.15, 2.02, 2.15),   // idx 4 (t=0.40) approaching the Kage Sanctuary
-    new THREE.Vector3(0.18, 1.88, 1.92),   // idx 5 (t=0.50) Kage World-Tree Centerpiece Close-Up (Mossy Bark, Tapering Branches, Veined Leaves & Fauna)
+    new THREE.Vector3(0.45, 4.35, 8.65),   // idx 0 (t=0.00) Grand Astrolabe Overview (Hogwarts + Eywa Tree)
+    new THREE.Vector3(2.15, 2.55, 5.15),   // idx 1 (t=0.10) swooping down toward Hogwarts Castle & Viaduct
+    new THREE.Vector3(4.05, 1.95, 3.85),   // idx 2 (t=0.20) Hogwarts Great Hall Lancet Windows, Witch-Hat Spires, Viaduct & Falcons
+    new THREE.Vector3(2.65, 2.15, 2.35),   // idx 3 (t=0.30) threading beside the Grand Staircase Keep & flying buttresses
+    new THREE.Vector3(1.25, 1.98, 2.35),   // idx 4 (t=0.40) approaching the Eywa Sanctuary
+    new THREE.Vector3(0.28, 1.86, 3.35),   // idx 5 (t=0.50) Tree of Eywa Close-Up (Braided Trunk, Cascading Weeping Willow Tendrils, Roots & Woodsprites)
     new THREE.Vector3(-1.85, 1.92, 2.45),  // idx 6 (t=0.60) gliding West toward the Copper Foundry
     new THREE.Vector3(-4.15, 1.82, 2.55),  // idx 7 (t=0.70) The Workshop Foundry & 4 Craft Alcoves
     new THREE.Vector3(-1.25, 1.65, -3.45), // idx 8 (t=0.80) The Campus Amphitheater
-    new THREE.Vector3(1.45, 1.68, -0.75),  // idx 9 (t=0.90) Bootcamp Basalt Cliffs, Mist & Lighthouse
+    new THREE.Vector3(4.15, 2.15, -3.75),  // idx 9 (t=0.90) Bootcamp Basalt Cliffs, Viaduct & Lighthouse
     new THREE.Vector3(3.65, 2.45, 3.85)    // idx 10 (t=1.00) climbing back across the harbor toward Overview
   ], false, 'centripetal', 0.5);
 
   const masterLookAtRail = new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0.20, 1.15, 0.15),   // idx 0 (t=0.00) Center of the Astrolabe Table
-    new THREE.Vector3(2.15, 1.65, 1.95),   // idx 1 (t=0.10)
-    new THREE.Vector3(2.38, 1.82, 2.02),   // idx 2 (t=0.20) City Keep Bricks, Windows & Hero Falcons
+    new THREE.Vector3(0.45, 1.32, 0.35),   // idx 0 (t=0.00) Center of the Astrolabe Table
+    new THREE.Vector3(2.05, 1.65, 1.85),   // idx 1 (t=0.10)
+    new THREE.Vector3(2.15, 1.68, 1.85),   // idx 2 (t=0.20) Hogwarts Great Hall, Astronomy Tower & Falcons
     new THREE.Vector3(1.65, 1.75, 1.25),   // idx 3 (t=0.30)
-    new THREE.Vector3(0.25, 1.72, 0.25),   // idx 4 (t=0.40)
-    new THREE.Vector3(0.00, 1.72, 0.00),   // idx 5 (t=0.50) Centerpiece Kage World-Tree Trunk, Moss, Branches & Leaves
+    new THREE.Vector3(0.25, 1.65, 0.25),   // idx 4 (t=0.40)
+    new THREE.Vector3(0.00, 1.56, 0.00),   // idx 5 (t=0.50) Centerpiece Tree of Eywa Braided Trunk & Weeping Willow Canopy
     new THREE.Vector3(-2.15, 1.15, 1.15),  // idx 6 (t=0.60)
     new THREE.Vector3(-3.10, 0.92, 1.35),  // idx 7 (t=0.70) Workshop Copper Dome & Hearth
     new THREE.Vector3(-2.55, 0.78, -2.35), // idx 8 (t=0.80) Campus Colonnade
-    new THREE.Vector3(2.75, 1.32, -2.25),  // idx 9 (t=0.90) Bootcamp Lighthouse & Flock II
+    new THREE.Vector3(2.75, 1.32, -2.25),  // idx 9 (t=0.90) Bootcamp Lighthouse & Viaduct
     new THREE.Vector3(0.45, 1.25, 0.35)    // idx 10 (t=1.00)
   ], false, 'centripetal', 0.5);
 
