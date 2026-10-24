@@ -822,19 +822,13 @@
      ============================================================================ */
   .study-vignette {
     background:
-      radial-gradient(circle at 52% 46%, rgba(10, 12, 16, 0.0) 38%, rgba(5, 7, 11, 0.64) 84%, rgba(3, 4, 7, 0.90) 100%);
+      radial-gradient(circle at 52% 46%, rgba(10, 12, 16, 0.0) 70%, rgba(5, 7, 11, 0.16) 92%, rgba(3, 4, 7, 0.32) 100%) !important;
   }
 
-  /* Subtle tactile film-grain overlay across the 3D stage */
+  /* Disabled 3px film-grain overlay so 2x Retina 4x-MSAA WebGL canvas is 100% razor-sharp */
   .samana-film-grain {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 3;
-    opacity: 0.042;
-    background-image: radial-gradient(rgba(242, 238, 228, 0.75) 0.75px, transparent 0.75px);
-    background-size: 3px 3px;
-    mix-blend-mode: overlay;
+    display: none !important;
+    opacity: 0 !important;
   }
 
   /* Ultra-clean borderless top-left Samana-style wordmark & realm coordinates */
@@ -1404,16 +1398,18 @@
     // Master Camera Rail stops (0.00 -> 1.00) + hyperreal close-up framing per stop
     const RAIL_STOPS = {
       overview: { t: 0.00, realm: 'city', depth: '—000 M · OVERVIEW', fov: 35 },
-      city:     { t: 0.22, realm: 'city', depth: '—022 M · THE CITY KEEP', fov: 28 },
-      kage:     { t: 0.48, realm: 'kage', depth: '—048 M · KAGE NEURAL HEART', fov: 30 },
-      workshop: { t: 0.72, realm: 'workshop', depth: '—072 M · COPPER FOUNDRY', fov: 30 },
-      campus:   { t: 0.84, realm: 'campus', depth: '—084 M · TRAVERTINE STOA', fov: 31 },
-      bootcamp: { t: 0.92, realm: 'bootcamp', depth: '—092 M · BASALT LIGHTHOUSE', fov: 28 }
+      city:     { t: 0.20, realm: 'city', depth: '—020 M · THE CITY KEEP', fov: 28 },
+      kage:     { t: 0.50, realm: 'kage', depth: '—050 M · KAGE WORLD-TREE', fov: 28 },
+      workshop: { t: 0.70, realm: 'workshop', depth: '—070 M · COPPER FOUNDRY', fov: 30 },
+      campus:   { t: 0.80, realm: 'campus', depth: '—080 M · TRAVERTINE STOA', fov: 31 },
+      bootcamp: { t: 0.90, realm: 'bootcamp', depth: '—090 M · BASALT LIGHTHOUSE', fov: 28 }
     };
 
-    // High-detail telephoto framing points for ?view=closeup and ?view=bootcamp
-    REALM_CONFIG.city.closeupPos = new THREE.Vector3(3.85, 2.18, 3.88);
-    REALM_CONFIG.city.closeupLook = new THREE.Vector3(2.35, 1.78, 1.95);
+    // High-detail telephoto framing points for ?view=closeup, ?view=kage, and ?view=bootcamp
+    REALM_CONFIG.city.closeupPos = new THREE.Vector3(3.68, 2.12, 3.62);
+    REALM_CONFIG.city.closeupLook = new THREE.Vector3(2.38, 1.82, 2.02);
+    REALM_CONFIG.kage.closeupPos = new THREE.Vector3(0.18, 1.88, 1.92);
+    REALM_CONFIG.kage.closeupLook = new THREE.Vector3(0.00, 1.72, 0.00);
     REALM_CONFIG.bootcamp.closeupPos = new THREE.Vector3(1.42, 1.68, -0.72);
     REALM_CONFIG.bootcamp.closeupLook = new THREE.Vector3(2.75, 1.32, -2.25);
 
@@ -1667,13 +1663,68 @@
 
     if (viewParam === 'bootcamp') {
       window.focusRealm('bootcamp', true);
+      useRailSpline = false;
+      currentCamPos.copy(REALM_CONFIG.bootcamp.closeupPos);
+      currentLookAt.copy(REALM_CONFIG.bootcamp.closeupLook);
     } else if (viewParam === 'closeup') {
       window.focusRealm('city', true);
+      useRailSpline = false;
+      currentCamPos.copy(REALM_CONFIG.city.closeupPos);
+      currentLookAt.copy(REALM_CONFIG.city.closeupLook);
+    } else if (viewParam === 'kage') {
+      window.focusRealm('kage', true);
+      useRailSpline = false;
+      currentCamPos.copy(REALM_CONFIG.kage.closeupPos);
+      currentLookAt.copy(REALM_CONFIG.kage.closeupLook);
+    } else if (viewParam === 'workshop') {
+      window.focusRealm('workshop', true);
+      useRailSpline = false;
+      currentCamPos.copy(REALM_CONFIG.workshop.closeupPos);
+      currentLookAt.copy(REALM_CONFIG.workshop.closeupLook);
     }
+
+    window.snapToView = function(mode) {
+      if (mode === 'stage') {
+        window.focusRealm('city', false);
+        useRailSpline = false;
+        targetCamPos.copy(REALM_CONFIG.city.camPos);
+        targetLookAt.copy(REALM_CONFIG.city.lookAt);
+        currentCamPos.copy(REALM_CONFIG.city.camPos);
+        currentLookAt.copy(REALM_CONFIG.city.lookAt);
+      } else if (mode === 'closeup') {
+        window.focusRealm('city', true);
+        useRailSpline = false;
+        targetCamPos.copy(REALM_CONFIG.city.closeupPos);
+        targetLookAt.copy(REALM_CONFIG.city.closeupLook);
+        currentCamPos.copy(REALM_CONFIG.city.closeupPos);
+        currentLookAt.copy(REALM_CONFIG.city.closeupLook);
+      } else if (mode === 'bootcamp') {
+        window.focusRealm('bootcamp', true);
+        useRailSpline = false;
+        targetCamPos.copy(REALM_CONFIG.bootcamp.closeupPos);
+        targetLookAt.copy(REALM_CONFIG.bootcamp.closeupLook);
+        currentCamPos.copy(REALM_CONFIG.bootcamp.closeupPos);
+        currentLookAt.copy(REALM_CONFIG.bootcamp.closeupLook);
+      } else if (mode === 'kage') {
+        window.focusRealm('kage', true);
+        useRailSpline = false;
+        targetCamPos.copy(REALM_CONFIG.kage.closeupPos);
+        targetLookAt.copy(REALM_CONFIG.kage.closeupLook);
+        currentCamPos.copy(REALM_CONFIG.kage.closeupPos);
+        currentLookAt.copy(REALM_CONFIG.kage.closeupLook);
+      }
+      camera.position.copy(currentCamPos);
+      camera.lookAt(currentLookAt);
+      if (animatedParts.update) animatedParts.update(1.45);
+      updateMarkers();
+      composer.render();
+      if (!window.__pauseAnim) {
+        setTimeout(() => requestAnimationFrame(animate), 20);
+      }
+    };
 
     const clock = new THREE.Clock();
     function animate() {
-      requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
       // Smooth damped Samana Camera Rail interpolation (lerp 0.055) + subtle banking roll
@@ -1722,6 +1773,7 @@
       if (animatedParts.campusGear) animatedParts.campusGear.rotation.y = -t * 0.09;
       if (animatedParts.bootcampFresnel) animatedParts.bootcampFresnel.rotation.y = t * 0.65;
       if (animatedParts.spores) animatedParts.spores.rotation.y = t * 0.03;
+      if (animatedParts.update) animatedParts.update(t);
 
       worldGroup.rotation.y += (tableRotationOffset - worldGroup.rotation.y) * 0.08;
 
@@ -1739,13 +1791,19 @@
 
       updateMarkers();
       composer.render();
+      if (!window.__pauseAnim) {
+        setTimeout(() => requestAnimationFrame(animate), 20);
+      }
     }
     animate();
 
     window.addEventListener('resize', () => {
+      const pr = Math.min(window.devicePixelRatio || 2, 2);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      renderer.setPixelRatio(pr);
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setPixelRatio(pr);
       composer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
