@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Roi Yotvat · Now — The Astrolabe &amp; The Neural Tree</title>
+<link rel="icon" href="data:," />
+<title>Roi Yotvat · Now — The Astrolabe &amp; The Neural Tree (v5 Diorama)</title>
 <style>
   @font-face {
     font-family: 'Barlow Semi Condensed';
@@ -113,6 +114,19 @@
       #1F242E 2px,
       #1F242E 4px
     );
+
+    /* ETCHED HOROLOGICAL VERNIER DEGREE TICKS */
+    --vernier-ruler-brass: repeating-linear-gradient(
+      90deg,
+      rgba(216, 180, 103, 0.55) 0px,
+      rgba(216, 180, 103, 0.55) 1px,
+      transparent 1px,
+      transparent 6px,
+      rgba(184, 146, 74, 0.28) 6px,
+      rgba(184, 146, 74, 0.28) 7px,
+      transparent 7px,
+      transparent 12px
+    );
   }
 
   * {
@@ -146,13 +160,33 @@
     cursor: grabbing;
   }
 
-  /* SUBTLE TABLETOP VIGNETTE (KEEPING 0% BLUR ON ALL UI CHROME) */
   .study-vignette {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 2;
-    background: radial-gradient(circle at 50% 48%, transparent 52%, rgba(6, 8, 11, 0.72) 100%);
+    background: radial-gradient(circle at 50% 48%, transparent 56%, rgba(5, 7, 10, 0.72) 100%);
+  }
+
+  /* HOROLOGICAL INSTRUMENT PANEL MIXIN: CORNER BRASS RIVETS & VERNIER RULER */
+  .horological-frame {
+    position: relative;
+    background-color: var(--table-obsidian);
+    background-image:
+      radial-gradient(circle at 6px 6px, #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      radial-gradient(circle at calc(100% - 6px) 6px, #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      radial-gradient(circle at 6px calc(100% - 6px), #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(0, 0, 0, 0.22) 100%);
+    box-shadow: var(--bevel-obsidian-raised), 0 12px 28px rgba(0, 0, 0, 0.78);
+  }
+
+  .vernier-strip {
+    height: 4px;
+    width: 100%;
+    background-image: var(--vernier-ruler-brass);
+    border-bottom: 1px solid rgba(92, 71, 36, 0.65);
+    opacity: 0.85;
   }
 
   /* IN-WORLD DIEGETIC BRASS & OBSIDIAN PLAQUES (TETHERED TO 3D LANDMARKS) */
@@ -167,20 +201,26 @@
     position: absolute;
     transform: translate(-50%, -100%);
     pointer-events: auto;
-    background: var(--table-obsidian);
-    box-shadow: var(--bevel-obsidian-raised), 0 8px 20px rgba(0, 0, 0, 0.75);
-    padding: 5px 10px;
+    background-color: var(--table-obsidian);
+    background-image:
+      radial-gradient(circle at 4px 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at 4px calc(100% - 4px), #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) calc(100% - 4px), #D8B467 1px, transparent 2px);
+    box-shadow: var(--bevel-obsidian-raised), 0 8px 20px rgba(0, 0, 0, 0.82);
+    padding: 5px 11px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 7px;
     transition: transform 120ms ease, filter 120ms ease;
     white-space: nowrap;
+    border: none;
   }
 
   .inworld-plaque:hover {
-    transform: translate(-50%, -104%);
-    filter: brightness(1.1);
+    transform: translate(-50%, -105%);
+    filter: brightness(1.12);
   }
 
   .inworld-plaque::after {
@@ -236,27 +276,31 @@
       inset -1px -1px 0px #050608,
       inset 2px 2px 0px var(--kage-gold),
       inset -2px -2px 0px var(--brass-aged),
-      0 0 18px rgba(255, 184, 77, 0.35),
-      0 10px 22px rgba(0, 0, 0, 0.85);
+      0 0 18px rgba(255, 184, 77, 0.38),
+      0 10px 22px rgba(0, 0, 0, 0.88);
   }
 
   /* TOP-LEFT EMBOSSED BRASS REALM CREST (<=12 WORDS OF STAGE COPY) */
   .top-left-crest {
     position: fixed;
-    top: 18px;
-    left: 20px;
+    top: 16px;
+    left: 18px;
     z-index: 10;
-    background: var(--table-obsidian);
-    box-shadow: var(--bevel-obsidian-raised), 0 12px 28px rgba(0, 0, 0, 0.72);
-    padding: 12px 16px;
+    padding: 10px 16px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .crest-main-row {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
   .crest-medallion {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     background: var(--table-channel);
     box-shadow: var(--bevel-obsidian-milled);
     display: grid;
@@ -282,11 +326,11 @@
     margin-top: 3px;
   }
 
-  /* TOP-RIGHT TACTILE HARDWARE BAR */
+  /* TOP-RIGHT TACTILE HOROLOGICAL BAR */
   .top-right-controls {
     position: fixed;
-    top: 18px;
-    right: 20px;
+    top: 16px;
+    right: 18px;
     z-index: 10;
     display: flex;
     align-items: center;
@@ -307,13 +351,18 @@
     align-items: center;
     gap: 8px;
     border: none;
-    background: var(--table-obsidian);
+    background-color: var(--table-obsidian);
+    background-image:
+      radial-gradient(circle at 4px 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at 4px calc(100% - 4px), #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) calc(100% - 4px), #D8B467 1px, transparent 2px);
     color: var(--parchment-scroll);
-    box-shadow: var(--bevel-obsidian-raised), 0 8px 18px rgba(0,0,0,0.6);
+    box-shadow: var(--bevel-obsidian-raised), 0 8px 18px rgba(0,0,0,0.65);
   }
 
   .citadel-btn:hover {
-    background: #181C24;
+    background-color: #181C24;
     color: #FFFFFF;
   }
 
@@ -328,14 +377,14 @@
   }
 
   .citadel-btn.variant-brass {
-    background: linear-gradient(180deg, #C9A358 0%, #A8823B 100%);
+    background: linear-gradient(180deg, #D2AC60 0%, #A67E36 100%);
     color: #0A0C10;
-    box-shadow: var(--bevel-brass-button), 0 8px 18px rgba(0,0,0,0.65);
+    box-shadow: var(--bevel-brass-button), 0 8px 18px rgba(0,0,0,0.7);
     font-weight: 900;
   }
 
   .citadel-btn.variant-brass:hover {
-    background: linear-gradient(180deg, #D8B467 0%, #B8924A 100%);
+    background: linear-gradient(180deg, #E2BE74 0%, #B8924A 100%);
   }
 
   .citadel-btn.variant-brass:active {
@@ -343,7 +392,7 @@
   }
 
   .citadel-btn.variant-cyan {
-    background: #0E2329;
+    background-color: #0E2329;
     color: var(--kage-cyan-core);
     box-shadow:
       inset 1px 1px 0px #2CE6D8,
@@ -359,16 +408,14 @@
     color: var(--kage-gold);
   }
 
-  /* BOTTOM-LEFT STORY POPOVER FOR CLICKED MEMORY ROOT NODES (HUMAN WORDS ONLY) */
+  /* BOTTOM-LEFT STORY POPOVER FOR CLICKED MEMORY ROOT NODES & REALM DIORAMAS (HUMAN WORDS ONLY) */
   .root-story-card {
     position: fixed;
-    left: 20px;
-    bottom: 84px;
-    width: 390px;
+    left: 18px;
+    bottom: 80px;
+    width: 410px;
     z-index: 10;
-    background: var(--table-obsidian);
-    box-shadow: var(--bevel-obsidian-raised), 0 14px 32px rgba(0,0,0,0.8);
-    padding: 12px 15px;
+    padding: 10px 15px 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -432,12 +479,10 @@
   /* BOTTOM ASTROLABE CHAPTER BAR */
   .bottom-astrolabe-bar {
     position: fixed;
-    left: 20px;
-    right: 20px;
-    bottom: 16px;
+    left: 18px;
+    right: 18px;
+    bottom: 14px;
     z-index: 10;
-    background: var(--table-obsidian);
-    box-shadow: var(--bevel-obsidian-raised), 0 12px 28px rgba(0,0,0,0.82);
     padding: 8px 14px;
     display: flex;
     align-items: center;
@@ -474,7 +519,7 @@
   }
 
   .chapter-btn.active {
-    background: linear-gradient(180deg, #C9A358 0%, #A8823B 100%);
+    background: linear-gradient(180deg, #D2AC60 0%, #A67E36 100%);
     color: #0A0C10;
     box-shadow: var(--bevel-brass-button);
     font-weight: 900;
@@ -489,13 +534,11 @@
   /* ON-DEMAND CITADEL SCROLL DRAWER (#F2EEE4 PARCHMENT WELL) */
   .citadel-scroll-drawer {
     position: fixed;
-    top: 18px;
-    right: 20px;
-    bottom: 74px;
-    width: min(620px, calc(100vw - 40px));
+    top: 16px;
+    right: 18px;
+    bottom: 72px;
+    width: min(620px, calc(100vw - 36px));
     z-index: 25;
-    background: var(--table-obsidian);
-    box-shadow: var(--bevel-obsidian-raised), -18px 0 44px rgba(0, 0, 0, 0.88);
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -550,7 +593,7 @@
 
   .scroll-masthead {
     border-bottom: 2px solid var(--ink-editorial);
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -564,14 +607,14 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--ink-editorial);
-    line-height: 1.1;
+    line-height: 1.08;
   }
 
   .scroll-masthead p {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     color: var(--ink-pencil);
-    margin-top: 4px;
+    margin-top: 3px;
   }
 
   .wax-stamp {
@@ -590,11 +633,11 @@
   .scroll-section h3 {
     font-family: 'Barlow Semi Condensed', sans-serif;
     font-weight: 900;
-    font-size: 15px;
+    font-size: 14.5px;
     letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--ink-citadel-blue);
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
 
   .scroll-section p {
@@ -607,7 +650,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 6px;
+    margin-top: 5px;
   }
 
   .stack-chip {
@@ -640,7 +683,7 @@
   .principle-card {
     background: #FAF6EC;
     border: 1px solid #C5BBA6;
-    padding: 8px 10px;
+    padding: 7px 9px;
   }
 
   .principle-card h4 {
@@ -650,27 +693,27 @@
     letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--ink-copper);
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
 
   .principle-card p {
-    font-size: 12px;
-    line-height: 1.42;
+    font-size: 11.5px;
+    line-height: 1.38;
     color: var(--ink-editorial);
   }
 
   .hand-schematic-box {
     background: #FAF6EC;
     border: 1.5px solid var(--ink-editorial);
-    padding: 10px 12px;
+    padding: 8px 11px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
 
   .hand-schematic-title {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--ink-pencil);
     text-transform: uppercase;
@@ -709,15 +752,15 @@
       font-size: 9.5px;
     }
     .top-right-controls {
-      top: 64px;
+      top: 68px;
       right: 8px;
       left: 8px;
       justify-content: space-between;
       gap: 4px;
     }
     .top-right-controls .citadel-btn {
-      font-size: 10.5px;
-      padding: 6px 8px;
+      font-size: 10px;
+      padding: 6px 7px;
       flex: 1;
       justify-content: center;
     }
@@ -775,7 +818,7 @@
 </style>
 </head>
 <body>
-  <!-- 3D CARVED OBSIDIAN TABLE & BIOLUMINESCENT KAGE NEURAL TREE VIEWPORT -->
+  <!-- 3D CARVED OBSIDIAN TABLE, ASTROLABE & KAGE NEURAL TREE VIEWPORT -->
   <canvas id="worldCanvas" aria-label="Interactive 3D Carved Obsidian Table with the Bioluminescent Kage Neural Tree and The City Citadel"></canvas>
   <div class="study-vignette"></div>
 
@@ -813,23 +856,30 @@
   </div>
 
   <!-- TOP-LEFT EMBOSSED BRASS REALM CREST (<=12 WORDS OF STAGE COPY AT REST) -->
-  <header class="top-left-crest">
-    <div class="crest-medallion" aria-hidden="true">
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-        <circle cx="14" cy="14" r="11" stroke="#D8B467" stroke-width="1.6"/>
-        <ellipse cx="14" cy="14" rx="11" ry="5" transform="rotate(-28 14 14)" stroke="#B8924A" stroke-width="1.2"/>
-        <path d="M14 23V13M14 13L9 8M14 13L19 8M10 22C12 19 16 19 18 22" stroke="#2CE6D8" stroke-width="1.6" stroke-linecap="round"/>
-        <circle cx="14" cy="11" r="2.6" fill="#FFB84D"/>
-      </svg>
-    </div>
-    <div class="crest-copy">
-      <h1 id="stageCrestTitle">ROI YOTVAT · NOW · THE CITY</h1>
-      <p id="stageCrestSub">Full-Stack Developer · Moveo Creative &amp; Kage Second Brain</p>
+  <header class="top-left-crest horological-frame">
+    <div class="vernier-strip" aria-hidden="true"></div>
+    <div class="crest-main-row">
+      <div class="crest-medallion" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="11" stroke="#D8B467" stroke-width="1.6"/>
+          <ellipse cx="14" cy="14" rx="11" ry="5" transform="rotate(-28 14 14)" stroke="#B8924A" stroke-width="1.2"/>
+          <path d="M14 23V13M14 13L9 8M14 13L19 8M10 22C12 19 16 19 18 22" stroke="#2CE6D8" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="14" cy="11" r="2.6" fill="#FFB84D"/>
+        </svg>
+      </div>
+      <div class="crest-copy">
+        <h1 id="stageCrestTitle">ROI YOTVAT · NOW · THE CITY</h1>
+        <p id="stageCrestSub">Full-Stack Developer · Moveo Creative &amp; Kage Second Brain</p>
+      </div>
     </div>
   </header>
 
-  <!-- TOP-RIGHT TACTILE HARDWARE BAR -->
+  <!-- TOP-RIGHT TACTILE HOROLOGICAL BAR -->
   <nav class="top-right-controls" aria-label="Scene Controls">
+    <button class="citadel-btn" id="btnCloseupZoom" type="button" onclick="toggleCloseupZoom()">
+      <span class="plaque-pip gold"></span>
+      <span id="zoomBtnLabel">DIORAMA CLOSE-UP</span>
+    </button>
     <button class="citadel-btn variant-cyan" id="btnPulseTask" type="button" onclick="triggerTaskPulse()">
       <span class="plaque-pip"></span>
       <span>PULSE ONE-LINE TASK</span>
@@ -843,11 +893,12 @@
     </button>
   </nav>
 
-  <!-- BOTTOM-LEFT KAGE MEMORY ROOT STORY READOUT (ZERO STATS · HUMAN TECH WORLDS ONLY) -->
-  <aside class="root-story-card" aria-label="Kage Memory Root Story">
+  <!-- BOTTOM-LEFT KAGE MEMORY ROOT & REALM STORY READOUT (ZERO STATS · HUMAN TECH WORLDS ONLY) -->
+  <aside class="root-story-card horological-frame" aria-label="Kage Memory Root Story">
+    <div class="vernier-strip" aria-hidden="true"></div>
     <div class="root-story-header">
-      <span class="step-tag" id="rootStepTag">MILLED ROOT CHANNEL · NODE I OF IV</span>
-      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass-specular);">CLICK NODE TO TRACE</span>
+      <span class="step-tag" id="rootStepTag">MILLED ROOT CHANNEL · IRIS NODE I OF IV</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass-specular);">HUMAN TECH WORLD</span>
     </div>
     <h2 id="rootStoryTitle">SESSION HANDOFF MEMORY · NO RE-EXPLAINING</h2>
     <p id="rootStoryBody">
@@ -862,7 +913,7 @@
   </aside>
 
   <!-- BOTTOM ASTROLABE CHAPTER BAR -->
-  <footer class="bottom-astrolabe-bar">
+  <footer class="bottom-astrolabe-bar horological-frame">
     <div class="chapter-stops" role="tablist" aria-label="Carved Obsidian Table Realms">
       <button class="chapter-btn active" id="tabCity" type="button" onclick="focusRealm('city')">
         <span>I · NOW · THE CITY</span>
@@ -895,7 +946,8 @@
   </footer>
 
   <!-- ON-DEMAND CITADEL SCROLL DRAWER (#F2EEE4 PARCHMENT WELL) -->
-  <section class="citadel-scroll-drawer" id="citadelScrollDrawer" aria-label="Citadel Scroll — Role, Kage Second Brain, and CV">
+  <section class="citadel-scroll-drawer horological-frame" id="citadelScrollDrawer" aria-label="Citadel Scroll — Role, Kage Second Brain, and CV">
+    <div class="vernier-strip" aria-hidden="true"></div>
     <div class="drawer-titlebar">
       <div class="drawer-titlebar-left">
         <span class="plaque-pip gold"></span>
@@ -1015,27 +1067,43 @@
   </section>
 
   <script type="module">
-    import * as THREE from '../vendor/three.module.min.js';
+    import { THREE } from '../vendor/three-citadel-bundle.js';
+    import { initCitadelWorldV5 } from '../vendor/citadel-world-v5.js';
+
+    const canvas = document.getElementById('worldCanvas');
+    const world = initCitadelWorldV5(canvas);
+    const {
+      renderer,
+      camera,
+      composer,
+      worldGroup,
+      animatedParts,
+      primaryCityCurve,
+      memoryRootNodes,
+      taskPulseGroup,
+      lights,
+      materials
+    } = world;
 
     // --- ROOT MEMORY STORIES IN HUMAN WORDS (ZERO STATISTICS!) ---
     const ROOT_STORIES = [
       {
-        tag: "MILLED ROOT CHANNEL · NODE I OF IV",
+        tag: "MILLED ROOT CHANNEL · IRIS NODE I OF IV",
         title: "SESSION HANDOFF MEMORY · NO RE-EXPLAINING",
         body: "Every session starts from the last session's written handoff in Roi's notes vault—so Kage remembers the architecture, past trade-offs, and open threads before Roi types a word."
       },
       {
-        tag: "MILLED ROOT CHANNEL · NODE II OF IV",
+        tag: "MILLED ROOT CHANNEL · IRIS NODE II OF IV",
         title: "ONE-LINE TASK TO SELF-CONTAINED SPEC",
         body: "Roi gives the orchestrator a one-line direction. It searches the notes vault (re-indexed on every commit) and hands worker agents a self-contained spec."
       },
       {
-        tag: "MILLED ROOT CHANNEL · NODE III OF IV",
+        tag: "MILLED ROOT CHANNEL · IRIS NODE III OF IV",
         title: "SECOND-MODEL REVIEW GATE THAT QUOTES THE LINE",
         body: "Workers never grade their own work. Every diff passes through a review gate run by a second model that must quote the exact line it objects to."
       },
       {
-        tag: "MILLED ROOT CHANNEL · NODE IV OF IV",
+        tag: "MILLED ROOT CHANNEL · IRIS NODE IV OF IV",
         title: "ROI IN THE DIRECTOR'S CHAIR · SAFETY HOOKS",
         body: "Pre-tool safety hooks hold force-pushes, protected branches, and production changes until Roi gives his explicit go-ahead for that specific step."
       }
@@ -1045,43 +1113,131 @@
       city: {
         title: "ROI YOTVAT · NOW · THE CITY",
         sub: "Full-Stack Developer · Moveo Creative & Kage Second Brain",
-        camPos: new THREE.Vector3(3.6, 5.2, 7.8),
-        lookAt: new THREE.Vector3(1.5, 1.2, 1.4),
+        camPos: new THREE.Vector3(3.35, 4.95, 7.65),
+        lookAt: new THREE.Vector3(0.95, 1.35, 0.85),
+        closeupPos: new THREE.Vector3(3.65, 2.55, 4.35),
+        closeupLook: new THREE.Vector3(1.55, 1.45, 1.25),
         tabId: 'tabCity',
-        markerId: 'markerCity'
+        markerId: 'markerCity',
+        storyTag: "REALM I · NOW · THE CITY CITADEL",
+        storyTitle: "MOVEO CREATIVE · ENTERPRISE FULL-STACK & AI WORKFLOWS",
+        storyBody: "Leading full-stack enterprise builds end-to-end in React, Next.js, and custom WordPress (PHP/Gutenberg/ACF), talking directly to clients and vendors while rolling out coding agents across the team."
       },
       kage: {
         title: "KAGE · THE BIOLUMINESCENT NEURAL TREE",
-        sub: "Persistent Second Brain · Cyan Memory Roots & Gold Canopy",
-        camPos: new THREE.Vector3(0.0, 5.6, 8.2),
-        lookAt: new THREE.Vector3(0.0, 1.8, 0.0),
+        sub: "Bonsai-Braided Optical Roots & 5-Ring Toothed Citadel Astrolabe",
+        camPos: new THREE.Vector3(0.0, 4.85, 7.45),
+        lookAt: new THREE.Vector3(0.0, 1.85, 0.0),
+        closeupPos: new THREE.Vector3(0.25, 2.65, 3.85),
+        closeupLook: new THREE.Vector3(0.0, 1.95, 0.0),
         tabId: 'tabKage',
-        markerId: 'markerKage'
+        markerId: 'markerKage',
+        storyTag: "CENTERPIECE · KAGE NEURAL WORLD-TREE",
+        storyTitle: "PERSISTENT SECOND BRAIN · CYAN ROOTS & GOLD CANOPY",
+        storyBody: "Braided optical-glass root filaments carry session handoffs through milled obsidian channels below, while the weeping-willow canopy and cardanic astrolabe rings synthesize specs above."
       },
       workshop: {
-        title: "THE WORKSHOP · AUTOMATON FORGE & DOMES",
-        sub: "Virtual Garden · Chord Cycle · Doodle Reborn · 3D Blender",
-        camPos: new THREE.Vector3(-4.8, 5.0, 6.8),
-        lookAt: new THREE.Vector3(-3.2, 1.0, 1.2),
+        title: "THE WORKSHOP · RIVETED COPPER FOUNDRY & ALCOVES",
+        sub: "Virtual Garden · Chord Cycle · Doodle Reborn · 3D Blender Craft",
+        camPos: new THREE.Vector3(-4.85, 4.45, 5.85),
+        lookAt: new THREE.Vector3(-2.65, 0.95, 1.05),
+        closeupPos: new THREE.Vector3(-4.25, 2.25, 3.45),
+        closeupLook: new THREE.Vector3(-3.05, 0.85, 1.35),
         tabId: 'tabWorkshop',
-        markerId: 'markerWorkshop'
+        markerId: 'markerWorkshop',
+        storyTag: "REALM II · THE WORKSHOP FOUNDRY",
+        storyTitle: "FOUR MAKER ALCOVES AROUND THE COPPER HEARTH",
+        storyBody: "Around the 12-ribbed copper foundry sit four miniature workbenches: the Virtual Garden geodesic conservatory, Chord Cycle's 12-tine brass carillon, Doodle Reborn's pantograph easel, and the 3D Blender sculptor's rig."
       },
       campus: {
-        title: "2022–26 · THE CAMPUS · MISTER BIT",
-        sub: "Full-Stack Developer & Coding Academy Instructor",
-        camPos: new THREE.Vector3(-3.8, 5.4, -6.2),
-        lookAt: new THREE.Vector3(-2.6, 1.0, -2.2),
+        title: "2022–26 · THE CAMPUS · TRAVERTINE STOA",
+        sub: "Mister Bit Full-Stack Developer & Coding Academy Instructor",
+        camPos: new THREE.Vector3(-4.25, 4.65, -5.65),
+        lookAt: new THREE.Vector3(-2.35, 0.95, -2.15),
+        closeupPos: new THREE.Vector3(-3.85, 2.35, -4.15),
+        closeupLook: new THREE.Vector3(-2.55, 0.85, -2.35),
         tabId: 'tabCampus',
-        markerId: 'markerCampus'
+        markerId: 'markerCampus',
+        storyTag: "REALM III · 2022–26 THE CAMPUS",
+        storyTitle: "SCHOLARLY STOA, AMPHITHEATER & ARCHITECTURE CHALKBOARD",
+        storyBody: "Carved from warm travertine with 14 fluted Doric columns and a sunken 5-row lecture amphitheater where Roi taught full-stack engineering and shipped production web platforms."
       },
       bootcamp: {
-        title: "2021 · BOOTCAMP · COASTAL SLATE BASTION",
+        title: "2021 · BOOTCAMP · BASALT CLIFF & LIGHTHOUSE",
         sub: "Coding Academy Intensive · Where the Journey Began",
-        camPos: new THREE.Vector3(4.5, 5.2, -6.0),
-        lookAt: new THREE.Vector3(2.8, 0.9, -2.2),
+        camPos: new THREE.Vector3(4.65, 4.55, -5.45),
+        lookAt: new THREE.Vector3(2.55, 1.05, -2.05),
+        closeupPos: new THREE.Vector3(4.15, 2.45, -3.85),
+        closeupLook: new THREE.Vector3(2.75, 1.15, -2.25),
         tabId: 'tabBootcamp',
-        markerId: 'markerBootcamp'
+        markerId: 'markerBootcamp',
+        storyTag: "REALM IV · 2021 BOOTCAMP LIGHTHOUSE",
+        storyTitle: "GIANT'S-CAUSEWAY BASALT CLIFFS & FRESNEL LANTERN",
+        storyBody: "Rising from the engraved wave-contour harbor basin on 28 hexagonal basalt columns, climbed by a switchback brass stair to the rotating Fresnel prism lighthouse."
       }
+    };
+
+    let activeRealmKey = 'city';
+    let isCloseupMode = new URLSearchParams(window.location.search).get('view') === 'closeup';
+    const urlParams = new URLSearchParams(window.location.search);
+    let isScrollOpen = urlParams.get('scroll') === 'open';
+    if (isScrollOpen) {
+      document.getElementById('citadelScrollDrawer').classList.add('is-open');
+      document.getElementById('bottomScrollBtnLabel').textContent = 'SEAL CITADEL SCROLL ✕';
+    }
+    let pulseProgress = -1;
+
+    const currentCamPos = new THREE.Vector3().copy(
+      isCloseupMode ? REALM_CONFIG.city.closeupPos : REALM_CONFIG.city.camPos
+    );
+    const targetCamPos = new THREE.Vector3().copy(currentCamPos);
+    const currentLookAt = new THREE.Vector3().copy(
+      isCloseupMode ? REALM_CONFIG.city.closeupLook : REALM_CONFIG.city.lookAt
+    );
+    const targetLookAt = new THREE.Vector3().copy(currentLookAt);
+    camera.position.copy(currentCamPos);
+    camera.lookAt(currentLookAt);
+
+    function syncCameraTarget() {
+      const cfg = REALM_CONFIG[activeRealmKey];
+      if (!cfg) return;
+      targetCamPos.copy(isCloseupMode ? cfg.closeupPos : cfg.camPos);
+      targetLookAt.copy(isCloseupMode ? cfg.closeupLook : cfg.lookAt);
+      const zBtn = document.getElementById(' btnCloseupZoom') || document.getElementById('btnCloseupZoom');
+      if (zBtn) zBtn.classList.toggle('is-latched', isCloseupMode);
+      const zLbl = document.getElementById('zoomBtnLabel');
+      if (zLbl) zLbl.textContent = isCloseupMode ? 'OVERVIEW TABLE' : 'DIORAMA CLOSE-UP';
+    }
+    syncCameraTarget();
+
+    window.toggleCloseupZoom = function(force) {
+      isCloseupMode = typeof force === 'boolean' ? force : !isCloseupMode;
+      syncCameraTarget();
+    };
+
+    window.focusRealm = function(realmKey, forceCloseup) {
+      const cfg = REALM_CONFIG[realmKey];
+      if (!cfg) return;
+      activeRealmKey = realmKey;
+      if (typeof forceCloseup === 'boolean') {
+        isCloseupMode = forceCloseup;
+      }
+      syncCameraTarget();
+
+      document.getElementById('stageCrestTitle').textContent = cfg.title;
+      document.getElementById('stageCrestSub').textContent = cfg.sub;
+
+      document.getElementById('rootStepTag').textContent = cfg.storyTag;
+      document.getElementById('rootStoryTitle').textContent = cfg.storyTitle;
+      document.getElementById('rootStoryBody').textContent = cfg.storyBody;
+
+      document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
+      const tab = document.getElementById(cfg.tabId);
+      if (tab) tab.classList.add('active');
+
+      document.querySelectorAll('.inworld-plaque').forEach(p => p.classList.remove('is-active'));
+      const marker = document.getElementById(cfg.markerId);
+      if (marker) marker.classList.add('is-active');
     };
 
     window.selectRootStory = function(idx) {
@@ -1092,10 +1248,18 @@
       document.querySelectorAll('.root-pill-btn').forEach((b, i) => {
         b.classList.toggle('active', i === idx);
       });
-      pulseHighlightNode(idx);
+      memoryRootNodes.forEach((n, i) => {
+        n.group.scale.setScalar(i === idx ? 1.48 : 1.0);
+      });
+      pulseProgress = 0;
+      taskPulseGroup.visible = true;
     };
 
-    let isScrollOpen = false;
+    window.triggerTaskPulse = function() {
+      pulseProgress = 0;
+      taskPulseGroup.visible = true;
+    };
+
     window.toggleCitadelScroll = function(forceState) {
       const drawer = document.getElementById('citadelScrollDrawer');
       const isOpen = typeof forceState === 'boolean' ? forceState : !drawer.classList.contains('is-open');
@@ -1107,452 +1271,13 @@
     };
 
     window.revealOrCopyEmail = function() {
-      const u = 'roiyot261098';
-      const d = 'gmail.com';
-      const addr = `${u}@${d}`;
-      const label = document.getElementById('emailBtnLabel');
-      label.textContent = addr;
+      const addr = `roiyot261098@gmail.com`;
+      document.getElementById('emailBtnLabel').textContent = addr;
       if (navigator.clipboard) {
         navigator.clipboard.writeText(addr).catch(() => {});
       }
     };
 
-    // --- THREE.JS SCENE: CARVED OBSIDIAN TABLE + ASTROLABE WELL + KAGE NEURAL TREE ---
-    const canvas = document.getElementById('worldCanvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0A0C10); // Milled channel dark study
-
-    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.1, 100);
-    const currentCamPos = new THREE.Vector3(3.2, 5.3, 8.2);
-    const targetCamPos = new THREE.Vector3(3.2, 5.3, 8.2);
-    const currentLookAt = new THREE.Vector3(0.8, 1.3, 0.7);
-    const targetLookAt = new THREE.Vector3(0.8, 1.3, 0.7);
-    camera.position.copy(currentCamPos);
-    camera.lookAt(currentLookAt);
-
-    // --- VISION'S LIGHTING & LUMINANCE BUDGET ---
-    // Study ambient luminance (0.06-0.09 linear)
-    const ambientLight = new THREE.AmbientLight(0x1b2230, 0.85);
-    scene.add(ambientLight);
-
-    // 2900K Warm Key Light from the overhead Citadel Astrolabe
-    const astrolabeKeyLight = new THREE.DirectionalLight(0xFFB84D, 2.6);
-    astrolabeKeyLight.position.set(2.5, 9.5, 4.0);
-    scene.add(astrolabeKeyLight);
-
-    // Canopy Warm Fill (2900K)
-    const canopyPointLight = new THREE.PointLight(0xFFB84D, 3.2, 11, 1.6);
-    canopyPointLight.position.set(0, 3.1, 0);
-    scene.add(canopyPointLight);
-
-    // 4800K Localized Cyan Bounce inside the Milled Root Grooves
-    const rootCyanLight = new THREE.PointLight(0x2CE6D8, 3.4, 9.5, 1.5);
-    rootCyanLight.position.set(0.6, 0.55, 0.8);
-    scene.add(rootCyanLight);
-
-    // Workshop Furnace Ember Light
-    const furnaceLight = new THREE.PointLight(0xFF6B2B, 2.2, 6.5, 1.8);
-    furnaceLight.position.set(-3.2, 0.9, 1.2);
-    scene.add(furnaceLight);
-
-    // --- 60 / 30 / 10 PHYSICAL MATERIALS ---
-    const matObsidianTable = new THREE.MeshStandardMaterial({
-      color: 0x111318,
-      roughness: 0.78,
-      metalness: 0.14
-    });
-
-    const matMilledChannel = new THREE.MeshStandardMaterial({
-      color: 0x0A0C10,
-      roughness: 0.9,
-      metalness: 0.08
-    });
-
-    const matSlateBootcamp = new THREE.MeshStandardMaterial({
-      color: 0x2A303C,
-      roughness: 0.72,
-      metalness: 0.18
-    });
-
-    const matTravertineCampus = new THREE.MeshStandardMaterial({
-      color: 0xDDD5C7,
-      roughness: 0.65,
-      metalness: 0.05
-    });
-
-    const matAgedBrass = new THREE.MeshStandardMaterial({
-      color: 0xB8924A,
-      roughness: 0.32,
-      metalness: 0.86
-    });
-
-    const matSpecularBrass = new THREE.MeshStandardMaterial({
-      color: 0xD8B467,
-      roughness: 0.22,
-      metalness: 0.92
-    });
-
-    const matWorkshopCopper = new THREE.MeshStandardMaterial({
-      color: 0xA85638,
-      roughness: 0.36,
-      metalness: 0.82
-    });
-
-    const matCyanRoot = new THREE.MeshStandardMaterial({
-      color: 0x2CE6D8,
-      emissive: 0x2CE6D8,
-      emissiveIntensity: 1.65,
-      roughness: 0.2
-    });
-
-    const matCyanCore = new THREE.MeshBasicMaterial({
-      color: 0xB8FFF9
-    });
-
-    const matGoldCanopy = new THREE.MeshStandardMaterial({
-      color: 0xFFB84D,
-      emissive: 0xFFB84D,
-      emissiveIntensity: 1.55,
-      roughness: 0.25
-    });
-
-    const matEmberHeart = new THREE.MeshBasicMaterial({
-      color: 0xFF6B2B
-    });
-
-    const worldGroup = new THREE.Group();
-    scene.add(worldGroup);
-
-    // 1. HEAVY CARVED OBSIDIAN RELIEF TABLE (#111318)
-    const tablePlinth = new THREE.Mesh(new THREE.CylinderGeometry(6.8, 7.1, 0.55, 64), matObsidianTable);
-    tablePlinth.position.y = -0.28;
-    worldGroup.add(tablePlinth);
-
-    // Outer Engraved Brass Table Bezel Ring
-    const outerBrassRim = new THREE.Mesh(new THREE.TorusGeometry(6.85, 0.09, 16, 96), matAgedBrass);
-    outerBrassRim.rotation.x = Math.PI / 2;
-    outerBrassRim.position.y = 0.0;
-    worldGroup.add(outerBrassRim);
-
-    const innerCompassRim = new THREE.Mesh(new THREE.TorusGeometry(5.2, 0.035, 12, 96), matSpecularBrass);
-    innerCompassRim.rotation.x = Math.PI / 2;
-    innerCompassRim.position.y = 0.02;
-    worldGroup.add(innerCompassRim);
-
-    // Topographic Carved Basalt Contour Terraces on the Obsidian Table
-    const terraceGeo1 = new THREE.CylinderGeometry(5.9, 6.2, 0.12, 48);
-    const terrace1 = new THREE.Mesh(terraceGeo1, matMilledChannel);
-    terrace1.position.y = 0.04;
-    worldGroup.add(terrace1);
-
-    // 2. CENTRAL BRASS ASTROLABE WELL & KAGE BIOLUMINESCENT NEURAL TREE
-    const astrolabeWellRim = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.08, 16, 64), matSpecularBrass);
-    astrolabeWellRim.rotation.x = Math.PI / 2;
-    astrolabeWellRim.position.y = 0.14;
-    worldGroup.add(astrolabeWellRim);
-
-    const wellRecess = new THREE.Mesh(new THREE.CylinderGeometry(1.28, 1.28, 0.16, 48), matMilledChannel);
-    wellRecess.position.y = 0.05;
-    worldGroup.add(wellRecess);
-
-    // Kage Tree Trunk: Braided Optical Cyan Filaments + Twisted Aged Brass Strands
-    const kageTreeGroup = new THREE.Group();
-    worldGroup.add(kageTreeGroup);
-
-    const strandCount = 14;
-    for (let i = 0; i < strandCount; i++) {
-      const angle0 = (i / strandCount) * Math.PI * 2;
-      const isBrass = i % 3 === 0;
-      const pts = [];
-      for (let step = 0; step <= 24; step++) {
-        const t = step / 24;
-        const y = 0.1 + t * 2.85;
-        const twist = angle0 + t * Math.PI * 1.35;
-        const radius = (1 - t * 0.72) * 0.55 + Math.pow(t, 2.2) * 1.55;
-        pts.push(new THREE.Vector3(Math.cos(twist) * radius, y, Math.sin(twist) * radius));
-      }
-      const curve = new THREE.CatmullRomCurve3(pts);
-      const tubeGeo = new THREE.TubeGeometry(curve, 36, isBrass ? 0.032 : 0.026, 8, false);
-      const mat = isBrass ? matAgedBrass : (t_mat => t_mat)(i % 2 === 0 ? matCyanRoot : matGoldCanopy);
-      kageTreeGroup.add(new THREE.Mesh(tubeGeo, mat));
-    }
-
-    // Glowing Cyan Core Heart inside the Trunk Base (Memory Below)
-    const trunkCore = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.34, 1.5, 24), matCyanRoot);
-    trunkCore.position.y = 0.85;
-    kageTreeGroup.add(trunkCore);
-
-    // Synaptic Gold Canopy Filaments & Glowing Nodes (Active Synthesis Above)
-    const canopyGroup = new THREE.Group();
-    canopyGroup.position.y = 2.95;
-    kageTreeGroup.add(canopyGroup);
-
-    const canopyPts = [];
-    for (let i = 0; i < 90; i++) {
-      const u = Math.random();
-      const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
-      const phi = Math.acos(2.0 * v - 1.0);
-      const r = 0.45 + Math.random() * 1.35;
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = (r * Math.cos(phi)) * 0.52;
-      const z = r * Math.sin(phi) * Math.sin(theta);
-      canopyPts.push(new THREE.Vector3(x, y, z));
-
-      if (i % 5 === 0) {
-        const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.045 + (i % 3) * 0.015, 10, 10),
-          i % 10 === 0 ? matCyanCore : matGoldCanopy
-        );
-        orb.position.set(x, y, z);
-        canopyGroup.add(orb);
-      }
-    }
-
-    
-    // Weeping Bioluminescent Canopy Tendrils (Avatar Tree of Souls)
-    for (let w = 0; w < 18; w++) {
-      const ang = (w / 18) * Math.PI * 2;
-      const rad = 0.72 + (w % 3) * 0.28;
-      const sx = Math.cos(ang) * rad;
-      const sz = Math.sin(ang) * rad;
-      const dropCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(sx * 0.7, 0.25, sz * 0.7),
-        new THREE.Vector3(sx, -0.15, sz),
-        new THREE.Vector3(sx * 1.06, -0.68 - (w % 2) * 0.25, sz * 1.06)
-      ]);
-      const dropGeo = new THREE.TubeGeometry(dropCurve, 16, 0.014, 6, false);
-      canopyGroup.add(new THREE.Mesh(dropGeo, w % 3 === 0 ? matCyanRoot : matGoldCanopy));
-    }
-
-    // Overhead Rotating Cardanic Brass Astrolabe Rings (Crowning the Kage Tree)
-    const astrolabeCrown = new THREE.Group();
-    astrolabeCrown.position.y = 2.95;
-    worldGroup.add(astrolabeCrown);
-
-    const ringOuter = new THREE.Mesh(new THREE.TorusGeometry(1.75, 0.045, 16, 80), matSpecularBrass);
-    ringOuter.rotation.x = Math.PI * 0.38;
-    astrolabeCrown.add(ringOuter);
-
-    const ringMiddle = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.036, 16, 72), matAgedBrass);
-    ringMiddle.rotation.y = Math.PI * 0.25;
-    ringMiddle.rotation.x = -Math.PI * 0.28;
-    astrolabeCrown.add(ringMiddle);
-
-    const ringInner = new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.028, 12, 64), matSpecularBrass);
-    ringInner.rotation.x = Math.PI * 0.5;
-    astrolabeCrown.add(ringInner);
-
-    // 3. MILLED KINTSUGI ROOT CHANNELS (#0A0C10) & OPTICAL CYAN FILAMENTS (#2CE6D8)
-    const realmTargets = [
-      { key: 'city', pos: new THREE.Vector3(2.35, 0.14, 1.95), primary: true },
-      { key: 'workshop', pos: new THREE.Vector3(-3.1, 0.14, 1.35), primary: false },
-      { key: 'campus', pos: new THREE.Vector3(-2.55, 0.14, -2.35), primary: false },
-      { key: 'bootcamp', pos: new THREE.Vector3(2.75, 0.14, -2.25), primary: false }
-    ];
-
-    const memoryRootNodes = [];
-    let primaryCityCurve = null;
-
-    realmTargets.forEach((rt) => {
-      const mid = rt.pos.clone().multiplyScalar(0.52);
-      mid.x += (rt.pos.z > 0 ? 0.35 : -0.35);
-      const curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0.13, 0),
-        new THREE.Vector3(mid.x * 0.6, 0.13, mid.z * 0.6),
-        new THREE.Vector3(mid.x, 0.13, mid.z),
-        rt.pos.clone()
-      ]);
-
-      if (rt.primary) {
-        primaryCityCurve = curve;
-      }
-
-      // Milled Obsidian Channel Trench (#0A0C10)
-      const trenchGeo = new THREE.TubeGeometry(curve, 40, rt.primary ? 0.095 : 0.065, 8, false);
-      const trenchMesh = new THREE.Mesh(trenchGeo, matMilledChannel);
-      trenchMesh.position.y = -0.02;
-      worldGroup.add(trenchMesh);
-
-      // Inlaid Cyan Optical Filament (#2CE6D8)
-      const veinGeo = new THREE.TubeGeometry(curve, 48, rt.primary ? 0.042 : 0.026, 8, false);
-      const veinMesh = new THREE.Mesh(veinGeo, matCyanRoot);
-      worldGroup.add(veinMesh);
-
-      // Companion Twisted Brass Wire Inlay (#D8B467)
-      const brassGeo = new THREE.TubeGeometry(curve, 40, 0.016, 6, false);
-      const brassMesh = new THREE.Mesh(brassGeo, matSpecularBrass);
-      brassMesh.position.set(0.04, 0.01, 0.02);
-      worldGroup.add(brassMesh);
-    });
-
-    // 4 Interactive Memory Root Nodes along the Primary Root Artery (Kage -> Now · The City)
-    for (let i = 0; i < 4; i++) {
-      const t = 0.24 + i * 0.19;
-      const pt = primaryCityCurve.getPointAt(t);
-      const nodeGroup = new THREE.Group();
-      nodeGroup.position.copy(pt);
-
-      const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.19, 0.08, 16), matSpecularBrass);
-      nodeGroup.add(collar);
-
-      const gem = new THREE.Mesh(new THREE.SphereGeometry(0.095, 16, 16), matCyanCore.clone());
-      gem.position.y = 0.06;
-      nodeGroup.add(gem);
-
-      worldGroup.add(nodeGroup);
-      memoryRootNodes.push({ group: nodeGroup, gem, t });
-    }
-
-    // Traveling Task Pulse Orb along the Primary Root Channel
-    const taskPulseOrb = new THREE.Mesh(new THREE.SphereGeometry(0.13, 18, 18), matGoldCanopy);
-    taskPulseOrb.visible = false;
-    worldGroup.add(taskPulseOrb);
-    let pulseProgress = -1;
-
-    window.triggerTaskPulse = function() {
-      pulseProgress = 0;
-      taskPulseOrb.visible = true;
-    };
-
-    function pulseHighlightNode(idx) {
-      memoryRootNodes.forEach((n, i) => {
-        n.group.scale.setScalar(i === idx ? 1.45 : 1.0);
-      });
-      pulseProgress = 0;
-      taskPulseOrb.visible = true;
-    }
-
-    // 4. REALM I: NOW · THE CITY CITADEL (MOVEO CREATIVE — FOREGROUND HERO REALM)
-    const cityGroup = new THREE.Group();
-    cityGroup.position.set(2.35, 0.1, 1.95);
-    worldGroup.add(cityGroup);
-
-    // Citadel Stepped Obsidian Base & Brass Ring
-    const cityBase = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.42, 0.28, 8), matObsidianTable);
-    cityBase.position.y = 0.14;
-    cityGroup.add(cityBase);
-
-    const cityBrassTrim = new THREE.Mesh(new THREE.TorusGeometry(1.32, 0.035, 12, 32), matAgedBrass);
-    cityBrassTrim.rotation.x = Math.PI / 2;
-    cityBrassTrim.position.y = 0.26;
-    cityGroup.add(cityBrassTrim);
-
-    // Central Moveo Citadel Keep (Carved Basalt + Filigreed Brass Ribs + Lit Windows)
-    const keepTowers = [
-      { x: 0, z: 0, w: 0.62, d: 0.62, h: 1.85, spire: 0.65 },
-      { x: -0.52, z: 0.28, w: 0.38, d: 0.38, h: 1.25, spire: 0.42 },
-      { x: 0.52, z: 0.24, w: 0.40, d: 0.40, h: 1.38, spire: 0.45 },
-      { x: -0.36, z: -0.46, w: 0.36, d: 0.36, h: 1.10, spire: 0.36 },
-      { x: 0.40, z: -0.42, w: 0.34, d: 0.34, h: 1.18, spire: 0.38 }
-    ];
-
-    keepTowers.forEach((t, idx) => {
-      const tower = new THREE.Mesh(new THREE.BoxGeometry(t.w, t.h, t.d), matObsidianTable);
-      tower.position.set(t.x, 0.28 + t.h / 2, t.z);
-      cityGroup.add(tower);
-
-      // Brass Structural Ribs
-      const crown = new THREE.Mesh(new THREE.BoxGeometry(t.w + 0.05, 0.07, t.d + 0.05), matAgedBrass);
-      crown.position.set(t.x, 0.28 + t.h, t.z);
-      cityGroup.add(crown);
-
-      // Brass Spire
-      const spire = new THREE.Mesh(new THREE.ConeGeometry(t.w * 0.48, t.spire, 4), matSpecularBrass);
-      spire.rotation.y = Math.PI / 4;
-      spire.position.set(t.x, 0.28 + t.h + t.spire / 2, t.z);
-      cityGroup.add(spire);
-
-      // Warm Golden & Cyan Lit Arch Windows
-      const winMat = idx === 0 ? matCyanRoot : matGoldCanopy;
-      const winStrip = new THREE.Mesh(new THREE.BoxGeometry(t.w * 0.28, t.h * 0.55, t.d + 0.02), winMat);
-      winStrip.position.set(t.x, 0.28 + t.h * 0.52, t.z);
-      cityGroup.add(winStrip);
-    });
-
-    // 5. REALM II: THE WORKSHOP (BURNISHED COPPER #A85638 & FURNACE EMBER #FF6B2B)
-    const workshopGroup = new THREE.Group();
-    workshopGroup.position.set(-3.1, 0.1, 1.35);
-    worldGroup.add(workshopGroup);
-
-    const wsBase = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.18, 0.24, 12), matObsidianTable);
-    wsBase.position.y = 0.12;
-    workshopGroup.add(wsBase);
-
-    const wsDome = new THREE.Mesh(new THREE.SphereGeometry(0.58, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.6), matWorkshopCopper);
-    wsDome.position.set(0, 0.24, 0);
-    workshopGroup.add(wsDome);
-
-    const wsFurnaceCore = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.42, 16), matEmberHeart);
-    wsFurnaceCore.position.set(0.35, 0.36, 0.35);
-    workshopGroup.add(wsFurnaceCore);
-
-    const wsGlassDome = new THREE.Mesh(new THREE.SphereGeometry(0.36, 16, 12), matCyanRoot);
-    wsGlassDome.position.set(-0.46, 0.35, 0.28);
-    workshopGroup.add(wsGlassDome);
-
-    // 6. REALM III: 2022–26 · THE CAMPUS (WARM TRAVERTINE #DDD5C7, <=15% FRAME)
-    const campusGroup = new THREE.Group();
-    campusGroup.position.set(-2.55, 0.1, -2.35);
-    worldGroup.add(campusGroup);
-
-    const campusPlinth = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.22, 1.15), matTravertineCampus);
-    campusPlinth.position.y = 0.11;
-    campusGroup.add(campusPlinth);
-
-    for (let c = -2; c <= 2; c++) {
-      const col = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.065, 0.62, 12), matTravertineCampus);
-      col.position.set(c * 0.28, 0.52, 0.38);
-      campusGroup.add(col);
-    }
-
-    const campusRoof = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.12, 0.95), matAgedBrass);
-    campusRoof.position.y = 0.88;
-    campusGroup.add(campusRoof);
-
-    // 7. REALM IV: 2021 · BOOTCAMP (WEATHERED COASTAL SLATE #2A303C BASTION & LIGHTHOUSE)
-    const bootcampGroup = new THREE.Group();
-    bootcampGroup.position.set(2.75, 0.1, -2.25);
-    worldGroup.add(bootcampGroup);
-
-    const slateBastion = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.05, 0.45, 7), matSlateBootcamp);
-    slateBastion.position.y = 0.22;
-    bootcampGroup.add(slateBastion);
-
-    const lighthouseTower = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 1.15, 12), matSlateBootcamp);
-    lighthouseTower.position.set(0.15, 0.85, -0.1);
-    bootcampGroup.add(lighthouseTower);
-
-    const lighthouseLantern = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), matGoldCanopy);
-    lighthouseLantern.position.set(0.15, 1.48, -0.1);
-    bootcampGroup.add(lighthouseLantern);
-
-    // --- CAMERA CHOREOGRAPHY & REALM FOCUS ---
-    window.focusRealm = function(realmKey) {
-      const cfg = REALM_CONFIG[realmKey];
-      if (!cfg) return;
-      targetCamPos.copy(cfg.camPos);
-      targetLookAt.copy(cfg.lookAt);
-
-      document.getElementById('stageCrestTitle').textContent = cfg.title;
-      document.getElementById('stageCrestSub').textContent = cfg.sub;
-
-      document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
-      const tab = document.getElementById(cfg.tabId);
-      if (tab) tab.classList.add('active');
-
-      document.querySelectorAll('.inworld-plaque').forEach(p => p.classList.remove('is-active'));
-      const marker = document.getElementById(cfg.markerId);
-      if (marker) marker.classList.add('is-active');
-    };
-
-    // --- LIGHTING MODE TOGGLE (2900K ASTROLABE KEY <-> 4800K DEEP ROOT BIOLUMINESCENCE) ---
     let deepBioMode = false;
     window.toggleLightingMode = function() {
       deepBioMode = !deepBioMode;
@@ -1564,19 +1289,19 @@
       if (deepBioMode) {
         label.textContent = '4800K DEEP BIOLUMINESCENCE';
         pip.classList.remove('gold');
-        astrolabeKeyLight.intensity = 1.05;
-        rootCyanLight.intensity = 5.4;
-        matCyanRoot.emissiveIntensity = 2.45;
+        lights.astrolabeKeyLight.intensity = 1.15;
+        lights.rootCyanLight.intensity = 6.2;
+        materials.matCyanRoot.emissiveIntensity = 2.65;
       } else {
         label.textContent = '2900K ASTROLABE KEY';
         pip.classList.add('gold');
-        astrolabeKeyLight.intensity = 2.6;
-        rootCyanLight.intensity = 3.4;
-        matCyanRoot.emissiveIntensity = 1.65;
+        lights.astrolabeKeyLight.intensity = 2.85;
+        lights.rootCyanLight.intensity = 4.5;
+        materials.matCyanRoot.emissiveIntensity = 1.95;
       }
     };
 
-    // --- POINTER DRAG ORBIT ON THE OBSIDIAN TABLE ---
+    // Pointer Drag Orbit on the Obsidian Table
     let isDragging = false;
     let prevX = 0;
     let tableRotationOffset = 0;
@@ -1595,13 +1320,12 @@
       isDragging = false;
     });
 
-    // --- PROJECT 3D LANDMARK POSITIONS TO 2D DIEGETIC PLAQUES ---
     const markerAnchors = [
-      { id: 'markerCity', localPos: new THREE.Vector3(2.35, 2.55, 1.95) },
-      { id: 'markerKage', localPos: new THREE.Vector3(0.0, 4.15, 0.0) },
-      { id: 'markerWorkshop', localPos: new THREE.Vector3(-3.1, 1.25, 1.35) },
-      { id: 'markerCampus', localPos: new THREE.Vector3(-2.55, 1.35, -2.35) },
-      { id: 'markerBootcamp', localPos: new THREE.Vector3(2.75, 1.95, -2.25) }
+      { id: 'markerCity', localPos: new THREE.Vector3(2.35, 3.15, 1.95) },
+      { id: 'markerKage', localPos: new THREE.Vector3(0.0, 4.35, 0.0) },
+      { id: 'markerWorkshop', localPos: new THREE.Vector3(-3.10, 1.95, 1.35) },
+      { id: 'markerCampus', localPos: new THREE.Vector3(-2.55, 1.75, -2.35) },
+      { id: 'markerBootcamp', localPos: new THREE.Vector3(2.75, 2.55, -2.25) }
     ];
 
     function updateMarkers() {
@@ -1619,13 +1343,12 @@
       });
     }
 
-    // --- ANIMATION LOOP ---
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      // Smooth spring camera choreography
+      // Smooth spring camera choreography (+ shift left when right scroll drawer is open)
       const effectiveCamPos = targetCamPos.clone();
       const effectiveLookAt = targetLookAt.clone();
       if (isScrollOpen && window.innerWidth > 900) {
@@ -1637,29 +1360,43 @@
       camera.position.copy(currentCamPos);
       camera.lookAt(currentLookAt);
 
-      // Subtle breathing rotation on the overhead Cardanic Brass Astrolabe Rings
-      ringOuter.rotation.z = t * 0.18;
-      ringMiddle.rotation.x = -Math.PI * 0.28 + Math.sin(t * 0.5) * 0.12;
-      ringMiddle.rotation.z = -t * 0.24;
-      ringInner.rotation.y = t * 0.32;
+      // Rotate the 5-Ring Toothed Citadel Astrolabe & Worm-Gear Pinion
+      if (animatedParts.outerRing) animatedParts.outerRing.rotation.z = t * 0.14;
+      if (animatedParts.horizonRing) animatedParts.horizonRing.rotation.y = -t * 0.18;
+      if (animatedParts.middleRing) {
+        animatedParts.middleRing.rotation.x = -Math.PI * 0.32 + Math.sin(t * 0.5) * 0.10;
+        animatedParts.middleRing.rotation.z = -t * 0.22;
+      }
+      if (animatedParts.equatorialRing) animatedParts.equatorialRing.rotation.y = t * 0.28;
+      if (animatedParts.innerRing) animatedParts.innerRing.rotation.z = -t * 0.35;
+      if (animatedParts.wormPinion) animatedParts.wormPinion.rotation.y = t * 1.6;
 
-      // Apply user drag rotation smoothly
+      // Animate Realm Clockwork Mechanisms (Functional, never decorative wallpaper!)
+      if (animatedParts.cityHeliostat) animatedParts.cityHeliostat.rotation.y = t * 0.45;
+      if (animatedParts.cityEscapement) animatedParts.cityEscapement.rotation.z = Math.sin(t * 2.8) * 0.18;
+      if (animatedParts.cityFoundationGear) animatedParts.cityFoundationGear.rotation.y = t * 0.08;
+      if (animatedParts.workshopCarillon) animatedParts.workshopCarillon.rotation.y = -t * 0.55;
+      if (animatedParts.workshopBeam) animatedParts.workshopBeam.rotation.z = Math.sin(t * 2.2) * 0.22;
+      if (animatedParts.campusGear) animatedParts.campusGear.rotation.y = -t * 0.09;
+      if (animatedParts.bootcampFresnel) animatedParts.bootcampFresnel.rotation.y = t * 0.65;
+      if (animatedParts.spores) animatedParts.spores.rotation.y = t * 0.03;
+
       worldGroup.rotation.y += (tableRotationOffset - worldGroup.rotation.y) * 0.08;
 
-      // Animate traveling task pulse along the primary milled root channel
       if (pulseProgress >= 0 && primaryCityCurve) {
-        pulseProgress += 0.012;
+        pulseProgress += 0.011;
         if (pulseProgress > 1) {
           pulseProgress = -1;
-          taskPulseOrb.visible = false;
+          taskPulseGroup.visible = false;
         } else {
           const p = primaryCityCurve.getPointAt(pulseProgress);
-          taskPulseOrb.position.set(p.x, p.y + 0.08, p.z);
+          taskPulseGroup.position.set(p.x, p.y + 0.09, p.z);
+          taskPulseGroup.rotation.y = t * 4.0;
         }
       }
 
       updateMarkers();
-      renderer.render(scene, camera);
+      composer.render();
     }
     animate();
 
@@ -1667,6 +1404,7 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
     });
   </script>
 </body>

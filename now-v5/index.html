@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<title>Roi Yotvat · Now — The Astrolabe &amp; The Neural Tree (v5 Diorama)</title>
+<style>
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('../fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Patrick Hand';
+    src: url('../fonts/PatrickHand-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  :root {
+    /* 60% BASE: CARVED OBSIDIAN & SLATE TABLE */
+    --table-obsidian: #111318;
+    --table-channel: #0A0C10;
+    --slate-bootcamp: #2A303C;
+    --travertine-campus: #DDD5C7;
+    --parchment-scroll: #F2EEE4;
+    --parchment-grid: #E4DCCB;
+
+    /* 30% STRUCTURE & CRAFT: CLOCKWORK METALS */
+    --brass-aged: #B8924A;
+    --brass-specular: #D8B467;
+    --bronze-shadow: #5C4724;
+    --copper-workshop: #A85638;
+
+    /* 10% EMISSION: KAGE BIOLUMINESCENCE & FURNACE */
+    --kage-cyan: #2CE6D8;
+    --kage-cyan-core: #B8FFF9;
+    --kage-gold: #FFB84D;
+    --ember-workshop: #FF6B2B;
+
+    /* EDITORIAL INK (ON #F2EEE4 SCROLL) */
+    --ink-editorial: #1C1D1F;
+    --ink-pencil: #5A5852;
+    --ink-citadel-blue: #1F3A5F;
+    --ink-copper: #9E331E;
+
+    /* HENRY HEFFERNAN 2-LAYER DIRECTIONAL BEVEL STACKS */
+    --bevel-obsidian-raised:
+      inset 1px 1px 0px #2A303C,
+      inset -1px -1px 0px #050608,
+      inset 2px 2px 0px #B8924A,
+      inset -2px -2px 0px #5C4724;
+
+    --bevel-obsidian-milled:
+      inset 1px 1px 0px #050608,
+      inset -1px -1px 0px #2A303C,
+      inset 2px 2px 0px #5C4724,
+      inset -2px -2px 0px #B8924A;
+
+    --bevel-brass-button:
+      inset 1px 1px 0px #FFF1B8,
+      inset -1px -1px 0px #3D2E14,
+      inset 2px 2px 0px #D8B467,
+      inset -2px -2px 0px #5C4724;
+
+    --bevel-brass-depressed:
+      inset 1px 1px 0px #3D2E14,
+      inset -1px -1px 0px #FFF1B8,
+      inset 2px 2px 0px #5C4724,
+      inset -2px -2px 0px #D8B467;
+
+    --bevel-scroll-well:
+      inset 1px 1px 0px #050608,
+      inset -1px -1px 0px #D8B467,
+      inset 2px 2px 0px #5C4724,
+      inset -2px -2px 0px #FFFDF8;
+
+    --dither-obsidian-latched: repeating-linear-gradient(
+      45deg,
+      #0A0C10 0px,
+      #0A0C10 2px,
+      #1F242E 2px,
+      #1F242E 4px
+    );
+
+    /* ETCHED HOROLOGICAL VERNIER DEGREE TICKS */
+    --vernier-ruler-brass: repeating-linear-gradient(
+      90deg,
+      rgba(216, 180, 103, 0.55) 0px,
+      rgba(216, 180, 103, 0.55) 1px,
+      transparent 1px,
+      transparent 6px,
+      rgba(184, 146, 74, 0.28) 6px,
+      rgba(184, 146, 74, 0.28) 7px,
+      transparent 7px,
+      transparent 12px
+    );
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--table-channel);
+    color: var(--parchment-scroll);
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  #worldCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    z-index: 1;
+    cursor: grab;
+  }
+
+  #worldCanvas:active {
+    cursor: grabbing;
+  }
+
+  .study-vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(circle at 50% 48%, transparent 56%, rgba(5, 7, 10, 0.72) 100%);
+  }
+
+  /* HOROLOGICAL INSTRUMENT PANEL MIXIN: CORNER BRASS RIVETS & VERNIER RULER */
+  .horological-frame {
+    position: relative;
+    background-color: var(--table-obsidian);
+    background-image:
+      radial-gradient(circle at 6px 6px, #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      radial-gradient(circle at calc(100% - 6px) 6px, #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      radial-gradient(circle at 6px calc(100% - 6px), #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      radial-gradient(circle at calc(100% - 6px) calc(100% - 6px), #D8B467 1.5px, #5C4724 2.5px, transparent 3px),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(0, 0, 0, 0.22) 100%);
+    box-shadow: var(--bevel-obsidian-raised), 0 12px 28px rgba(0, 0, 0, 0.78);
+  }
+
+  .vernier-strip {
+    height: 4px;
+    width: 100%;
+    background-image: var(--vernier-ruler-brass);
+    border-bottom: 1px solid rgba(92, 71, 36, 0.65);
+    opacity: 0.85;
+  }
+
+  /* IN-WORLD DIEGETIC BRASS & OBSIDIAN PLAQUES (TETHERED TO 3D LANDMARKS) */
+  .world-markers {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .inworld-plaque {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    pointer-events: auto;
+    background-color: var(--table-obsidian);
+    background-image:
+      radial-gradient(circle at 4px 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at 4px calc(100% - 4px), #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) calc(100% - 4px), #D8B467 1px, transparent 2px);
+    box-shadow: var(--bevel-obsidian-raised), 0 8px 20px rgba(0, 0, 0, 0.82);
+    padding: 5px 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: transform 120ms ease, filter 120ms ease;
+    white-space: nowrap;
+    border: none;
+  }
+
+  .inworld-plaque:hover {
+    transform: translate(-50%, -105%);
+    filter: brightness(1.12);
+  }
+
+  .inworld-plaque::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -14px;
+    width: 1.5px;
+    height: 14px;
+    transform: translateX(-50%);
+    background: var(--brass-specular);
+    box-shadow: 0 0 6px var(--kage-cyan);
+  }
+
+  .plaque-pip {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--kage-cyan);
+    box-shadow: 0 0 8px var(--kage-cyan);
+    flex-shrink: 0;
+  }
+
+  .plaque-pip.gold {
+    background: var(--kage-gold);
+    box-shadow: 0 0 9px var(--kage-gold);
+  }
+
+  .plaque-pip.ember {
+    background: var(--ember-workshop);
+    box-shadow: 0 0 8px var(--ember-workshop);
+  }
+
+  .plaque-title {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--parchment-scroll);
+  }
+
+  .plaque-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--brass-specular);
+    letter-spacing: 0.04em;
+  }
+
+  .inworld-plaque.is-active {
+    box-shadow:
+      inset 1px 1px 0px #FFF1B8,
+      inset -1px -1px 0px #050608,
+      inset 2px 2px 0px var(--kage-gold),
+      inset -2px -2px 0px var(--brass-aged),
+      0 0 18px rgba(255, 184, 77, 0.38),
+      0 10px 22px rgba(0, 0, 0, 0.88);
+  }
+
+  /* TOP-LEFT EMBOSSED BRASS REALM CREST (<=12 WORDS OF STAGE COPY) */
+  .top-left-crest {
+    position: fixed;
+    top: 16px;
+    left: 18px;
+    z-index: 10;
+    padding: 10px 16px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .crest-main-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .crest-medallion {
+    width: 40px;
+    height: 40px;
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .crest-copy h1 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--parchment-scroll);
+    line-height: 1.05;
+  }
+
+  .crest-copy p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--brass-specular);
+    letter-spacing: 0.05em;
+    margin-top: 3px;
+  }
+
+  /* TOP-RIGHT TACTILE HOROLOGICAL BAR */
+  .top-right-controls {
+    position: fixed;
+    top: 16px;
+    right: 18px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .citadel-btn {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 14px;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background-color: var(--table-obsidian);
+    background-image:
+      radial-gradient(circle at 4px 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) 4px, #D8B467 1px, transparent 2px),
+      radial-gradient(circle at 4px calc(100% - 4px), #D8B467 1px, transparent 2px),
+      radial-gradient(circle at calc(100% - 4px) calc(100% - 4px), #D8B467 1px, transparent 2px);
+    color: var(--parchment-scroll);
+    box-shadow: var(--bevel-obsidian-raised), 0 8px 18px rgba(0,0,0,0.65);
+  }
+
+  .citadel-btn:hover {
+    background-color: #181C24;
+    color: #FFFFFF;
+  }
+
+  .citadel-btn:active,
+  .citadel-btn.is-pressed {
+    box-shadow: var(--bevel-obsidian-milled);
+  }
+
+  .citadel-btn:active > span,
+  .citadel-btn.is-pressed > span {
+    transform: translate(1px, 1px);
+  }
+
+  .citadel-btn.variant-brass {
+    background: linear-gradient(180deg, #D2AC60 0%, #A67E36 100%);
+    color: #0A0C10;
+    box-shadow: var(--bevel-brass-button), 0 8px 18px rgba(0,0,0,0.7);
+    font-weight: 900;
+  }
+
+  .citadel-btn.variant-brass:hover {
+    background: linear-gradient(180deg, #E2BE74 0%, #B8924A 100%);
+  }
+
+  .citadel-btn.variant-brass:active {
+    box-shadow: var(--bevel-brass-depressed);
+  }
+
+  .citadel-btn.variant-cyan {
+    background-color: #0E2329;
+    color: var(--kage-cyan-core);
+    box-shadow:
+      inset 1px 1px 0px #2CE6D8,
+      inset -1px -1px 0px #050608,
+      inset 2px 2px 0px #164E56,
+      inset -2px -2px 0px #081519,
+      0 8px 18px rgba(0,0,0,0.65);
+  }
+
+  .citadel-btn.is-latched {
+    background: var(--dither-obsidian-latched);
+    box-shadow: var(--bevel-obsidian-milled);
+    color: var(--kage-gold);
+  }
+
+  /* BOTTOM-LEFT STORY POPOVER FOR CLICKED MEMORY ROOT NODES & REALM DIORAMAS (HUMAN WORDS ONLY) */
+  .root-story-card {
+    position: fixed;
+    left: 18px;
+    bottom: 80px;
+    width: 410px;
+    z-index: 10;
+    padding: 10px 15px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 3px solid var(--kage-cyan);
+  }
+
+  .root-story-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .root-story-header span.step-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--kage-cyan);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .root-story-card h2 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--kage-gold);
+  }
+
+  .root-story-card p {
+    font-size: 12.5px;
+    line-height: 1.48;
+    color: var(--parchment-scroll);
+  }
+
+  .root-node-pills {
+    display: flex;
+    gap: 5px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+  }
+
+  .root-pill-btn {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    border: 1px solid var(--bronze-shadow);
+    color: var(--travertine-campus);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    padding: 3px 7px;
+    cursor: pointer;
+  }
+
+  .root-pill-btn.active {
+    border-color: var(--kage-cyan);
+    color: var(--kage-cyan-core);
+    background: #0E2329;
+  }
+
+  /* BOTTOM ASTROLABE CHAPTER BAR */
+  .bottom-astrolabe-bar {
+    position: fixed;
+    left: 18px;
+    right: 18px;
+    bottom: 14px;
+    z-index: 10;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .chapter-stops {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .chapter-btn {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    border: none;
+    color: var(--travertine-campus);
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 7px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .chapter-btn:hover {
+    color: #FFFFFF;
+  }
+
+  .chapter-btn.active {
+    background: linear-gradient(180deg, #D2AC60 0%, #A67E36 100%);
+    color: #0A0C10;
+    box-shadow: var(--bevel-brass-button);
+    font-weight: 900;
+  }
+
+  .bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ON-DEMAND CITADEL SCROLL DRAWER (#F2EEE4 PARCHMENT WELL) */
+  .citadel-scroll-drawer {
+    position: fixed;
+    top: 16px;
+    right: 18px;
+    bottom: 72px;
+    width: min(620px, calc(100vw - 36px));
+    z-index: 25;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transform: translateX(calc(100% + 40px));
+    transition: transform 420ms cubic-bezier(0.13, 0.99, 0.00, 1.00);
+    user-select: text;
+  }
+
+  .citadel-scroll-drawer.is-open {
+    transform: translateX(0);
+  }
+
+  .drawer-titlebar {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .drawer-titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brass-specular);
+  }
+
+  .scroll-well {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--parchment-scroll);
+    background-image:
+      linear-gradient(to right, rgba(228, 220, 203, 0.55) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(228, 220, 203, 0.55) 1px, transparent 1px);
+    background-size: 16px 16px;
+    color: var(--ink-editorial);
+    box-shadow: var(--bevel-scroll-well);
+    padding: 15px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .scroll-masthead {
+    border-bottom: 2px solid var(--ink-editorial);
+    padding-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .scroll-masthead h2 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-editorial);
+    line-height: 1.08;
+  }
+
+  .scroll-masthead p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-pencil);
+    margin-top: 3px;
+  }
+
+  .wax-stamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-copper);
+    border: 1.5px solid var(--ink-copper);
+    padding: 3px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    background: rgba(255, 250, 240, 0.85);
+  }
+
+  .scroll-section h3 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 14.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--ink-citadel-blue);
+    margin-bottom: 4px;
+  }
+
+  .scroll-section p {
+    font-size: 13px;
+    line-height: 1.46;
+    color: var(--ink-editorial);
+  }
+
+  .stack-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 5px;
+  }
+
+  .stack-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-editorial);
+    background: #FAF6EC;
+    border: 1px solid #C5BBA6;
+    padding: 2px 8px;
+  }
+
+  .kage-voice-box {
+    border-top: 2px solid var(--ink-editorial);
+    border-bottom: 1px solid var(--ink-editorial);
+    background: rgba(255, 253, 247, 0.88);
+    padding: 7px 12px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 16.5px;
+    line-height: 1.28;
+    color: var(--ink-citadel-blue);
+  }
+
+  .kage-principles-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .principle-card {
+    background: #FAF6EC;
+    border: 1px solid #C5BBA6;
+    padding: 7px 9px;
+  }
+
+  .principle-card h4 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 12.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-copper);
+    margin-bottom: 2px;
+  }
+
+  .principle-card p {
+    font-size: 11.5px;
+    line-height: 1.38;
+    color: var(--ink-editorial);
+  }
+
+  .hand-schematic-box {
+    background: #FAF6EC;
+    border: 1.5px solid var(--ink-editorial);
+    padding: 8px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hand-schematic-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-pencil);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .drawer-footer {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .drawer-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .top-left-crest {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      padding: 8px 10px;
+    }
+    .crest-copy h1 {
+      font-size: 16px;
+    }
+    .crest-copy p {
+      font-size: 9.5px;
+    }
+    .top-right-controls {
+      top: 68px;
+      right: 8px;
+      left: 8px;
+      justify-content: space-between;
+      gap: 4px;
+    }
+    .top-right-controls .citadel-btn {
+      font-size: 10px;
+      padding: 6px 7px;
+      flex: 1;
+      justify-content: center;
+    }
+    .root-story-card {
+      left: 8px;
+      right: 8px;
+      width: auto;
+      bottom: 102px;
+      padding: 9px 11px;
+    }
+    .root-story-card h2 {
+      font-size: 13px;
+    }
+    .root-story-card p {
+      font-size: 11.5px;
+    }
+    .bottom-astrolabe-bar {
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      padding: 6px 8px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+    }
+    .chapter-stops {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .chapter-btn {
+      font-size: 10.5px;
+      padding: 5px 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .bar-actions {
+      justify-content: space-between;
+    }
+    .bar-actions .citadel-btn {
+      font-size: 10.5px;
+      padding: 5px 8px;
+    }
+    .citadel-scroll-drawer {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      width: auto;
+    }
+    .kage-principles-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- 3D CARVED OBSIDIAN TABLE, ASTROLABE & KAGE NEURAL TREE VIEWPORT -->
+  <canvas id="worldCanvas" aria-label="Interactive 3D Carved Obsidian Table with the Bioluminescent Kage Neural Tree and The City Citadel"></canvas>
+  <div class="study-vignette"></div>
+
+  <!-- IN-WORLD DIEGETIC BRASS & OBSIDIAN PLAQUES TETHERED TO 3D LANDMARKS -->
+  <div class="world-markers" id="worldMarkers">
+    <button class="inworld-plaque is-active" id="markerCity" type="button" onclick="focusRealm('city')">
+      <span class="plaque-pip gold"></span>
+      <span class="plaque-title">NOW · THE CITY</span>
+      <span class="plaque-sub">Moveo Creative</span>
+    </button>
+
+    <button class="inworld-plaque" id="markerKage" type="button" onclick="focusRealm('kage')">
+      <span class="plaque-pip"></span>
+      <span class="plaque-title">KAGE NEURAL TREE</span>
+      <span class="plaque-sub">AI Second Brain</span>
+    </button>
+
+    <button class="inworld-plaque" id="markerWorkshop" type="button" onclick="focusRealm('workshop')">
+      <span class="plaque-pip ember"></span>
+      <span class="plaque-title">THE WORKSHOP</span>
+      <span class="plaque-sub">Side Projects</span>
+    </button>
+
+    <button class="inworld-plaque" id="markerCampus" type="button" onclick="focusRealm('campus')">
+      <span class="plaque-pip gold"></span>
+      <span class="plaque-title">2022–26 · THE CAMPUS</span>
+      <span class="plaque-sub">Mister Bit</span>
+    </button>
+
+    <button class="inworld-plaque" id="markerBootcamp" type="button" onclick="focusRealm('bootcamp')">
+      <span class="plaque-pip"></span>
+      <span class="plaque-title">2021 · BOOTCAMP</span>
+      <span class="plaque-sub">Coding Academy</span>
+    </button>
+  </div>
+
+  <!-- TOP-LEFT EMBOSSED BRASS REALM CREST (<=12 WORDS OF STAGE COPY AT REST) -->
+  <header class="top-left-crest horological-frame">
+    <div class="vernier-strip" aria-hidden="true"></div>
+    <div class="crest-main-row">
+      <div class="crest-medallion" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="11" stroke="#D8B467" stroke-width="1.6"/>
+          <ellipse cx="14" cy="14" rx="11" ry="5" transform="rotate(-28 14 14)" stroke="#B8924A" stroke-width="1.2"/>
+          <path d="M14 23V13M14 13L9 8M14 13L19 8M10 22C12 19 16 19 18 22" stroke="#2CE6D8" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="14" cy="11" r="2.6" fill="#FFB84D"/>
+        </svg>
+      </div>
+      <div class="crest-copy">
+        <h1 id="stageCrestTitle">ROI YOTVAT · NOW · THE CITY</h1>
+        <p id="stageCrestSub">Full-Stack Developer · Moveo Creative &amp; Kage Second Brain</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOP-RIGHT TACTILE HOROLOGICAL BAR -->
+  <nav class="top-right-controls" aria-label="Scene Controls">
+    <button class="citadel-btn" id="btnCloseupZoom" type="button" onclick="toggleCloseupZoom()">
+      <span class="plaque-pip gold"></span>
+      <span id="zoomBtnLabel">DIORAMA CLOSE-UP</span>
+    </button>
+    <button class="citadel-btn variant-cyan" id="btnPulseTask" type="button" onclick="triggerTaskPulse()">
+      <span class="plaque-pip"></span>
+      <span>PULSE ONE-LINE TASK</span>
+    </button>
+    <button class="citadel-btn" id="btnLightMode" type="button" onclick="toggleLightingMode()">
+      <span class="plaque-pip gold" id="lightModePip"></span>
+      <span id="lightModeLabel">2900K ASTROLABE KEY</span>
+    </button>
+    <button class="citadel-btn variant-brass" id="btnOpenScrollTop" type="button" onclick="toggleCitadelScroll(true)">
+      <span>UNSEAL CITADEL SCROLL ↵</span>
+    </button>
+  </nav>
+
+  <!-- BOTTOM-LEFT KAGE MEMORY ROOT & REALM STORY READOUT (ZERO STATS · HUMAN TECH WORLDS ONLY) -->
+  <aside class="root-story-card horological-frame" aria-label="Kage Memory Root Story">
+    <div class="vernier-strip" aria-hidden="true"></div>
+    <div class="root-story-header">
+      <span class="step-tag" id="rootStepTag">MILLED ROOT CHANNEL · IRIS NODE I OF IV</span>
+      <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass-specular);">HUMAN TECH WORLD</span>
+    </div>
+    <h2 id="rootStoryTitle">SESSION HANDOFF MEMORY · NO RE-EXPLAINING</h2>
+    <p id="rootStoryBody">
+      Every session starts from the last session's written handoff in Roi's notes vault—so Kage remembers the architecture, past trade-offs, and open threads before Roi types a word.
+    </p>
+    <div class="root-node-pills">
+      <button class="root-pill-btn active" type="button" onclick="selectRootStory(0)">I. Handoff Memory</button>
+      <button class="root-pill-btn" type="button" onclick="selectRootStory(1)">II. Vault Search &amp; Spec</button>
+      <button class="root-pill-btn" type="button" onclick="selectRootStory(2)">III. Line-Cited Review</button>
+      <button class="root-pill-btn" type="button" onclick="selectRootStory(3)">IV. Roi's Go-Ahead</button>
+    </div>
+  </aside>
+
+  <!-- BOTTOM ASTROLABE CHAPTER BAR -->
+  <footer class="bottom-astrolabe-bar horological-frame">
+    <div class="chapter-stops" role="tablist" aria-label="Carved Obsidian Table Realms">
+      <button class="chapter-btn active" id="tabCity" type="button" onclick="focusRealm('city')">
+        <span>I · NOW · THE CITY</span>
+      </button>
+      <button class="chapter-btn" id="tabKage" type="button" onclick="focusRealm('kage')">
+        <span>KAGE NEURAL TREE</span>
+      </button>
+      <button class="chapter-btn" id="tabWorkshop" type="button" onclick="focusRealm('workshop')">
+        <span>II · THE WORKSHOP</span>
+      </button>
+      <button class="chapter-btn" id="tabCampus" type="button" onclick="focusRealm('campus')">
+        <span>III · 2022–26 CAMPUS</span>
+      </button>
+      <button class="chapter-btn" id="tabBootcamp" type="button" onclick="focusRealm('bootcamp')">
+        <span>IV · 2021 BOOTCAMP</span>
+      </button>
+    </div>
+
+    <div class="bar-actions">
+      <a class="citadel-btn" href="../ui-kit/index.html">
+        <span>UI KIT</span>
+      </a>
+      <a class="citadel-btn" href="../cv.pdf" target="_blank" rel="noopener">
+        <span>CV (PDF) ↗</span>
+      </a>
+      <button class="citadel-btn variant-brass" type="button" onclick="toggleCitadelScroll()">
+        <span id="bottomScrollBtnLabel">READ ROLE &amp; KAGE STORY ↵</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ON-DEMAND CITADEL SCROLL DRAWER (#F2EEE4 PARCHMENT WELL) -->
+  <section class="citadel-scroll-drawer horological-frame" id="citadelScrollDrawer" aria-label="Citadel Scroll — Role, Kage Second Brain, and CV">
+    <div class="vernier-strip" aria-hidden="true"></div>
+    <div class="drawer-titlebar">
+      <div class="drawer-titlebar-left">
+        <span class="plaque-pip gold"></span>
+        <span>CITADEL SCROLL · NOW · THE CITY &amp; KAGE NEURAL TREE</span>
+      </div>
+      <button class="citadel-btn" type="button" onclick="toggleCitadelScroll(false)" style="padding:4px 10px; font-size:11.5px;">
+        <span>SEAL SCROLL ✕</span>
+      </button>
+    </div>
+
+    <div class="scroll-well">
+      <div class="scroll-masthead">
+        <div>
+          <h2>ROI YOTVAT</h2>
+          <p>Full-Stack Developer · Tel Aviv · Leading Enterprise Web &amp; AI Workflows</p>
+        </div>
+        <span class="wax-stamp">JAN 2026 – NOW · MOVEO CREATIVE</span>
+      </div>
+
+      <!-- HUMAN STORY 1: MOVEO CREATIVE -->
+      <div class="scroll-section">
+        <h3>NOW · THE CITY — FULL-STACK DEVELOPER AT MOVEO CREATIVE</h3>
+        <p>
+          Leading full-stack enterprise projects end-to-end—architecting and shipping custom WordPress platforms (<strong>PHP, Gutenberg, ACF</strong>) alongside modern <strong>React and Next.js</strong> applications. I work directly with clients and third-party vendors from kickoff to launch, and brought <strong>Claude Code and custom AI workflows</strong> into the team's daily engineering practice.
+        </p>
+        <div class="stack-chip-row">
+          <span class="stack-chip">React</span>
+          <span class="stack-chip">Next.js</span>
+          <span class="stack-chip">Node.js</span>
+          <span class="stack-chip">TypeScript</span>
+          <span class="stack-chip">WordPress (PHP / Gutenberg / ACF)</span>
+          <span class="stack-chip">Claude Code &amp; Agent Workflows</span>
+        </div>
+      </div>
+
+      <!-- HUMAN STORY 2: KAGE IN FIRST PERSON -->
+      <div class="kage-voice-box">
+        "I'm Kage, Roi's AI second brain. I live at the center of this obsidian table so Roi never has to explain a project twice. Give me a one-line task and I'll search his notes vault, hand worker agents a self-contained spec, and run every diff through a second-model review gate before he approves the pull request."
+      </div>
+
+      <!-- HUMAN STORY 3: HOW KAGE WORKS IN HUMAN WORDS (ZERO STATS) -->
+      <div class="scroll-section">
+        <h3>HOW WORK MOVES THROUGH KAGE (IN HUMAN WORDS)</h3>
+        <div class="kage-principles-grid">
+          <div class="principle-card">
+            <h4>1. Written Handoff Memory</h4>
+            <p>Each session starts from the previous session's written handoff in the notes vault, re-indexed on every commit so context stays alive.</p>
+          </div>
+          <div class="principle-card">
+            <h4>2. Line-Citing Review Gate</h4>
+            <p>Workers never grade their own work. A second model reviews every diff and must quote the exact line it objects to.</p>
+          </div>
+          <div class="principle-card">
+            <h4>3. Roi in the Director's Chair</h4>
+            <p>Safety hooks block force-pushes, protected branches, and production steps until Roi approves that exact change.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- HAND-DRAWN SQUARED-PAPER TASK FLOW SCHEMATIC -->
+      <div class="hand-schematic-box">
+        <div class="hand-schematic-title">FIG I · HAND-DRAWN TASK TRACE (CLICK "PULSE ONE-LINE TASK" TO WATCH ON TABLE)</div>
+        <svg viewBox="0 0 540 82" width="100%" height="82" aria-label="Roi's one-line task flows to Orchestrator and Notes Vault, then Worker Agents, then Second-Model Line Review, then Roi's Approval and Pull Request">
+          <defs>
+            <marker id="arrowInk" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="#9E331E" />
+            </marker>
+          </defs>
+          <!-- Step 1 -->
+          <rect x="4" y="14" width="92" height="52" rx="4" fill="#FFFDF8" stroke="#1C1D1F" stroke-width="1.6"/>
+          <text x="50" y="36" text-anchor="middle" font-family="Patrick Hand" font-size="14" fill="#1C1D1F">Roi's one-line</text>
+          <text x="50" y="54" text-anchor="middle" font-family="Patrick Hand" font-size="14" fill="#9E331E">task direction</text>
+          <line x1="96" y1="40" x2="112" y2="40" stroke="#9E331E" stroke-width="1.8" marker-end="url(#arrowInk)"/>
+
+          <!-- Step 2 -->
+          <rect x="114" y="14" width="98" height="52" rx="4" fill="#FFFDF8" stroke="#1F3A5F" stroke-width="1.6"/>
+          <text x="163" y="36" text-anchor="middle" font-family="Patrick Hand" font-size="14" fill="#1F3A5F">Orchestrator &amp;</text>
+          <text x="163" y="54" text-anchor="middle" font-family="Patrick Hand" font-size="13" fill="#5A5852">Notes Vault Search</text>
+          <line x1="212" y1="40" x2="228" y2="40" stroke="#9E331E" stroke-width="1.8" marker-end="url(#arrowInk)"/>
+
+          <!-- Step 3 -->
+          <rect x="230" y="14" width="90" height="52" rx="4" fill="#FFFDF8" stroke="#1C1D1F" stroke-width="1.6"/>
+          <text x="275" y="36" text-anchor="middle" font-family="Patrick Hand" font-size="14" fill="#1C1D1F">Worker Agents</text>
+          <text x="275" y="54" text-anchor="middle" font-family="Patrick Hand" font-size="13" fill="#5A5852">Self-contained spec</text>
+          <line x1="320" y1="40" x2="336" y2="40" stroke="#9E331E" stroke-width="1.8" marker-end="url(#arrowInk)"/>
+
+          <!-- Step 4 -->
+          <rect x="338" y="14" width="94" height="52" rx="4" fill="#FFFDF8" stroke="#1F3A5F" stroke-width="1.6"/>
+          <text x="385" y="36" text-anchor="middle" font-family="Patrick Hand" font-size="14" fill="#1F3A5F">2nd-Model Gate</text>
+          <text x="385" y="54" text-anchor="middle" font-family="Patrick Hand" font-size="13" fill="#9E331E">Quotes exact line</text>
+          <line x1="432" y1="40" x2="448" y2="40" stroke="#9E331E" stroke-width="1.8" marker-end="url(#arrowInk)"/>
+
+          <!-- Step 5 -->
+          <rect x="450" y="14" width="86" height="52" rx="4" fill="#FFFDF8" stroke="#9E331E" stroke-width="2"/>
+          <text x="493" y="36" text-anchor="middle" font-family="Patrick Hand" font-size="14" fill="#9E331E">Roi's Go-Ahead</text>
+          <text x="493" y="54" text-anchor="middle" font-family="Patrick Hand" font-size="13" fill="#1C1D1F">Clean PR ships</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <div class="drawer-links">
+        <a class="citadel-btn variant-brass" href="../cv.pdf" target="_blank" rel="noopener" style="padding:6px 12px; font-size:12px;">
+          <span>DOWNLOAD CV (PDF) ↗</span>
+        </a>
+        <a class="citadel-btn" href="https://www.linkedin.com/in/roi-yotvat/" target="_blank" rel="noopener" style="padding:6px 11px; font-size:12px;">
+          <span>LINKEDIN ↗</span>
+        </a>
+        <a class="citadel-btn" href="https://github.com/roiyot26" target="_blank" rel="noopener" style="padding:6px 11px; font-size:12px;">
+          <span>GITHUB (ROIYOT26) ↗</span>
+        </a>
+        <button class="citadel-btn" id="emailObfuscatedBtn" type="button" onclick="revealOrCopyEmail()" style="padding:6px 11px; font-size:12px;">
+          <span id="emailBtnLabel">EMAIL ROI ✉</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script type="module">
+    import { THREE } from '../vendor/three-citadel-bundle.js';
+    import { initCitadelWorldV5 } from '../vendor/citadel-world-v5.js';
+
+    const canvas = document.getElementById('worldCanvas');
+    const world = initCitadelWorldV5(canvas);
+    const {
+      renderer,
+      camera,
+      composer,
+      worldGroup,
+      animatedParts,
+      primaryCityCurve,
+      memoryRootNodes,
+      taskPulseGroup,
+      lights,
+      materials
+    } = world;
+
+    // --- ROOT MEMORY STORIES IN HUMAN WORDS (ZERO STATISTICS!) ---
+    const ROOT_STORIES = [
+      {
+        tag: "MILLED ROOT CHANNEL · IRIS NODE I OF IV",
+        title: "SESSION HANDOFF MEMORY · NO RE-EXPLAINING",
+        body: "Every session starts from the last session's written handoff in Roi's notes vault—so Kage remembers the architecture, past trade-offs, and open threads before Roi types a word."
+      },
+      {
+        tag: "MILLED ROOT CHANNEL · IRIS NODE II OF IV",
+        title: "ONE-LINE TASK TO SELF-CONTAINED SPEC",
+        body: "Roi gives the orchestrator a one-line direction. It searches the notes vault (re-indexed on every commit) and hands worker agents a self-contained spec."
+      },
+      {
+        tag: "MILLED ROOT CHANNEL · IRIS NODE III OF IV",
+        title: "SECOND-MODEL REVIEW GATE THAT QUOTES THE LINE",
+        body: "Workers never grade their own work. Every diff passes through a review gate run by a second model that must quote the exact line it objects to."
+      },
+      {
+        tag: "MILLED ROOT CHANNEL · IRIS NODE IV OF IV",
+        title: "ROI IN THE DIRECTOR'S CHAIR · SAFETY HOOKS",
+        body: "Pre-tool safety hooks hold force-pushes, protected branches, and production changes until Roi gives his explicit go-ahead for that specific step."
+      }
+    ];
+
+    const REALM_CONFIG = {
+      city: {
+        title: "ROI YOTVAT · NOW · THE CITY",
+        sub: "Full-Stack Developer · Moveo Creative & Kage Second Brain",
+        camPos: new THREE.Vector3(3.35, 4.95, 7.65),
+        lookAt: new THREE.Vector3(0.95, 1.35, 0.85),
+        closeupPos: new THREE.Vector3(3.65, 2.55, 4.35),
+        closeupLook: new THREE.Vector3(1.55, 1.45, 1.25),
+        tabId: 'tabCity',
+        markerId: 'markerCity',
+        storyTag: "REALM I · NOW · THE CITY CITADEL",
+        storyTitle: "MOVEO CREATIVE · ENTERPRISE FULL-STACK & AI WORKFLOWS",
+        storyBody: "Leading full-stack enterprise builds end-to-end in React, Next.js, and custom WordPress (PHP/Gutenberg/ACF), talking directly to clients and vendors while rolling out coding agents across the team."
+      },
+      kage: {
+        title: "KAGE · THE BIOLUMINESCENT NEURAL TREE",
+        sub: "Bonsai-Braided Optical Roots & 5-Ring Toothed Citadel Astrolabe",
+        camPos: new THREE.Vector3(0.0, 4.85, 7.45),
+        lookAt: new THREE.Vector3(0.0, 1.85, 0.0),
+        closeupPos: new THREE.Vector3(0.25, 2.65, 3.85),
+        closeupLook: new THREE.Vector3(0.0, 1.95, 0.0),
+        tabId: 'tabKage',
+        markerId: 'markerKage',
+        storyTag: "CENTERPIECE · KAGE NEURAL WORLD-TREE",
+        storyTitle: "PERSISTENT SECOND BRAIN · CYAN ROOTS & GOLD CANOPY",
+        storyBody: "Braided optical-glass root filaments carry session handoffs through milled obsidian channels below, while the weeping-willow canopy and cardanic astrolabe rings synthesize specs above."
+      },
+      workshop: {
+        title: "THE WORKSHOP · RIVETED COPPER FOUNDRY & ALCOVES",
+        sub: "Virtual Garden · Chord Cycle · Doodle Reborn · 3D Blender Craft",
+        camPos: new THREE.Vector3(-4.85, 4.45, 5.85),
+        lookAt: new THREE.Vector3(-2.65, 0.95, 1.05),
+        closeupPos: new THREE.Vector3(-4.25, 2.25, 3.45),
+        closeupLook: new THREE.Vector3(-3.05, 0.85, 1.35),
+        tabId: 'tabWorkshop',
+        markerId: 'markerWorkshop',
+        storyTag: "REALM II · THE WORKSHOP FOUNDRY",
+        storyTitle: "FOUR MAKER ALCOVES AROUND THE COPPER HEARTH",
+        storyBody: "Around the 12-ribbed copper foundry sit four miniature workbenches: the Virtual Garden geodesic conservatory, Chord Cycle's 12-tine brass carillon, Doodle Reborn's pantograph easel, and the 3D Blender sculptor's rig."
+      },
+      campus: {
+        title: "2022–26 · THE CAMPUS · TRAVERTINE STOA",
+        sub: "Mister Bit Full-Stack Developer & Coding Academy Instructor",
+        camPos: new THREE.Vector3(-4.25, 4.65, -5.65),
+        lookAt: new THREE.Vector3(-2.35, 0.95, -2.15),
+        closeupPos: new THREE.Vector3(-3.85, 2.35, -4.15),
+        closeupLook: new THREE.Vector3(-2.55, 0.85, -2.35),
+        tabId: 'tabCampus',
+        markerId: 'markerCampus',
+        storyTag: "REALM III · 2022–26 THE CAMPUS",
+        storyTitle: "SCHOLARLY STOA, AMPHITHEATER & ARCHITECTURE CHALKBOARD",
+        storyBody: "Carved from warm travertine with 14 fluted Doric columns and a sunken 5-row lecture amphitheater where Roi taught full-stack engineering and shipped production web platforms."
+      },
+      bootcamp: {
+        title: "2021 · BOOTCAMP · BASALT CLIFF & LIGHTHOUSE",
+        sub: "Coding Academy Intensive · Where the Journey Began",
+        camPos: new THREE.Vector3(4.65, 4.55, -5.45),
+        lookAt: new THREE.Vector3(2.55, 1.05, -2.05),
+        closeupPos: new THREE.Vector3(4.15, 2.45, -3.85),
+        closeupLook: new THREE.Vector3(2.75, 1.15, -2.25),
+        tabId: 'tabBootcamp',
+        markerId: 'markerBootcamp',
+        storyTag: "REALM IV · 2021 BOOTCAMP LIGHTHOUSE",
+        storyTitle: "GIANT'S-CAUSEWAY BASALT CLIFFS & FRESNEL LANTERN",
+        storyBody: "Rising from the engraved wave-contour harbor basin on 28 hexagonal basalt columns, climbed by a switchback brass stair to the rotating Fresnel prism lighthouse."
+      }
+    };
+
+    let activeRealmKey = 'city';
+    let isCloseupMode = new URLSearchParams(window.location.search).get('view') === 'closeup';
+    const urlParams = new URLSearchParams(window.location.search);
+    let isScrollOpen = urlParams.get('scroll') === 'open';
+    if (isScrollOpen) {
+      document.getElementById('citadelScrollDrawer').classList.add('is-open');
+      document.getElementById('bottomScrollBtnLabel').textContent = 'SEAL CITADEL SCROLL ✕';
+    }
+    let pulseProgress = -1;
+
+    const currentCamPos = new THREE.Vector3().copy(
+      isCloseupMode ? REALM_CONFIG.city.closeupPos : REALM_CONFIG.city.camPos
+    );
+    const targetCamPos = new THREE.Vector3().copy(currentCamPos);
+    const currentLookAt = new THREE.Vector3().copy(
+      isCloseupMode ? REALM_CONFIG.city.closeupLook : REALM_CONFIG.city.lookAt
+    );
+    const targetLookAt = new THREE.Vector3().copy(currentLookAt);
+    camera.position.copy(currentCamPos);
+    camera.lookAt(currentLookAt);
+
+    function syncCameraTarget() {
+      const cfg = REALM_CONFIG[activeRealmKey];
+      if (!cfg) return;
+      targetCamPos.copy(isCloseupMode ? cfg.closeupPos : cfg.camPos);
+      targetLookAt.copy(isCloseupMode ? cfg.closeupLook : cfg.lookAt);
+      const zBtn = document.getElementById(' btnCloseupZoom') || document.getElementById('btnCloseupZoom');
+      if (zBtn) zBtn.classList.toggle('is-latched', isCloseupMode);
+      const zLbl = document.getElementById('zoomBtnLabel');
+      if (zLbl) zLbl.textContent = isCloseupMode ? 'OVERVIEW TABLE' : 'DIORAMA CLOSE-UP';
+    }
+    syncCameraTarget();
+
+    window.toggleCloseupZoom = function(force) {
+      isCloseupMode = typeof force === 'boolean' ? force : !isCloseupMode;
+      syncCameraTarget();
+    };
+
+    window.focusRealm = function(realmKey, forceCloseup) {
+      const cfg = REALM_CONFIG[realmKey];
+      if (!cfg) return;
+      activeRealmKey = realmKey;
+      if (typeof forceCloseup === 'boolean') {
+        isCloseupMode = forceCloseup;
+      }
+      syncCameraTarget();
+
+      document.getElementById('stageCrestTitle').textContent = cfg.title;
+      document.getElementById('stageCrestSub').textContent = cfg.sub;
+
+      document.getElementById('rootStepTag').textContent = cfg.storyTag;
+      document.getElementById('rootStoryTitle').textContent = cfg.storyTitle;
+      document.getElementById('rootStoryBody').textContent = cfg.storyBody;
+
+      document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
+      const tab = document.getElementById(cfg.tabId);
+      if (tab) tab.classList.add('active');
+
+      document.querySelectorAll('.inworld-plaque').forEach(p => p.classList.remove('is-active'));
+      const marker = document.getElementById(cfg.markerId);
+      if (marker) marker.classList.add('is-active');
+    };
+
+    window.selectRootStory = function(idx) {
+      const s = ROOT_STORIES[idx];
+      document.getElementById('rootStepTag').textContent = s.tag;
+      document.getElementById('rootStoryTitle').textContent = s.title;
+      document.getElementById('rootStoryBody').textContent = s.body;
+      document.querySelectorAll('.root-pill-btn').forEach((b, i) => {
+        b.classList.toggle('active', i === idx);
+      });
+      memoryRootNodes.forEach((n, i) => {
+        n.group.scale.setScalar(i === idx ? 1.48 : 1.0);
+      });
+      pulseProgress = 0;
+      taskPulseGroup.visible = true;
+    };
+
+    window.triggerTaskPulse = function() {
+      pulseProgress = 0;
+      taskPulseGroup.visible = true;
+    };
+
+    window.toggleCitadelScroll = function(forceState) {
+      const drawer = document.getElementById('citadelScrollDrawer');
+      const isOpen = typeof forceState === 'boolean' ? forceState : !drawer.classList.contains('is-open');
+      isScrollOpen = isOpen;
+      drawer.classList.toggle('is-open', isOpen);
+      document.getElementById('bottomScrollBtnLabel').textContent = isOpen
+        ? 'SEAL CITADEL SCROLL ✕'
+        : 'READ ROLE & KAGE STORY ↵';
+    };
+
+    window.revealOrCopyEmail = function() {
+      const addr = `roiyot261098@gmail.com`;
+      document.getElementById('emailBtnLabel').textContent = addr;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(addr).catch(() => {});
+      }
+    };
+
+    let deepBioMode = false;
+    window.toggleLightingMode = function() {
+      deepBioMode = !deepBioMode;
+      const btn = document.getElementById('btnLightMode');
+      const label = document.getElementById('lightModeLabel');
+      const pip = document.getElementById('lightModePip');
+
+      btn.classList.toggle('is-latched', deepBioMode);
+      if (deepBioMode) {
+        label.textContent = '4800K DEEP BIOLUMINESCENCE';
+        pip.classList.remove('gold');
+        lights.astrolabeKeyLight.intensity = 1.15;
+        lights.rootCyanLight.intensity = 6.2;
+        materials.matCyanRoot.emissiveIntensity = 2.65;
+      } else {
+        label.textContent = '2900K ASTROLABE KEY';
+        pip.classList.add('gold');
+        lights.astrolabeKeyLight.intensity = 2.85;
+        lights.rootCyanLight.intensity = 4.5;
+        materials.matCyanRoot.emissiveIntensity = 1.95;
+      }
+    };
+
+    // Pointer Drag Orbit on the Obsidian Table
+    let isDragging = false;
+    let prevX = 0;
+    let tableRotationOffset = 0;
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      prevX = e.clientX;
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevX;
+      prevX = e.clientX;
+      tableRotationOffset += dx * 0.0045;
+    });
+    window.addEventListener('pointerup', () => {
+      isDragging = false;
+    });
+
+    const markerAnchors = [
+      { id: 'markerCity', localPos: new THREE.Vector3(2.35, 3.15, 1.95) },
+      { id: 'markerKage', localPos: new THREE.Vector3(0.0, 4.35, 0.0) },
+      { id: 'markerWorkshop', localPos: new THREE.Vector3(-3.10, 1.95, 1.35) },
+      { id: 'markerCampus', localPos: new THREE.Vector3(-2.55, 1.75, -2.35) },
+      { id: 'markerBootcamp', localPos: new THREE.Vector3(2.75, 2.55, -2.25) }
+    ];
+
+    function updateMarkers() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      markerAnchors.forEach((m) => {
+        const el = document.getElementById(m.id);
+        if (!el) return;
+        const worldPos = m.localPos.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), worldGroup.rotation.y);
+        worldPos.project(camera);
+        const x = (worldPos.x * 0.5 + 0.5) * w;
+        const y = (-worldPos.y * 0.5 + 0.5) * h;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+      });
+    }
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // Smooth spring camera choreography (+ shift left when right scroll drawer is open)
+      const effectiveCamPos = targetCamPos.clone();
+      const effectiveLookAt = targetLookAt.clone();
+      if (isScrollOpen && window.innerWidth > 900) {
+        effectiveCamPos.x += 1.35;
+        effectiveLookAt.x += 1.35;
+      }
+      currentCamPos.lerp(effectiveCamPos, 0.08);
+      currentLookAt.lerp(effectiveLookAt, 0.08);
+      camera.position.copy(currentCamPos);
+      camera.lookAt(currentLookAt);
+
+      // Rotate the 5-Ring Toothed Citadel Astrolabe & Worm-Gear Pinion
+      if (animatedParts.outerRing) animatedParts.outerRing.rotation.z = t * 0.14;
+      if (animatedParts.horizonRing) animatedParts.horizonRing.rotation.y = -t * 0.18;
+      if (animatedParts.middleRing) {
+        animatedParts.middleRing.rotation.x = -Math.PI * 0.32 + Math.sin(t * 0.5) * 0.10;
+        animatedParts.middleRing.rotation.z = -t * 0.22;
+      }
+      if (animatedParts.equatorialRing) animatedParts.equatorialRing.rotation.y = t * 0.28;
+      if (animatedParts.innerRing) animatedParts.innerRing.rotation.z = -t * 0.35;
+      if (animatedParts.wormPinion) animatedParts.wormPinion.rotation.y = t * 1.6;
+
+      // Animate Realm Clockwork Mechanisms (Functional, never decorative wallpaper!)
+      if (animatedParts.cityHeliostat) animatedParts.cityHeliostat.rotation.y = t * 0.45;
+      if (animatedParts.cityEscapement) animatedParts.cityEscapement.rotation.z = Math.sin(t * 2.8) * 0.18;
+      if (animatedParts.cityFoundationGear) animatedParts.cityFoundationGear.rotation.y = t * 0.08;
+      if (animatedParts.workshopCarillon) animatedParts.workshopCarillon.rotation.y = -t * 0.55;
+      if (animatedParts.workshopBeam) animatedParts.workshopBeam.rotation.z = Math.sin(t * 2.2) * 0.22;
+      if (animatedParts.campusGear) animatedParts.campusGear.rotation.y = -t * 0.09;
+      if (animatedParts.bootcampFresnel) animatedParts.bootcampFresnel.rotation.y = t * 0.65;
+      if (animatedParts.spores) animatedParts.spores.rotation.y = t * 0.03;
+
+      worldGroup.rotation.y += (tableRotationOffset - worldGroup.rotation.y) * 0.08;
+
+      if (pulseProgress >= 0 && primaryCityCurve) {
+        pulseProgress += 0.011;
+        if (pulseProgress > 1) {
+          pulseProgress = -1;
+          taskPulseGroup.visible = false;
+        } else {
+          const p = primaryCityCurve.getPointAt(pulseProgress);
+          taskPulseGroup.position.set(p.x, p.y + 0.09, p.z);
+          taskPulseGroup.rotation.y = t * 4.0;
+        }
+      }
+
+      updateMarkers();
+      composer.render();
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
