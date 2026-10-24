@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CITADEL-DS v2.0 — The Astrolabe & The Neural Tree UI Kit · Roi Yotvat</title>
+<style>
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('../fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'Patrick Hand';
+    src: url('../fonts/PatrickHand-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  :root {
+    /* 60% BASE: CARVED OBSIDIAN & SLATE TABLE */
+    --table-obsidian: #111318;
+    --table-channel: #0A0C10;
+    --slate-bootcamp: #2A303C;
+    --travertine-campus: #DDD5C7;
+    --parchment-scroll: #F2EEE4;
+    --parchment-grid: #E4DCCB;
+
+    /* 30% STRUCTURE & CRAFT: CLOCKWORK METALS */
+    --brass-aged: #B8924A;
+    --brass-specular: #D8B467;
+    --bronze-shadow: #5C4724;
+    --copper-workshop: #A85638;
+
+    /* 10% EMISSION: KAGE BIOLUMINESCENCE & FURNACE */
+    --kage-cyan: #2CE6D8;
+    --kage-cyan-core: #B8FFF9;
+    --kage-gold: #FFB84D;
+    --ember-workshop: #FF6B2B;
+
+    /* EDITORIAL INK (ON #F2EEE4 SCROLL) */
+    --ink-editorial: #1C1D1F;
+    --ink-pencil: #5A5852;
+    --ink-citadel-blue: #1F3A5F;
+    --ink-copper: #9E331E;
+
+    /* HENRY HEFFERNAN 2-LAYER DIRECTIONAL BEVEL STACKS */
+    --bevel-obsidian-raised:
+      inset 1px 1px 0px #2A303C,
+      inset -1px -1px 0px #050608,
+      inset 2px 2px 0px #B8924A,
+      inset -2px -2px 0px #5C4724;
+
+    --bevel-obsidian-milled:
+      inset 1px 1px 0px #050608,
+      inset -1px -1px 0px #2A303C,
+      inset 2px 2px 0px #5C4724,
+      inset -2px -2px 0px #B8924A;
+
+    --bevel-brass-button:
+      inset 1px 1px 0px #FFF1B8,
+      inset -1px -1px 0px #3D2E14,
+      inset 2px 2px 0px #D8B467,
+      inset -2px -2px 0px #5C4724;
+
+    --bevel-brass-depressed:
+      inset 1px 1px 0px #3D2E14,
+      inset -1px -1px 0px #FFF1B8,
+      inset 2px 2px 0px #5C4724,
+      inset -2px -2px 0px #D8B467;
+
+    --bevel-scroll-well:
+      inset 1px 1px 0px #050608,
+      inset -1px -1px 0px #D8B467,
+      inset 2px 2px 0px #5C4724,
+      inset -2px -2px 0px #FFFDF8;
+
+    --dither-obsidian-latched: repeating-linear-gradient(
+      45deg,
+      #0A0C10 0px,
+      #0A0C10 2px,
+      #1F242E 2px,
+      #1F242E 4px
+    );
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--table-channel);
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(255, 184, 77, 0.08) 0%, transparent 55%),
+      radial-gradient(circle at 20% 80%, rgba(44, 230, 216, 0.06) 0%, transparent 50%),
+      linear-gradient(90deg, rgba(184, 146, 74, 0.04) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(184, 146, 74, 0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    color: var(--parchment-scroll);
+    font-family: 'IBM Plex Sans', sans-serif;
+    padding: 20px 24px 36px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .kit-shell {
+    max-width: 1392px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* TOP CITADEL HEADER BAR */
+  .kit-header {
+    background: var(--table-obsidian);
+    box-shadow: var(--bevel-obsidian-raised), 0 10px 24px rgba(0,0,0,0.65);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: relative;
+  }
+
+  .kit-header::after {
+    content: '';
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 2px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--kage-cyan), var(--kage-gold), transparent);
+    opacity: 0.65;
+  }
+
+  .kit-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .astrolabe-emblem {
+    width: 38px;
+    height: 38px;
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  .kit-title-block h1 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 21px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--parchment-scroll);
+    line-height: 1.05;
+  }
+
+  .kit-title-block p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--brass-specular);
+    letter-spacing: 0.05em;
+    margin-top: 3px;
+  }
+
+  .kit-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* TACTILE BEVELED BUTTONS (HENRY HEFFERNAN 0ms ACTUATION) */
+  .citadel-btn {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    cursor: pointer;
+    user-select: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: var(--table-obsidian);
+    color: var(--parchment-scroll);
+    box-shadow: var(--bevel-obsidian-raised);
+    position: relative;
+  }
+
+  .citadel-btn:hover {
+    color: #FFFFFF;
+    background: #181C24;
+  }
+
+  .citadel-btn:active,
+  .citadel-btn.is-pressed {
+    box-shadow: var(--bevel-obsidian-milled);
+  }
+
+  .citadel-btn:active > span,
+  .citadel-btn.is-pressed > span {
+    transform: translate(1px, 1px);
+  }
+
+  .citadel-btn.variant-brass {
+    background: linear-gradient(180deg, #C9A358 0%, #A8823B 100%);
+    color: #0A0C10;
+    box-shadow: var(--bevel-brass-button);
+    font-weight: 900;
+  }
+
+  .citadel-btn.variant-brass:hover {
+    background: linear-gradient(180deg, #D8B467 0%, #B8924A 100%);
+    color: #050608;
+  }
+
+  .citadel-btn.variant-brass:active,
+  .citadel-btn.variant-brass.is-pressed {
+    box-shadow: var(--bevel-brass-depressed);
+  }
+
+  .citadel-btn.variant-cyan {
+    background: #0F2329;
+    color: var(--kage-cyan-core);
+    box-shadow:
+      inset 1px 1px 0px #2CE6D8,
+      inset -1px -1px 0px #050608,
+      inset 2px 2px 0px #164E56,
+      inset -2px -2px 0px #081519;
+  }
+
+  .citadel-btn.is-latched {
+    background: var(--dither-obsidian-latched);
+    box-shadow: var(--bevel-obsidian-milled);
+    color: var(--kage-gold);
+  }
+
+  .led-pip {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--kage-cyan);
+    box-shadow: 0 0 8px var(--kage-cyan);
+    display: inline-block;
+  }
+
+  .led-pip.gold {
+    background: var(--kage-gold);
+    box-shadow: 0 0 8px var(--kage-gold);
+  }
+
+  .led-pip.ember {
+    background: var(--ember-workshop);
+    box-shadow: 0 0 8px var(--ember-workshop);
+  }
+
+  /* MAIN 2-ROW COMPOSITE GRID */
+  .kit-grid-top {
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 16px;
+  }
+
+  .kit-grid-bottom {
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 16px;
+  }
+
+  .kit-panel {
+    background: var(--table-obsidian);
+    box-shadow: var(--bevel-obsidian-raised), 0 10px 24px rgba(0,0,0,0.55);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--bronze-shadow);
+    padding-bottom: 8px;
+  }
+
+  .panel-header h2 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--brass-specular);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--travertine-campus);
+    background: var(--table-channel);
+    padding: 2px 7px;
+    box-shadow: var(--bevel-obsidian-milled);
+    letter-spacing: 0.04em;
+  }
+
+  /* SECTION 01: 60 / 30 / 10 SWATCH GRID */
+  .budget-bar {
+    display: grid;
+    grid-template-columns: 60fr 30fr 10fr;
+    height: 22px;
+    box-shadow: var(--bevel-obsidian-milled);
+    overflow: hidden;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .budget-seg {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    white-space: nowrap;
+  }
+
+  .swatch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .swatch-card {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    transition: transform 80ms ease;
+  }
+
+  .swatch-card:hover {
+    transform: translateY(-1px);
+  }
+
+  .swatch-chip {
+    height: 30px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 3px 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .swatch-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .swatch-name {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--parchment-scroll);
+  }
+
+  .swatch-role {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9.5px;
+    color: var(--travertine-campus);
+    opacity: 0.82;
+  }
+
+  /* SECTION 02: TYPOGRAPHY & BEVEL CONTROLS */
+  .type-specimen-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .type-row {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    padding: 8px 12px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .type-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--brass-specular);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .bevel-demo-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding-top: 4px;
+  }
+
+  /* SECTION 03: ASTROLABE CHAPTER RING & MILLED ROOT MEMORY NODES (ZERO STATS!) */
+  .world-mechanics-box {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  .astrolabe-dial-wrap {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .astrolabe-wheel {
+    width: 148px;
+    height: 148px;
+    border-radius: 50%;
+    border: 3px solid var(--brass-aged);
+    box-shadow:
+      inset 0 0 0 2px var(--bronze-shadow),
+      0 0 0 2px var(--table-obsidian),
+      0 0 18px rgba(255, 184, 77, 0.22);
+    position: relative;
+    display: grid;
+    place-items: center;
+    transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    background: radial-gradient(circle, rgba(44,230,216,0.16) 0%, rgba(10,12,16,0.95) 68%);
+  }
+
+  .astrolabe-inner-ring {
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    border: 1.5px dashed var(--brass-specular);
+    display: grid;
+    place-items: center;
+  }
+
+  .astrolabe-core {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--kage-cyan-core) 0%, var(--kage-cyan) 45%, #0A2E36 100%);
+    box-shadow: 0 0 16px var(--kage-cyan), 0 0 28px rgba(255, 184, 77, 0.45);
+    border: 2px solid var(--brass-specular);
+  }
+
+  .dial-stop-btn {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--table-obsidian);
+    border: 2px solid var(--brass-specular);
+    color: var(--parchment-scroll);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+
+  .dial-stop-btn.active {
+    background: var(--kage-gold);
+    color: #0A0C10;
+    box-shadow: 0 0 10px var(--kage-gold);
+  }
+
+  /* MEMORY ROOT CHANNEL & NODES */
+  .root-story-panel {
+    background: var(--table-channel);
+    box-shadow: var(--bevel-obsidian-milled);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .milled-channel-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 10px;
+    background: #06080B;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.9), 0 1px 0 rgba(216,180,103,0.25);
+    border-radius: 2px;
+  }
+
+  .milled-channel-line {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 50%;
+    height: 3px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, var(--kage-cyan) 0%, var(--kage-cyan-core) 50%, var(--kage-gold) 100%);
+    box-shadow: 0 0 10px var(--kage-cyan);
+    z-index: 1;
+  }
+
+  .memory-node-btn {
+    position: relative;
+    z-index: 2;
+    background: var(--table-obsidian);
+    border: 2px solid var(--brass-aged);
+    color: var(--parchment-scroll);
+    padding: 5px 9px;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+
+  .memory-node-btn.active {
+    border-color: var(--kage-cyan-core);
+    background: #0F262C;
+    color: #FFFFFF;
+    box-shadow: 0 0 12px rgba(44, 230, 216, 0.55);
+  }
+
+  .memory-story-readout {
+    background: var(--table-obsidian);
+    box-shadow: var(--bevel-obsidian-raised);
+    padding: 10px 12px;
+    border-left: 3px solid var(--kage-cyan);
+  }
+
+  .memory-story-readout h4 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--kage-gold);
+    margin-bottom: 4px;
+  }
+
+  .memory-story-readout p {
+    font-size: 12.5px;
+    line-height: 1.48;
+    color: var(--parchment-scroll);
+  }
+
+  /* SECTION 04: ON-DEMAND CITADEL SCROLL SPECIMEN (#F2EEE4 PARCHMENT WELL) */
+  .scroll-well-specimen {
+    background-color: var(--parchment-scroll);
+    background-image:
+      linear-gradient(to right, rgba(228, 220, 203, 0.55) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(228, 220, 203, 0.55) 1px, transparent 1px);
+    background-size: 16px 16px;
+    color: var(--ink-editorial);
+    box-shadow: var(--bevel-scroll-well);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .scroll-header-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink-editorial);
+    padding-bottom: 6px;
+  }
+
+  .scroll-header-row h3 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-editorial);
+  }
+
+  .scroll-stamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-copper);
+    border: 1.5px solid var(--ink-copper);
+    padding: 1px 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .scroll-prose {
+    font-size: 13px;
+    line-height: 1.52;
+    color: var(--ink-editorial);
+  }
+
+  .kage-hand-quote {
+    border-top: 2px solid var(--ink-editorial);
+    border-bottom: 1px solid var(--ink-editorial);
+    background: rgba(255, 252, 244, 0.78);
+    padding: 7px 10px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 16.5px;
+    line-height: 1.32;
+    color: var(--ink-citadel-blue);
+  }
+
+  .hand-flow-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 6px 8px;
+    background: #FAF6EC;
+    border: 1.5px solid var(--ink-editorial);
+    font-family: 'Patrick Hand', cursive;
+    font-size: 14px;
+    color: var(--ink-editorial);
+  }
+
+  .hand-flow-node {
+    padding: 2px 7px;
+    border: 1px solid var(--ink-citadel-blue);
+    background: #FFFDF8;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .hand-flow-arrow {
+    color: var(--ink-copper);
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+  <div class="kit-shell">
+    <!-- TOP CITADEL INSTRUMENT HEADER -->
+    <header class="kit-header">
+      <div class="kit-brand">
+        <div class="astrolabe-emblem" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="11" stroke="#D8B467" stroke-width="1.6"/>
+            <ellipse cx="14" cy="14" rx="11" ry="5" transform="rotate(-28 14 14)" stroke="#B8924A" stroke-width="1.2"/>
+            <path d="M14 23V13M14 13L9 8M14 13L19 8M10 22C12 19 16 19 18 22" stroke="#2CE6D8" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="14" cy="11" r="2.6" fill="#FFB84D"/>
+          </svg>
+        </div>
+        <div class="kit-title-block">
+          <h1>CITADEL-DS v2.0 · THE ASTROLABE &amp; THE NEURAL TREE UI KIT</h1>
+          <p>60% CARVED OBSIDIAN TABLE · 30% CLOCKWORK BRASS · 10% KAGE BIOLUMINESCENCE · ZERO STATS / HUMAN WORDS ONLY</p>
+        </div>
+      </div>
+      <div class="kit-header-actions">
+        <a class="citadel-btn variant-brass" href="../now-v4/index.html">
+          <span>ENTER LIVE /NOW CITADEL WORLD ↵</span>
+        </a>
+        <button class="citadel-btn variant-cyan" id="btnPulseRoots" type="button">
+          <span class="led-pip"></span>
+          <span>PULSE KAGE MEMORY ROOTS</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- TOP ROW: 60/30/10 MATERIAL TOKENS + TYPOGRAPHY & HENRY HEFFERNAN BEVEL LAB -->
+    <div class="kit-grid-top">
+      <!-- PANEL 01: 60 / 30 / 10 COLOR, MATERIAL & LIGHTING BUDGET -->
+      <section class="kit-panel">
+        <div class="panel-header">
+          <h2><span class="led-pip gold"></span> 01 · VISION'S 60 / 30 / 10 MATERIAL &amp; LIGHTING BUDGET</h2>
+          <span class="panel-tag">STUDY LUMINANCE 0.06–0.09 LINEAR · BLOOM &gt; 0.85</span>
+        </div>
+
+        <div class="budget-bar">
+          <div class="budget-seg" style="background:#111318; color:#F2EEE4; border-right:1px solid #B8924A;">60% CARVED OBSIDIAN &amp; SLATE TABLE (#111318 / #0A0C10)</div>
+          <div class="budget-seg" style="background:#B8924A; color:#0A0C10; border-right:1px solid #0A0C10;">30% CLOCKWORK METALS (#B8924A)</div>
+          <div class="budget-seg" style="background:linear-gradient(90deg,#2CE6D8,#FFB84D); color:#0A0C10;">10% KAGE GLOW</div>
+        </div>
+
+        <div class="swatch-grid">
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#111318; color:#F2EEE4; border:1px solid #2A303C;"><span>#111318</span><span>60%</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Obsidian Table</span><span class="swatch-role">Carved matte basalt relief</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#0A0C10; color:#2CE6D8; border:1px solid #2A303C;"><span>#0A0C10</span><span>WELL</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Milled Channel</span><span class="swatch-role">Inlaid root &amp; brass grooves</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#2A303C; color:#F2EEE4;"><span>#2A303C</span><span>SLATE</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Coastal Slate</span><span class="swatch-role">Bootcamp bastion &amp; bevel</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#DDD5C7; color:#111318;"><span>#DDD5C7</span><span>≤15%</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Campus Travertine</span><span class="swatch-role">Scholarly stone colonnade</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#B8924A; color:#0A0C10;"><span>#B8924A</span><span>30%</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Aged Astrolabe Brass</span><span class="swatch-role">Cardanic rings &amp; frames</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#D8B467; color:#0A0C10;"><span>#D8B467</span><span>9.4:1</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Brass Specular</span><span class="swatch-role">Top-left machined catch-light</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#A85638; color:#F2EEE4;"><span>#A85638</span><span>FORGE</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Workshop Copper</span><span class="swatch-role">Side-project domes &amp; trim</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#2CE6D8; color:#0A0C10; box-shadow:inset 0 0 10px #B8FFF9;"><span>#2CE6D8</span><span>4800K</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Kage Root Cyan</span><span class="swatch-role">Memory filaments below</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#FFB84D; color:#0A0C10;"><span>#FFB84D</span><span>2900K</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Synaptic Canopy Gold</span><span class="swatch-role">Active synthesis above</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#FF6B2B; color:#0A0C10;"><span>#FF6B2B</span><span>100ms</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Furnace Ember</span><span class="swatch-role">Workshop heart &amp; click spark</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#F2EEE4; color:#1C1D1F; border:1px solid #B8924A;"><span>#F2EEE4</span><span>14.6:1</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Citadel Scroll</span><span class="swatch-role">On-demand editorial well</span></div>
+          </div>
+          <div class="swatch-card">
+            <div class="swatch-chip" style="background:#1C1D1F; color:#F2EEE4; border:1px solid #5C4724;"><span>#1C1D1F</span><span>AAA</span></div>
+            <div class="swatch-meta"><span class="swatch-name">Iron-Gall Ink</span><span class="swatch-role">Human prose on parchment</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 02: TYPOGRAPHY HIERARCHY & HENRY HEFFERNAN 2-LAYER BEVEL BUTTON LAB -->
+      <section class="kit-panel">
+        <div class="panel-header">
+          <h2><span class="led-pip"></span> 02 · TYPOGRAPHY &amp; TACTILE 2-LAYER BEVEL MECHANICS</h2>
+          <span class="panel-tag">0% BLUR · 1PX POINTERDOWN ACTUATION</span>
+        </div>
+
+        <div class="type-specimen-list">
+          <div class="type-row">
+            <span style="font-family:'Barlow Semi Condensed',sans-serif; font-weight:900; font-size:19px; letter-spacing:0.08em; text-transform:uppercase; color:var(--parchment-scroll);">NOW · THE CITY CITADEL &amp; KAGE NEURAL TREE</span>
+            <span class="type-meta">Barlow Semi Condensed 900 · Plaques</span>
+          </div>
+          <div class="type-row">
+            <span style="font-family:'IBM Plex Sans',sans-serif; font-size:13.5px; color:var(--parchment-scroll);">Full-stack developer leading enterprise projects end-to-end with a persistent second brain.</span>
+            <span class="type-meta">IBM Plex Sans 400 · Human Story</span>
+          </div>
+          <div class="type-row">
+            <span style="font-family:'Patrick Hand',cursive; font-size:17px; color:var(--kage-gold);">"Every session starts from the last written handoff—Roi never explains a project twice."</span>
+            <span class="type-meta">Patrick Hand · Kage Voice</span>
+          </div>
+          <div class="type-row">
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--kage-cyan);">React · Next.js · Node.js · TypeScript · WordPress (PHP / Gutenberg / ACF)</span>
+            <span class="type-meta">IBM Plex Mono · Stack Etching</span>
+          </div>
+        </div>
+
+        <div class="panel-header" style="margin-top:2px;">
+          <h2><span class="led-pip ember"></span> HENRY HEFFERNAN 2-LAYER BEVEL PUSH-BUTTONS (CLICK TO DEPRESS 1PX)</h2>
+          <span class="panel-tag" id="bevelStateReadout">STATE: RAISED SPECULAR (#D8B467 TOP-LEFT)</span>
+        </div>
+
+        <div class="bevel-demo-strip">
+          <button class="citadel-btn variant-brass" type="button" onclick="flashBevel(this, 'UNSEAL CITADEL SCROLL (ROLE & CV)')">
+            <span>UNSEAL CITADEL SCROLL ↵</span>
+          </button>
+          <button class="citadel-btn variant-cyan" type="button" onclick="flashBevel(this, 'TRACE ONE-LINE TASK THROUGH KAGE ROOTS')">
+            <span class="led-pip"></span>
+            <span>TRACE TASK PULSE</span>
+          </button>
+          <button class="citadel-btn" type="button" id="toggleLatchBtn" onclick="toggleLatch(this)">
+            <span class="led-pip gold"></span>
+            <span>2900K ASTROLABE KEY LIGHT</span>
+          </button>
+          <button class="citadel-btn" type="button" onclick="flashBevel(this, 'OPEN CV.PDF IN NEW TAB')">
+            <span>CV (PDF) ↗</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- BOTTOM ROW: ASTROLABE CHAPTER DIAL + MEMORY ROOT NODES (ZERO STATS!) & ON-DEMAND CITADEL SCROLL -->
+    <div class="kit-grid-bottom">
+      <!-- PANEL 03: ASTROLABE CHAPTER RING & MILLED ROOT MEMORY NODES -->
+      <section class="kit-panel">
+        <div class="panel-header">
+          <h2><span class="led-pip"></span> 03 · IN-WORLD STORY PRIMITIVES (ZERO STATS · HUMAN TECH WORLDS)</h2>
+          <span class="panel-tag">CLICK ANY REALM STOP OR MEMORY ROOT NODE</span>
+        </div>
+
+        <div class="world-mechanics-box">
+          <!-- LEFT: ROTATING BRASS ASTROLABE CHAPTER RING -->
+          <div class="astrolabe-dial-wrap">
+            <div class="astrolabe-wheel" id="kitAstrolabeWheel">
+              <div class="astrolabe-inner-ring">
+                <div class="astrolabe-core"></div>
+              </div>
+              <button class="dial-stop-btn active" style="top:-10px; left:59px;" onclick="selectKitRealm(0, 'NOW · THE CITY (MOVEO CREATIVE)', this)" title="Now · The City">I</button>
+              <button class="dial-stop-btn" style="top:59px; right:-10px;" onclick="selectKitRealm(90, 'THE WORKSHOP (SIDE PROJECTS)', this)" title="The Workshop">II</button>
+              <button class="dial-stop-btn" style="bottom:-10px; left:59px;" onclick="selectKitRealm(180, '2022–26 · THE CAMPUS (MISTER BIT)', this)" title="The Campus">III</button>
+              <button class="dial-stop-btn" style="top:59px; left:-10px;" onclick="selectKitRealm(270, '2021 · BOOTCAMP (CODING ACADEMY)', this)" title="Bootcamp">IV</button>
+            </div>
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass-specular); text-align:center;" id="kitRealmLabel">
+              NOW · THE CITY (MOVEO CREATIVE)
+            </div>
+          </div>
+
+          <!-- RIGHT: MILLED OBSIDIAN CHANNEL & KAGE MEMORY ROOT NODES -->
+          <div class="root-story-panel">
+            <div style="font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--travertine-campus); display:flex; justify-content:space-between;">
+              <span>&lt;memory-node&gt; INLAID ROOT CHANNEL (#0A0C10)</span>
+              <span style="color:var(--kage-cyan);">CYAN = MEMORY BELOW · GOLD = SYNTHESIS ABOVE</span>
+            </div>
+
+            <div class="milled-channel-track">
+              <div class="milled-channel-line" id="kitChannelLine"></div>
+              <button class="memory-node-btn active" type="button" onclick="selectMemoryNode(0, this)">
+                <span class="led-pip"></span> I. Handoff Memory
+              </button>
+              <button class="memory-node-btn" type="button" onclick="selectMemoryNode(1, this)">
+                <span class="led-pip"></span> II. Vault Search &amp; Spec
+              </button>
+              <button class="memory-node-btn" type="button" onclick="selectMemoryNode(2, this)">
+                <span class="led-pip gold"></span> III. Line-Cited Review
+              </button>
+              <button class="memory-node-btn" type="button" onclick="selectMemoryNode(3, this)">
+                <span class="led-pip ember"></span> IV. Roi's Go-Ahead
+              </button>
+            </div>
+
+            <div class="memory-story-readout" id="memoryStoryCard">
+              <h4>I. SESSION HANDOFF MEMORY · NO RE-EXPLAINING</h4>
+              <p>Every session starts from the previous session's written handoff inside Roi's notes vault. Kage already knows the project architecture, past trade-offs, and open threads before Roi types a word.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PANEL 04: ON-DEMAND CITADEL SCROLL SPECIMEN (#F2EEE4 PARCHMENT WELL) -->
+      <section class="kit-panel">
+        <div class="panel-header">
+          <h2><span class="led-pip gold"></span> 04 · ON-DEMAND CITADEL SCROLL (&lt;citadel-scroll&gt; #F2EEE4 WELL)</h2>
+          <span class="panel-tag">14.56:1 AAA INK · HAND-DRAWN KAGE WORKFLOW</span>
+        </div>
+
+        <div class="scroll-well-specimen">
+          <div class="scroll-header-row">
+            <h3>ROI YOTVAT · FULL-STACK DEVELOPER AT MOVEO CREATIVE</h3>
+            <span class="scroll-stamp">JAN 2026 – NOW · THE CITY</span>
+          </div>
+
+          <p class="scroll-prose">
+            Leading full-stack enterprise projects end-to-end across custom WordPress (<strong>PHP, Gutenberg, ACF</strong>) and modern <strong>React / Next.js</strong>—talking directly with clients and third-party vendors while bringing Claude Code and custom AI workflows into the team.
+          </p>
+
+          <div class="kage-hand-quote">
+            "I'm Kage, Roi's AI second brain. Give me a one-line task and I'll search the notes vault, hand worker agents a self-contained spec, and run every diff through a second-model review gate that quotes the exact line it objects to."
+          </div>
+
+          <div class="hand-flow-strip" aria-label="How a task moves through Kage in human words">
+            <span class="hand-flow-node">1. Roi's one-line task</span>
+            <span class="hand-flow-arrow">→</span>
+            <span class="hand-flow-node">2. Notes search &amp; spec</span>
+            <span class="hand-flow-arrow">→</span>
+            <span class="hand-flow-node">3. Worker agents</span>
+            <span class="hand-flow-arrow">→</span>
+            <span class="hand-flow-node">4. Line-citing review</span>
+            <span class="hand-flow-arrow">→</span>
+            <span class="hand-flow-node" style="border-color:#9E331E; font-weight:700;">5. Roi's approval</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const MEMORY_STORIES = [
+      {
+        title: "I. SESSION HANDOFF MEMORY · NO RE-EXPLAINING",
+        body: "Every session starts from the previous session's written handoff inside Roi's notes vault. Kage already knows the project architecture, past trade-offs, and open threads before Roi types a word."
+      },
+      {
+        title: "II. ONE-LINE TASK TO SELF-CONTAINED SPEC",
+        body: "Roi gives the orchestrator a one-line task. It runs hybrid search across the notes vault (re-indexed on every commit) and writes a self-contained spec so worker agents never guess at context."
+      },
+      {
+        title: "III. SECOND-MODEL REVIEW GATE THAT QUOTES THE LINE",
+        body: "Worker agents never grade their own homework. Every diff goes through a review gate run by a second model that must quote the exact line it objects to before a change can advance."
+      },
+      {
+        title: "IV. ROI IN THE DIRECTOR'S CHAIR · SAFETY HOOKS",
+        body: "Pre-tool safety hooks block force-pushes, protected-branch pushes, and production actions until Roi reviews the diff and gives his explicit go-ahead for that specific step."
+      }
+    ];
+
+    function selectMemoryNode(idx, btn) {
+      document.querySelectorAll('.memory-node-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const card = document.getElementById('memoryStoryCard');
+      card.querySelector('h4').textContent = MEMORY_STORIES[idx].title;
+      card.querySelector('p').textContent = MEMORY_STORIES[idx].body;
+    }
+
+    function selectKitRealm(deg, label, btn) {
+      document.getElementById('kitAstrolabeWheel').style.transform = `rotate(${deg}deg)`;
+      document.querySelectorAll('.dial-stop-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('kitRealmLabel').textContent = label;
+    }
+
+    function flashBevel(btn, label) {
+      const readout = document.getElementById('bevelStateReadout');
+      readout.textContent = `ACTUATED (1PX DEPRESSED): ${label}`;
+      btn.classList.add('is-pressed');
+      setTimeout(() => btn.classList.remove('is-pressed'), 180);
+    }
+
+    function toggleLatch(btn) {
+      btn.classList.toggle('is-latched');
+      const isLatched = btn.classList.contains('is-latched');
+      btn.querySelector('span:last-child').textContent = isLatched
+        ? '4800K DEEP ROOT BIOLUMINESCENCE (LATCHED)'
+        : '2900K ASTROLABE KEY LIGHT';
+      document.getElementById('bevelStateReadout').textContent = isLatched
+        ? 'STATE: LATCHED 45° ENGRAVED HATCH (#0A0C10 / #1F242E)'
+        : 'STATE: RAISED SPECULAR (#D8B467 TOP-LEFT)';
+    }
+
+    document.getElementById('btnPulseRoots').addEventListener('click', () => {
+      const line = document.getElementById('kitChannelLine');
+      line.style.boxShadow = '0 0 22px #B8FFF9, 0 0 36px #FFB84D';
+      setTimeout(() => {
+        line.style.boxShadow = '0 0 10px #2CE6D8';
+      }, 650);
+    });
+  </script>
+</body>
+</html>
