@@ -815,12 +815,223 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* ============================================================================
+     SAMANA STUDIO (samanastudio.es) BRAND-WORLD IMMERSION OVERLAYS (v6)
+     Strips away heavy boxed dashboard panels at rest so 100% of the 3D world breathes.
+     ============================================================================ */
+  .study-vignette {
+    background:
+      radial-gradient(circle at 52% 46%, rgba(10, 12, 16, 0.0) 38%, rgba(5, 7, 11, 0.64) 84%, rgba(3, 4, 7, 0.90) 100%);
+  }
+
+  /* Subtle tactile film-grain overlay across the 3D stage */
+  .samana-film-grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.042;
+    background-image: radial-gradient(rgba(242, 238, 228, 0.75) 0.75px, transparent 0.75px);
+    background-size: 3px 3px;
+    mix-blend-mode: overlay;
+  }
+
+  /* Ultra-clean borderless top-left Samana-style wordmark & realm coordinates */
+  .top-left-crest.horological-frame {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    top: 26px;
+    left: 32px;
+  }
+  .top-left-crest .vernier-strip,
+  .top-left-crest .crest-medallion {
+    display: none !important;
+  }
+  .crest-copy h1 {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.22em;
+    color: rgba(242, 238, 228, 0.92);
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+  }
+  .crest-copy p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.10em;
+    color: rgba(216, 180, 103, 0.82);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+    margin-top: 4px;
+  }
+
+  /* Minimal floating top-right HUD links */
+  .top-right-controls {
+    top: 24px;
+    right: 32px;
+    gap: 10px;
+  }
+  .top-right-controls .citadel-btn {
+    background: rgba(10, 12, 16, 0.42) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 0 0 1px rgba(216, 180, 103, 0.26), 0 6px 18px rgba(0, 0, 0, 0.55) !important;
+    padding: 6px 12px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+  .top-right-controls .citadel-btn.variant-brass {
+    background: rgba(216, 180, 103, 0.16) !important;
+    color: #F2EEE4 !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.55), 0 6px 18px rgba(0, 0, 0, 0.65) !important;
+  }
+
+  /* Minimal circular reticle in-world markers (like samanastudio.es .hud-point) */
+  .inworld-plaque {
+    background: rgba(10, 12, 16, 0.46) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 0 1px rgba(216, 180, 103, 0.34), 0 4px 14px rgba(0, 0, 0, 0.68) !important;
+    border-radius: 999px;
+    padding: 4px 11px 4px 8px;
+    gap: 6px;
+  }
+  .inworld-plaque.is-active {
+    background: rgba(16, 20, 28, 0.72) !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 184, 77, 0.85), 0 0 18px rgba(255, 184, 77, 0.28) !important;
+  }
+  .inworld-plaque::after {
+    height: 10px;
+    bottom: -10px;
+    opacity: 0.65;
+  }
+  .plaque-title {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+  .plaque-sub {
+    display: none;
+  }
+
+  /* Bottom-Left Floating Diegetic Whisper Caption (Zero Boxy Card Border!) */
+  .root-story-card.horological-frame {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-left: 1.5px solid rgba(44, 230, 216, 0.55) !important;
+    left: 32px;
+    bottom: 72px;
+    width: 390px;
+    padding: 2px 0 2px 14px !important;
+    gap: 4px;
+    pointer-events: auto;
+  }
+  .root-story-card .vernier-strip {
+    display: none !important;
+  }
+  .root-story-header span.step-tag {
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    color: rgba(44, 230, 216, 0.92);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.95);
+  }
+  .root-story-card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(242, 238, 228, 0.96);
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.95);
+  }
+  .root-story-card p {
+    font-size: 12px;
+    line-height: 1.48;
+    color: rgba(221, 213, 199, 0.84);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
+  }
+  .root-node-pills {
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .root-pill-btn {
+    background: rgba(10, 12, 16, 0.45);
+    box-shadow: none;
+    border: 1px solid rgba(216, 180, 103, 0.25);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+  }
+
+  /* Bottom-Right Samana Depth / Rail Telemetry Counter (e.g. -042 M · RAIL 022%) */
+  .samana-telemetry {
+    position: fixed;
+    right: 32px;
+    bottom: 74px;
+    z-index: 10;
+    pointer-events: none;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .samana-telemetry-depth {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: rgba(242, 238, 228, 0.88);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+  }
+  .samana-telemetry-hint {
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    color: rgba(216, 180, 103, 0.72);
+    text-transform: uppercase;
+  }
+
+  /* Ultra-clean Bottom Camera Rail Scrubber Bar */
+  .bottom-astrolabe-bar.horological-frame {
+    background: rgba(8, 10, 14, 0.52) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 1px 0 rgba(216, 180, 103, 0.24), 0 10px 28px rgba(0, 0, 0, 0.72) !important;
+    left: 32px;
+    right: 32px;
+    bottom: 18px;
+    padding: 7px 16px;
+  }
+  .chapter-btn {
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1.5px solid transparent;
+    padding: 5px 11px;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    color: rgba(221, 213, 199, 0.68);
+  }
+  .chapter-btn.active {
+    background: transparent;
+    box-shadow: none;
+    color: var(--kage-gold);
+    border-bottom-color: var(--kage-gold);
+  }
+  .bar-actions .citadel-btn {
+    background: transparent !important;
+    box-shadow: inset 0 0 0 1px rgba(216, 180, 103, 0.28) !important;
+    padding: 5px 11px;
+    font-size: 11px;
+    letter-spacing: 0.10em;
+  }
+
 </style>
 </head>
 <body>
   <!-- 3D CARVED OBSIDIAN TABLE, ASTROLABE & KAGE NEURAL TREE VIEWPORT -->
   <canvas id="worldCanvas" aria-label="Interactive 3D Carved Obsidian Table with the Bioluminescent Kage Neural Tree and The City Citadel"></canvas>
   <div class="study-vignette"></div>
+  <div class="samana-film-grain" aria-hidden="true"></div>
+  <div class="samana-telemetry" aria-hidden="true">
+    <div class="samana-telemetry-depth" id="samanaDepthReadout">—022 M · RAIL 01/05</div>
+    <div class="samana-telemetry-hint">SCROLL OR CLICK STOPS TO FLY CAMERA RAIL</div>
+  </div>
 
   <!-- IN-WORLD DIEGETIC BRASS & OBSIDIAN PLAQUES TETHERED TO 3D LANDMARKS -->
   <div class="world-markers" id="worldMarkers">
@@ -933,6 +1144,7 @@
     </div>
 
     <div class="bar-actions">
+      <a class="citadel-btn" href="../moodboard/index.html"><span>MOODBOARD</span></a>
       <a class="citadel-btn" href="../ui-kit/index.html">
         <span>UI KIT</span>
       </a>
@@ -1068,10 +1280,10 @@
 
   <script type="module">
     import { THREE } from '../vendor/three-citadel-bundle.js';
-    import { initCitadelWorldV5 } from '../vendor/citadel-world-v5.js';
+    import { initCitadelWorldV6 } from '../vendor/citadel-world-v6.js';
 
     const canvas = document.getElementById('worldCanvas');
-    const world = initCitadelWorldV5(canvas);
+    const world = initCitadelWorldV6(canvas);
     const {
       renderer,
       camera,
@@ -1177,9 +1389,11 @@
       }
     };
 
+    const { masterCameraRail, masterLookAtRail } = world;
     let activeRealmKey = 'city';
-    let isCloseupMode = new URLSearchParams(window.location.search).get('view') === 'closeup';
     const urlParams = new URLSearchParams(window.location.search);
+    const viewParam = urlParams.get('view') || '';
+    let isCloseupMode = (viewParam === 'closeup' || viewParam === 'bootcamp' || viewParam === 'workshop' || viewParam === 'kage');
     let isScrollOpen = urlParams.get('scroll') === 'open';
     if (isScrollOpen) {
       document.getElementById('citadelScrollDrawer').classList.add('is-open');
@@ -1187,31 +1401,88 @@
     }
     let pulseProgress = -1;
 
+    // Master Camera Rail stops (0.00 -> 1.00) + hyperreal close-up framing per stop
+    const RAIL_STOPS = {
+      overview: { t: 0.00, realm: 'city', depth: '—000 M · OVERVIEW', fov: 35 },
+      city:     { t: 0.22, realm: 'city', depth: '—022 M · THE CITY KEEP', fov: 28 },
+      kage:     { t: 0.48, realm: 'kage', depth: '—048 M · KAGE NEURAL HEART', fov: 30 },
+      workshop: { t: 0.72, realm: 'workshop', depth: '—072 M · COPPER FOUNDRY', fov: 30 },
+      campus:   { t: 0.84, realm: 'campus', depth: '—084 M · TRAVERTINE STOA', fov: 31 },
+      bootcamp: { t: 0.92, realm: 'bootcamp', depth: '—092 M · BASALT LIGHTHOUSE', fov: 28 }
+    };
+
+    // High-detail telephoto framing points for ?view=closeup and ?view=bootcamp
+    REALM_CONFIG.city.closeupPos = new THREE.Vector3(3.85, 2.18, 3.88);
+    REALM_CONFIG.city.closeupLook = new THREE.Vector3(2.35, 1.78, 1.95);
+    REALM_CONFIG.bootcamp.closeupPos = new THREE.Vector3(1.42, 1.68, -0.72);
+    REALM_CONFIG.bootcamp.closeupLook = new THREE.Vector3(2.75, 1.32, -2.25);
+
+    let railProgress = 0.0;
+    let railTarget = 0.0;
+    let useRailSpline = true;
+
+    if (viewParam === 'closeup') {
+      activeRealmKey = 'city';
+      isCloseupMode = true;
+      railProgress = railTarget = RAIL_STOPS.city.t;
+      camera.fov = 28;
+      camera.updateProjectionMatrix();
+    } else if (viewParam === 'bootcamp') {
+      activeRealmKey = 'bootcamp';
+      isCloseupMode = true;
+      railProgress = railTarget = RAIL_STOPS.bootcamp.t;
+      camera.fov = 28;
+      camera.updateProjectionMatrix();
+    } else if (viewParam === 'workshop') {
+      activeRealmKey = 'workshop';
+      isCloseupMode = true;
+      railProgress = railTarget = RAIL_STOPS.workshop.t;
+    } else if (viewParam === 'kage') {
+      activeRealmKey = 'kage';
+      isCloseupMode = true;
+      railProgress = railTarget = RAIL_STOPS.kage.t;
+    }
+
+    const initialCfg = REALM_CONFIG[activeRealmKey] || REALM_CONFIG.city;
     const currentCamPos = new THREE.Vector3().copy(
-      isCloseupMode ? REALM_CONFIG.city.closeupPos : REALM_CONFIG.city.camPos
+      isCloseupMode ? initialCfg.closeupPos : initialCfg.camPos
     );
     const targetCamPos = new THREE.Vector3().copy(currentCamPos);
     const currentLookAt = new THREE.Vector3().copy(
-      isCloseupMode ? REALM_CONFIG.city.closeupLook : REALM_CONFIG.city.lookAt
+      isCloseupMode ? initialCfg.closeupLook : initialCfg.lookAt
     );
     const targetLookAt = new THREE.Vector3().copy(currentLookAt);
     camera.position.copy(currentCamPos);
     camera.lookAt(currentLookAt);
+
+    function updateDepthTelemetry(tVal) {
+      const el = document.getElementById('samanaDepthReadout');
+      if (!el) return;
+      const meters = String(Math.round(tVal * 100)).padStart(3, '0');
+      const stopIdx = tVal < 0.12 ? '00' : tVal < 0.35 ? '01' : tVal < 0.60 ? '02' : tVal < 0.78 ? '03' : tVal < 0.88 ? '04' : '05';
+      el.textContent = `—${meters} M · RAIL ${stopIdx}/05`;
+    }
 
     function syncCameraTarget() {
       const cfg = REALM_CONFIG[activeRealmKey];
       if (!cfg) return;
       targetCamPos.copy(isCloseupMode ? cfg.closeupPos : cfg.camPos);
       targetLookAt.copy(isCloseupMode ? cfg.closeupLook : cfg.lookAt);
-      const zBtn = document.getElementById(' btnCloseupZoom') || document.getElementById('btnCloseupZoom');
+      const zBtn = document.getElementById('btnCloseupZoom');
       if (zBtn) zBtn.classList.toggle('is-latched', isCloseupMode);
       const zLbl = document.getElementById('zoomBtnLabel');
-      if (zLbl) zLbl.textContent = isCloseupMode ? 'OVERVIEW TABLE' : 'DIORAMA CLOSE-UP';
+      if (zLbl) zLbl.textContent = isCloseupMode ? 'OVERVIEW TABLE' : 'RAIL CLOSE-UP';
+      const targetFov = isCloseupMode ? 28 : 35;
+      if (Math.abs(camera.fov - targetFov) > 0.1) {
+        camera.fov = targetFov;
+        camera.updateProjectionMatrix();
+      }
     }
     syncCameraTarget();
 
     window.toggleCloseupZoom = function(force) {
       isCloseupMode = typeof force === 'boolean' ? force : !isCloseupMode;
+      useRailSpline = false;
       syncCameraTarget();
     };
 
@@ -1221,6 +1492,13 @@
       activeRealmKey = realmKey;
       if (typeof forceCloseup === 'boolean') {
         isCloseupMode = forceCloseup;
+      } else {
+        isCloseupMode = true;
+      }
+      if (RAIL_STOPS[realmKey]) {
+        railTarget = RAIL_STOPS[realmKey].t;
+        useRailSpline = true;
+        updateDepthTelemetry(railTarget);
       }
       syncCameraTarget();
 
@@ -1239,6 +1517,41 @@
       const marker = document.getElementById(cfg.markerId);
       if (marker) marker.classList.add('is-active');
     };
+
+    // Samana Studio Continuous Wheel / Trackpad Camera Rail Scrubber
+    window.addEventListener('wheel', (e) => {
+      if (isScrollOpen) return;
+      useRailSpline = true;
+      isCloseupMode = true;
+      railTarget = Math.max(0.0, Math.min(1.0, railTarget + e.deltaY * 0.00028));
+      updateDepthTelemetry(railTarget);
+
+      // Automatically sync active realm caption as you travel along the camera rail
+      let nearestRealm = 'city';
+      if (railTarget >= 0.88) nearestRealm = 'bootcamp';
+      else if (railTarget >= 0.78) nearestRealm = 'campus';
+      else if (railTarget >= 0.60) nearestRealm = 'workshop';
+      else if (railTarget >= 0.36) nearestRealm = 'kage';
+      else nearestRealm = 'city';
+
+      if (nearestRealm !== activeRealmKey) {
+        activeRealmKey = nearestRealm;
+        const cfg = REALM_CONFIG[nearestRealm];
+        if (cfg) {
+          document.getElementById('stageCrestTitle').textContent = cfg.title;
+          document.getElementById('stageCrestSub').textContent = cfg.sub;
+          document.getElementById('rootStepTag').textContent = cfg.storyTag;
+          document.getElementById('rootStoryTitle').textContent = cfg.storyTitle;
+          document.getElementById('rootStoryBody').textContent = cfg.storyBody;
+          document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
+          const tab = document.getElementById(cfg.tabId);
+          if (tab) tab.classList.add('active');
+          document.querySelectorAll('.inworld-plaque').forEach(p => p.classList.remove('is-active'));
+          const marker = document.getElementById(cfg.markerId);
+          if (marker) marker.classList.add('is-active');
+        }
+      }
+    }, { passive: true });
 
     window.selectRootStory = function(idx) {
       const s = ROOT_STORIES[idx];
@@ -1301,16 +1614,20 @@
       }
     };
 
-    // Pointer Drag Orbit on the Obsidian Table
+    // Pointer Drag Orbit & Subtle Samana Parallax
     let isDragging = false;
     let prevX = 0;
     let tableRotationOffset = 0;
+    let pointerNdcX = 0;
+    let pointerNdcY = 0;
 
     canvas.addEventListener('pointerdown', (e) => {
       isDragging = true;
       prevX = e.clientX;
     });
     window.addEventListener('pointermove', (e) => {
+      pointerNdcX = (e.clientX / window.innerWidth) * 2 - 1;
+      pointerNdcY = -(e.clientY / window.innerHeight) * 2 + 1;
       if (!isDragging) return;
       const dx = e.clientX - prevX;
       prevX = e.clientX;
@@ -1336,6 +1653,11 @@
         if (!el) return;
         const worldPos = m.localPos.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), worldGroup.rotation.y);
         worldPos.project(camera);
+        if (worldPos.z > 1.0) {
+          el.style.opacity = '0';
+          return;
+        }
+        el.style.opacity = '1';
         const x = (worldPos.x * 0.5 + 0.5) * w;
         const y = (-worldPos.y * 0.5 + 0.5) * h;
         el.style.left = `${x}px`;
@@ -1343,14 +1665,29 @@
       });
     }
 
+    if (viewParam === 'bootcamp') {
+      window.focusRealm('bootcamp', true);
+    } else if (viewParam === 'closeup') {
+      window.focusRealm('city', true);
+    }
+
     const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      // Smooth spring camera choreography (+ shift left when right scroll drawer is open)
+      // Smooth damped Samana Camera Rail interpolation (lerp 0.055) + subtle banking roll
+      railProgress += (railTarget - railProgress) * 0.055;
+      if (useRailSpline && masterCameraRail && masterLookAtRail && isCloseupMode) {
+        masterCameraRail.getPointAt(railProgress, targetCamPos);
+        masterLookAtRail.getPointAt(railProgress, targetLookAt);
+      }
+
       const effectiveCamPos = targetCamPos.clone();
       const effectiveLookAt = targetLookAt.clone();
+      effectiveCamPos.x += pointerNdcX * 0.14;
+      effectiveCamPos.y += pointerNdcY * 0.09;
+
       if (isScrollOpen && window.innerWidth > 900) {
         effectiveCamPos.x += 1.35;
         effectiveLookAt.x += 1.35;
@@ -1360,23 +1697,28 @@
       camera.position.copy(currentCamPos);
       camera.lookAt(currentLookAt);
 
-      // Rotate the 5-Ring Toothed Citadel Astrolabe & Worm-Gear Pinion
+      // Subtle Dutch bank roll proportional to camera rail velocity
+      const railVel = railTarget - railProgress;
+      camera.rotation.z += THREE.MathUtils.clamp(-railVel * 0.38, -0.08, 0.08);
+
+      // Rotate the 5-Ring Toothed Citadel Astrolabe & Worm-Gear Pinion (with 1.0s escapement tick on middleRing)
       if (animatedParts.outerRing) animatedParts.outerRing.rotation.z = t * 0.14;
       if (animatedParts.horizonRing) animatedParts.horizonRing.rotation.y = -t * 0.18;
       if (animatedParts.middleRing) {
+        const tickStep = Math.floor(t) + Math.pow(t % 1, 0.35);
         animatedParts.middleRing.rotation.x = -Math.PI * 0.32 + Math.sin(t * 0.5) * 0.10;
-        animatedParts.middleRing.rotation.z = -t * 0.22;
+        animatedParts.middleRing.rotation.z = -tickStep * 0.1047;
       }
       if (animatedParts.equatorialRing) animatedParts.equatorialRing.rotation.y = t * 0.28;
       if (animatedParts.innerRing) animatedParts.innerRing.rotation.z = -t * 0.35;
       if (animatedParts.wormPinion) animatedParts.wormPinion.rotation.y = t * 1.6;
 
-      // Animate Realm Clockwork Mechanisms (Functional, never decorative wallpaper!)
+      // Animate Realm Clockwork Mechanisms
       if (animatedParts.cityHeliostat) animatedParts.cityHeliostat.rotation.y = t * 0.45;
-      if (animatedParts.cityEscapement) animatedParts.cityEscapement.rotation.z = Math.sin(t * 2.8) * 0.18;
+      if (animatedParts.cityEscapement) animatedParts.cityEscapement.rotation.z = Math.sin(t * Math.PI * 2) * 0.22;
       if (animatedParts.cityFoundationGear) animatedParts.cityFoundationGear.rotation.y = t * 0.08;
       if (animatedParts.workshopCarillon) animatedParts.workshopCarillon.rotation.y = -t * 0.55;
-      if (animatedParts.workshopBeam) animatedParts.workshopBeam.rotation.z = Math.sin(t * 2.2) * 0.22;
+      if (animatedParts.workshopBeam) animatedParts.workshopBeam.rotation.z = Math.sin(t * 2.2) * 0.24;
       if (animatedParts.campusGear) animatedParts.campusGear.rotation.y = -t * 0.09;
       if (animatedParts.bootcampFresnel) animatedParts.bootcampFresnel.rotation.y = t * 0.65;
       if (animatedParts.spores) animatedParts.spores.rotation.y = t * 0.03;
