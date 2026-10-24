@@ -17,14 +17,14 @@ function createDarkStudyEnvironment(THREE, renderer) {
   envScene.background = new THREE.Color(0x182232);
 
   // Overhead 2900K warm gold reflection rings
-  const warmMat = new THREE.MeshBasicMaterial({ color: 0xFFB84D });
+  const warmMat = new THREE.MeshBasicMaterial({ color: 0x9E7232 });
   const warmRing = new THREE.Mesh(new THREE.TorusGeometry(6.0, 0.45, 8, 48), warmMat);
   warmRing.rotation.x = Math.PI / 2;
   warmRing.position.y = 8.0;
   envScene.add(warmRing);
 
   // Side raking warm brass reflection panels
-  const brassStripMat = new THREE.MeshBasicMaterial({ color: 0xD8B467 });
+  const brassStripMat = new THREE.MeshBasicMaterial({ color: 0x8C7242 });
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2;
     const panel = new THREE.Mesh(new THREE.BoxGeometry(2.2, 5.5, 0.1), brassStripMat);
@@ -34,7 +34,7 @@ function createDarkStudyEnvironment(THREE, renderer) {
   }
 
   // Subterranean 4800K cyan root bounce strip
-  const cyanMat = new THREE.MeshBasicMaterial({ color: 0x2CE6D8 });
+  const cyanMat = new THREE.MeshBasicMaterial({ color: 0x1E8C84 });
   const cyanRing = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.25, 8, 48), cyanMat);
   cyanRing.rotation.x = Math.PI / 2;
   cyanRing.position.y = -4.0;
@@ -450,14 +450,13 @@ function createFeatherPlumageTextures(THREE, maxAnisotropy = 16) {
   bumpCanvas.height = h;
   const bctx = bumpCanvas.getContext('2d');
 
-  // Base slate-bronze feather vane gradient with burnished gold/amber terminal tip (top of UV)
+  // Base natural dark-bronze & warm chestnut-amber falcon feather vane gradient (zero neon cyan/white)
   const vaneGrad = ctx.createLinearGradient(0, 0, 0, h);
-  vaneGrad.addColorStop(0.00, '#FFE08A'); // Bright burnished gold tip
-  vaneGrad.addColorStop(0.16, '#E89E38'); // Amber-gold sub-terminal band
-  vaneGrad.addColorStop(0.30, '#2CE6D8'); // Thin iridescent kingfisher-cyan spec band
-  vaneGrad.addColorStop(0.42, '#5E4B38'); // Warm bronze mid-vane
-  vaneGrad.addColorStop(0.75, '#364052'); // Slate-indigo inner vane
-  vaneGrad.addColorStop(1.00, '#242B38'); // Basal downy covert base
+  vaneGrad.addColorStop(0.00, '#C89648'); // Burnished antique gold tip
+  vaneGrad.addColorStop(0.18, '#9A6B2E'); // Warm chestnut-amber sub-terminal band
+  vaneGrad.addColorStop(0.36, '#5C4632'); // Rich umber-bronze mid-vane
+  vaneGrad.addColorStop(0.68, '#3B342E'); // Deep sepia-slate inner vane
+  vaneGrad.addColorStop(1.00, '#242220'); // Basal dark covert base
   ctx.fillStyle = vaneGrad;
   ctx.fillRect(0, 0, w, h);
 
@@ -474,10 +473,10 @@ function createFeatherPlumageTextures(THREE, maxAnisotropy = 16) {
     const tipDrop = -38 * (1.0 - t * 0.35);
 
     const isHighlightBarb = i % 2 === 0;
-    const isGoldTipZone = t < 0.25;
+    const isGoldTipZone = t < 0.22;
     ctx.strokeStyle = isGoldTipZone
-      ? (isHighlightBarb ? 'rgba(255, 244, 198, 0.85)' : 'rgba(184, 118, 28, 0.75)')
-      : (isHighlightBarb ? 'rgba(216, 188, 136, 0.62)' : 'rgba(22, 28, 38, 0.72)');
+      ? (isHighlightBarb ? 'rgba(224, 182, 106, 0.88)' : 'rgba(112, 74, 24, 0.82)')
+      : (isHighlightBarb ? 'rgba(176, 144, 98, 0.75)' : 'rgba(26, 22, 18, 0.85)');
     ctx.lineWidth = isHighlightBarb ? 2.1 : 1.5;
 
     bctx.strokeStyle = isHighlightBarb ? '#E8E8E8' : '#262626';
@@ -507,7 +506,7 @@ function createFeatherPlumageTextures(THREE, maxAnisotropy = 16) {
   }
 
   // Crisp central feather Rachis (quill shaft) tapering from base (bottom) to tip (top)
-  ctx.fillStyle = '#F6EAD2';
+  ctx.fillStyle = '#C4A472';
   bctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
   ctx.moveTo(shaftX - 7.5, h);
@@ -668,7 +667,7 @@ function createHyperrealBarkTextures(THREE, maxAnisotropy = 16) {
   for (let v = 0; v < 26; v++) {
     let vx = (v / 26) * size + (rand() - 0.5) * 30;
     const isCyanSap = v % 2 === 0;
-    const sapColor = isCyanSap ? 'rgba(44, 230, 216, 0.85)' : 'rgba(255, 184, 77, 0.85)';
+    const sapColor = isCyanSap ? 'rgba(42, 118, 96, 0.45)' : 'rgba(148, 104, 48, 0.45)';
 
     ctx.strokeStyle = sapColor;
     ctx.lineWidth = 2.4;
@@ -775,15 +774,15 @@ function createTranslucentLeafTextures(THREE, palette = 'gold', maxAnisotropy = 
   // Translucent leaf lamina gradient (emerald-jade & golden-amber or bioluminescent teal)
   const laminaGrad = ctx.createRadialGradient(cx, size * 0.52, 30, cx, size * 0.52, 460);
   if (palette === 'gold') {
-    laminaGrad.addColorStop(0.0, 'rgba(255, 210, 112, 0.98)');
-    laminaGrad.addColorStop(0.45, 'rgba(196, 152, 58, 0.95)');
-    laminaGrad.addColorStop(0.82, 'rgba(68, 128, 66, 0.94)');
-    laminaGrad.addColorStop(1.0, 'rgba(42, 92, 48, 0.92)');
+    laminaGrad.addColorStop(0.0, 'rgba(198, 156, 68, 0.98)');
+    laminaGrad.addColorStop(0.45, 'rgba(148, 118, 48, 0.96)');
+    laminaGrad.addColorStop(0.82, 'rgba(68, 112, 56, 0.95)');
+    laminaGrad.addColorStop(1.0, 'rgba(42, 78, 38, 0.94)');
   } else {
-    laminaGrad.addColorStop(0.0, 'rgba(168, 255, 244, 0.98)');
-    laminaGrad.addColorStop(0.45, 'rgba(44, 214, 198, 0.95)');
-    laminaGrad.addColorStop(0.82, 'rgba(38, 136, 118, 0.94)');
-    laminaGrad.addColorStop(1.0, 'rgba(28, 88, 76, 0.92)');
+    laminaGrad.addColorStop(0.0, 'rgba(82, 168, 142, 0.98)');
+    laminaGrad.addColorStop(0.45, 'rgba(54, 132, 112, 0.96)');
+    laminaGrad.addColorStop(0.82, 'rgba(38, 98, 82, 0.95)');
+    laminaGrad.addColorStop(1.0, 'rgba(26, 68, 56, 0.94)');
   }
   ctx.fillStyle = laminaGrad;
   ctx.fillRect(0, 0, size, size);
@@ -817,7 +816,7 @@ function createTranslucentLeafTextures(THREE, palette = 'gold', maxAnisotropy = 
     const yTip = yStart - 85 - (1 - t) * 45;
 
     for (let side of [-1, 1]) {
-      ctx.strokeStyle = palette === 'gold' ? '#FFF1BA' : '#D8FFF9';
+      ctx.strokeStyle = palette === 'gold' ? '#D8B268' : '#78C8B4';
       ctx.lineWidth = 5.2 * (1 - t * 0.45);
       ectx.strokeStyle = palette === 'gold' ? '#FFD470' : '#58FFF0';
       ectx.lineWidth = 6.0 * (1 - t * 0.45);
@@ -858,7 +857,7 @@ function createTranslucentLeafTextures(THREE, palette = 'gold', maxAnisotropy = 
 
   // Prominent glowing central Midrib vein tapering from petiole (y=965) to apex (y=42)
   [ctx, ectx, bctx].forEach((c, idx) => {
-    c.fillStyle = idx === 2 ? '#FFFFFF' : (palette === 'gold' ? '#FFF6CE' : '#E6FFFC');
+    c.fillStyle = idx === 2 ? '#FFFFFF' : (palette === 'gold' ? '#CCA454' : '#68B8A4');
     c.beginPath();
     c.moveTo(cx - 10, 965);
     c.lineTo(cx - 1.5, 42);
@@ -1026,7 +1025,7 @@ function createArticulatedBird(THREE, { matBody, matWing, matGoldTip, matFeather
     innerSpar.position.set(side * 0.062, 0.005, 0.018);
     pivot.add(innerSpar);
 
-    const outerSpar = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.007, 0.14, 8), matGoldTip);
+    const outerSpar = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.007, 0.14, 8), matBody);
     outerSpar.rotation.z = side * -Math.PI / 2;
     outerSpar.rotation.y = side * -0.24;
     outerSpar.position.set(side * 0.185, 0.006, 0.002);
@@ -1045,7 +1044,7 @@ function createArticulatedBird(THREE, { matBody, matWing, matGoldTip, matFeather
       pivot.add(secFeather);
 
       // Upper Greater Wing Covert shingle overlapping the base of each secondary feather
-      const covFeather = new THREE.Mesh(covertBladeGeo, s % 2 === 0 ? matBody : matGoldTip);
+      const covFeather = new THREE.Mesh(covertBladeGeo, s % 2 === 0 ? matBody : featherMat);
       covFeather.position.set(spanX, 0.0065, -0.002);
       covFeather.rotation.y = side * (-0.05 - u * 0.10);
       covFeather.rotation.x = 0.10;
@@ -1075,13 +1074,13 @@ function createArticulatedBird(THREE, { matBody, matWing, matGoldTip, matFeather
       primFeather.rotation.x = 0.04 - v * 0.05;
       pivot.add(primFeather);
 
-      // Golden rachis quill highlight along each primary feather
+      // Subtle organic quill shaft along each primary feather (zero metallic glare)
       const rachis = new THREE.Mesh(
-        new THREE.BoxGeometry(0.0032, 0.0038, 0.135 * lenScale),
-        matGoldTip
+        new THREE.BoxGeometry(0.0018, 0.0022, 0.128 * lenScale),
+        matBody
       );
       rachis.position.copy(primFeather.position);
-      rachis.position.y += 0.0012;
+      rachis.position.y += 0.0008;
       rachis.rotation.copy(primFeather.rotation);
       pivot.add(rachis);
     }
@@ -1212,7 +1211,7 @@ export function initCitadelWorldV6(canvas) {
   renderer.setPixelRatio(pixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.66; // Lifted exposure so every brick, feather barb, bark groove & leaf vein shines
+  renderer.toneMappingExposure = 1.32; // v7.1 Crisp PBR illumination without emissive blowout
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -1224,7 +1223,7 @@ export function initCitadelWorldV6(canvas) {
 
   // Lifted PMREM Study Environment (brightens stone midtones & makes brass/copper gleam)
   scene.environment = createDarkStudyEnvironment(THREE, renderer);
-  scene.environmentIntensity = 1.18;
+  scene.environmentIntensity = 0.62;
 
   // Twilight-Gold & Cerulean Atmospheric Horizon Sky Dome so silhouettes pop crisply
   const skyCanvas = document.createElement('canvas');
@@ -1270,9 +1269,9 @@ export function initCitadelWorldV6(canvas) {
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth * pixelRatio, window.innerHeight * pixelRatio),
-    0.14, // crisp controlled bloom so individual leaf veins, feather barbs & gear teeth stay razor-sharp
-    0.28,
-    0.90
+    0.0, // v7.1 zero-blur calibration: 100% tack-sharp pixel edges, zero bloom blur or halo
+    0.05,
+    2.0
   );
   composer.addPass(bloomPass);
 
@@ -1280,11 +1279,11 @@ export function initCitadelWorldV6(canvas) {
   composer.addPass(outputPass);
 
   // --- ROUND 1: BRIGHTENED MULTI-DIRECTIONAL ARCHITECTURAL & BOTANICAL LIGHTING ---
-  const ambientLight = new THREE.HemisphereLight(0x5A729A, 0x242C3A, 1.58);
+  const ambientLight = new THREE.HemisphereLight(0x647EA8, 0x283242, 1.48);
   scene.add(ambientLight);
 
   // 2900K Overhead Citadel Astrolabe Key Light with 2048x2048 high-res shadow map
-  const astrolabeKeyLight = new THREE.DirectionalLight(0xFFC870, 3.45);
+  const astrolabeKeyLight = new THREE.DirectionalLight(0xFFD082, 2.75);
   astrolabeKeyLight.position.set(4.2, 10.5, 5.2);
   astrolabeKeyLight.castShadow = true;
   astrolabeKeyLight.shadow.mapSize.width = 2048;
@@ -1300,46 +1299,46 @@ export function initCitadelWorldV6(canvas) {
   scene.add(astrolabeKeyLight);
 
   // Dedicated Raking/Grazing Directional Fill Light so brick courses, chisel marks, bark grooves & feathers pop
-  const grazingFillLight = new THREE.DirectionalLight(0xFFE0A8, 1.85);
+  const grazingFillLight = new THREE.DirectionalLight(0xFFE4B5, 1.65);
   grazingFillLight.position.set(5.5, 3.8, 6.2);
   scene.add(grazingFillLight);
 
   // Cool Cerulean Rim Counter-Light from NNW for sculptural separation
-  const ceruleanRimLight = new THREE.DirectionalLight(0x68C8FF, 1.25);
+  const ceruleanRimLight = new THREE.DirectionalLight(0x72CCFF, 1.15);
   ceruleanRimLight.position.set(-5.0, 5.5, -6.0);
   scene.add(ceruleanRimLight);
 
-  // 2900K Canopy Synaptic Point Light
-  const canopyGoldLight = new THREE.PointLight(0xFFC45C, 3.85, 13.0, 1.35);
+  // 2900K Canopy Synaptic Point Light (gentle warm fill, zero washout)
+  const canopyGoldLight = new THREE.PointLight(0xFFC45C, 1.45, 11.0, 1.6);
   canopyGoldLight.position.set(0, 3.15, 0.25);
   scene.add(canopyGoldLight);
 
-  // Dedicated Kage World-Tree Trunk & Moss Front/Side Uplights (for ?view=kage hyperreal bark & veined leaves)
-  const kageBarkKeyLight = new THREE.PointLight(0xFFE29E, 3.45, 7.5, 1.35);
-  kageBarkKeyLight.position.set(0.65, 1.85, 1.65);
+  // Dedicated Kage World-Tree Trunk & Moss Front/Side Grazing Light (illuminates bark grooves & moss without hotspot)
+  const kageBarkKeyLight = new THREE.PointLight(0xFFE29E, 1.55, 7.0, 1.6);
+  kageBarkKeyLight.position.set(0.85, 1.85, 2.15);
   scene.add(kageBarkKeyLight);
 
   // 4800K Milled Groove Cyan Bounce Lights
-  const rootCyanLight = new THREE.PointLight(0x2CE6D8, 4.1, 11.0, 1.35);
+  const rootCyanLight = new THREE.PointLight(0x2CE6D8, 1.50, 9.5, 1.6);
   rootCyanLight.position.set(0.65, 0.75, 0.75);
   scene.add(rootCyanLight);
 
   // Dedicated City Citadel Uplight + Grazing Fill Light (for ?view=closeup bricks, windows & falcons)
-  const cityCyanLight = new THREE.PointLight(0x3CF2E4, 3.4, 8.0, 1.4);
+  const cityCyanLight = new THREE.PointLight(0x3CF2E4, 1.35, 7.5, 1.6);
   cityCyanLight.position.set(2.35, 1.45, 1.95);
   scene.add(cityCyanLight);
 
-  const cityWarmUplight = new THREE.PointLight(0xFFD084, 3.5, 8.5, 1.35);
-  cityWarmUplight.position.set(3.25, 2.05, 3.15);
+  const cityWarmUplight = new THREE.PointLight(0xFFD084, 1.65, 8.5, 1.55);
+  cityWarmUplight.position.set(3.45, 2.15, 3.35);
   scene.add(cityWarmUplight);
 
   // Dedicated Bootcamp Basalt Cliffs & Lighthouse Fill Light (for ?view=bootcamp)
-  const bootcampWarmLight = new THREE.PointLight(0xFFD288, 3.3, 9.0, 1.35);
-  bootcampWarmLight.position.set(2.15, 1.75, -1.45);
+  const bootcampWarmLight = new THREE.PointLight(0xFFD288, 1.65, 9.0, 1.55);
+  bootcampWarmLight.position.set(1.95, 1.85, -1.25);
   scene.add(bootcampWarmLight);
 
   // 2100K Workshop Furnace Hearth Light
-  const furnaceEmberLight = new THREE.PointLight(0xFF7B3B, 3.6, 9.0, 1.45);
+  const furnaceEmberLight = new THREE.PointLight(0xFF7B3B, 1.75, 8.5, 1.6);
   furnaceEmberLight.position.set(-3.1, 1.15, 1.35);
   scene.add(furnaceEmberLight);
 
@@ -1430,56 +1429,55 @@ export function initCitadelWorldV6(canvas) {
     metalness: 0.04
   });
 
-  // ROUND 4 MATERIALS: Deep-Grooved Mossy Kage Bark, Cushioned Emerald Moss & Translucent Veined Leaves
+  // ROUND 4 MATERIALS (v7.1 Calibrated): Deep-Grooved Mossy Kage Bark, Cushioned Emerald Moss & Translucent Veined Leaves
   const matKageGnarledBark = new THREE.MeshStandardMaterial({
-    color: 0xC8B8A6,
+    color: 0xDCCBB8,
     map: barkColorTex,
     bumpMap: barkBumpTex,
-    bumpScale: 0.145,
+    bumpScale: 0.175,
     roughnessMap: barkRoughTex,
-    roughness: 0.84,
-    metalness: 0.05,
-    emissive: 0xFFFFFF,
-    emissiveMap: barkEmissiveTex,
-    emissiveIntensity: 0.55
+    roughness: 0.86,
+    metalness: 0.03,
+    emissive: 0x000000,
+    emissiveIntensity: 0.0
   });
 
   const matKageVelvetMoss = new THREE.MeshStandardMaterial({
-    color: 0x3D8549,
+    color: 0x469653,
     bumpMap: barkBumpTex,
-    bumpScale: 0.085,
-    roughness: 0.92,
+    bumpScale: 0.090,
+    roughness: 0.90,
     metalness: 0.02,
-    emissive: 0x16381E,
-    emissiveIntensity: 0.25
+    emissive: 0x102815,
+    emissiveIntensity: 0.04
   });
 
   const matTranslucentLeafGold = new THREE.MeshStandardMaterial({
-    color: 0xFFFFFF,
+    color: 0xE8DFC8,
     map: leafGoldColorTex,
     emissive: 0xFFFFFF,
     emissiveMap: leafGoldEmissiveTex,
-    emissiveIntensity: 0.78,
+    emissiveIntensity: 0.08,
     bumpMap: leafGoldBumpTex,
-    bumpScale: 0.035,
-    roughness: 0.36,
+    bumpScale: 0.048,
+    roughness: 0.44,
     metalness: 0.04,
-    alphaTest: 0.20,
+    alphaTest: 0.28,
     transparent: true,
     side: THREE.DoubleSide
   });
 
   const matTranslucentLeafCyan = new THREE.MeshStandardMaterial({
-    color: 0xFFFFFF,
+    color: 0xD8EFEA,
     map: leafCyanColorTex,
     emissive: 0xFFFFFF,
     emissiveMap: leafCyanEmissiveTex,
-    emissiveIntensity: 0.82,
+    emissiveIntensity: 0.08,
     bumpMap: leafCyanBumpTex,
-    bumpScale: 0.035,
-    roughness: 0.34,
+    bumpScale: 0.048,
+    roughness: 0.42,
     metalness: 0.04,
-    alphaTest: 0.20,
+    alphaTest: 0.28,
     transparent: true,
     side: THREE.DoubleSide
   });
@@ -1492,9 +1490,9 @@ export function initCitadelWorldV6(canvas) {
   });
 
   const matSpecularBrass = new THREE.MeshStandardMaterial({
-    color: 0xD8B467,
-    roughness: 0.18,
-    metalness: 0.92
+    color: 0xCCA65A,
+    roughness: 0.30,
+    metalness: 0.82
   });
 
   const matOxidizedBronze = new THREE.MeshStandardMaterial({
@@ -1509,33 +1507,37 @@ export function initCitadelWorldV6(canvas) {
     metalness: 0.84
   });
 
-  // 10% Emission: Controlled Bioluminescence (crisp individual strands, zero white-out)
+  // 10% Emission (v7.1 Zero-Glare Calibration: subtle warm/cyan internal glow, never blowing out geometry)
   const matCyanRoot = new THREE.MeshStandardMaterial({
-    color: 0x2CE6D8,
-    emissive: 0x18B8AC,
-    emissiveIntensity: 1.05,
-    roughness: 0.22
+    color: 0x248C82,
+    emissive: 0x0A4A44,
+    emissiveIntensity: 0.06,
+    roughness: 0.48,
+    metalness: 0.08
   });
 
   const matCyanCore = new THREE.MeshStandardMaterial({
-    color: 0xB8FFF9,
-    emissive: 0x2CE6D8,
-    emissiveIntensity: 1.45,
-    roughness: 0.15
+    color: 0x2E9E94,
+    emissive: 0x0E5852,
+    emissiveIntensity: 0.08,
+    roughness: 0.44,
+    metalness: 0.10
   });
 
   const matGoldCanopy = new THREE.MeshStandardMaterial({
-    color: 0xFFB84D,
-    emissive: 0xE59422,
-    emissiveIntensity: 1.15,
-    roughness: 0.22
+    color: 0xB87E2C,
+    emissive: 0x6E420C,
+    emissiveIntensity: 0.08,
+    roughness: 0.46,
+    metalness: 0.12
   });
 
   const matEmberHeart = new THREE.MeshStandardMaterial({
-    color: 0xFF6B2B,
-    emissive: 0xE6480F,
-    emissiveIntensity: 1.55,
-    roughness: 0.22
+    color: 0xE05A22,
+    emissive: 0xA83208,
+    emissiveIntensity: 0.24,
+    roughness: 0.34,
+    metalness: 0.12
   });
 
   const matParchment = new THREE.MeshStandardMaterial({
@@ -1892,8 +1894,8 @@ export function initCitadelWorldV6(canvas) {
     }
   }
 
-  // Interwoven Bioluminescent Optical Root Veins & Golden Capillaries hugging the gnarled mossy bark
-  const totalStrands = 36;
+  // Subtle Capillary Filaments hugging the root base (kept ultra-slender so gnarled mossy bark is 100% unobstructed)
+  const totalStrands = 12;
   for (let i = 0; i < totalStrands; i++) {
     const angle0 = (i / totalStrands) * Math.PI * 2;
     const isStructuralArmature = i % 3 === 0;
@@ -1922,11 +1924,11 @@ export function initCitadelWorldV6(canvas) {
       ));
     }
     const curve = new THREE.CatmullRomCurve3(pts);
-    const radius = isStructuralArmature ? 0.022 : (isCyanVein ? 0.012 : 0.009);
+    const radius = isStructuralArmature ? 0.010 : (isCyanVein ? 0.0045 : 0.0040);
     const tubeGeo = new THREE.TubeGeometry(curve, 20, radius, 6, false);
     const mat = isStructuralArmature
-      ? matSpecularBrass
-      : (isCyanVein ? matCyanRoot : matGoldCanopy);
+      ? matAgedBrass
+      : matOxidizedBronze;
     stn02KageCore.add(new THREE.Mesh(tubeGeo, mat));
   }
 
@@ -1939,7 +1941,7 @@ export function initCitadelWorldV6(canvas) {
     { y: 2.40, r: 0.62 }
   ];
   collarSpecs.forEach((cs) => {
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(cs.r, 0.030, 10, 32), matSpecularBrass);
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(cs.r, 0.022, 10, 32), matAgedBrass);
     collar.rotation.x = Math.PI / 2;
     collar.position.y = cs.y;
     stn02KageCore.add(collar);
@@ -2020,8 +2022,8 @@ export function initCitadelWorldV6(canvas) {
   const condenserGeo = new THREE.OctahedronGeometry(0.036, 0);
   condenserGeo.scale(0.72, 1.65, 0.72);
 
-  for (let w = 0; w < 56; w++) {
-    const ang = (w / 56) * Math.PI * 2 + (w % 4) * 0.03;
+  for (let w = 0; w < 24; w++) {
+    const ang = (w / 24) * Math.PI * 2 + (w % 4) * 0.03;
     const reach = 0.85 + (w % 5) * 0.22;
     const sx = Math.cos(ang) * reach;
     const sz = Math.sin(ang) * reach;
@@ -2034,11 +2036,11 @@ export function initCitadelWorldV6(canvas) {
       new THREE.Vector3(sx * 1.04, topY - dropLen * 0.65, sz * 1.04),
       new THREE.Vector3(sx * 1.06, topY - dropLen, sz * 1.06)
     ]);
-    const curtainGeo = new THREE.TubeGeometry(curtainCurve, 10, 0.007, 5, false);
+    const curtainGeo = new THREE.TubeGeometry(curtainCurve, 10, 0.0038, 5, false);
     const isCyanTip = w % 4 === 0;
-    canopyGroup.add(new THREE.Mesh(curtainGeo, isCyanTip ? matCyanCore : matGoldCanopy));
+    canopyGroup.add(new THREE.Mesh(curtainGeo, matAgedBrass));
 
-    const drop = new THREE.Mesh(condenserGeo, isCyanTip ? matCyanCore : matGoldCanopy);
+    const drop = new THREE.Mesh(condenserGeo, isCyanTip ? matTranslucentLeafCyan : matTranslucentLeafGold);
     drop.position.set(sx * 1.06, topY - dropLen - 0.04, sz * 1.06);
     canopyGroup.add(drop);
   }
@@ -2057,10 +2059,10 @@ export function initCitadelWorldV6(canvas) {
   }
   sporeGeo.setAttribute('position', new THREE.BufferAttribute(sporePos, 3));
   const sporeMat = new THREE.PointsMaterial({
-    color: 0xFFC864,
-    size: 0.045,
+    color: 0xD8B467,
+    size: 0.016,
     transparent: true,
-    opacity: 0.78
+    opacity: 0.28
   });
   const sporePoints = new THREE.Points(sporeGeo, sporeMat);
   worldGroup.add(sporePoints);
@@ -2901,12 +2903,12 @@ export function initCitadelWorldV6(canvas) {
 
   const godRayTex = createGodRayShaftTexture();
   const godRayConfigs = [
-    // Primary 2900K Astrolabe Sun Shafts slicing through Kage & The City's brick towers
-    { x: 0.15, y: 3.1, z: 0.10, rTop: 0.42, rBot: 2.05, h: 6.2, rotZ: -0.26, rotX: 0.18, opacity: 0.14 },
-    { x: 2.25, y: 2.8, z: 1.85, rTop: 0.28, rBot: 1.48, h: 5.4, rotZ: -0.28, rotX: 0.20, opacity: 0.16 },
-    { x: 1.75, y: 2.5, z: 2.25, rTop: 0.22, rBot: 1.15, h: 4.8, rotZ: -0.25, rotX: 0.16, opacity: 0.13 },
-    { x: -2.85, y: 2.4, z: 1.25, rTop: 0.24, rBot: 1.25, h: 4.8, rotZ: -0.24, rotX: 0.15, opacity: 0.11 },
-    { x: -2.40, y: 2.3, z: -2.15, rTop: 0.22, rBot: 1.18, h: 4.6, rotZ: -0.22, rotX: 0.14, opacity: 0.10 }
+    // Subtle 2900K Astrolabe Sun Shafts (75% reduced opacity so geometry behind is never washed out or blurred)
+    { x: 0.15, y: 3.1, z: 0.10, rTop: 0.36, rBot: 1.75, h: 6.0, rotZ: -0.26, rotX: 0.18, opacity: 0.028 },
+    { x: 2.25, y: 2.8, z: 1.85, rTop: 0.24, rBot: 1.25, h: 5.2, rotZ: -0.28, rotX: 0.20, opacity: 0.032 },
+    { x: 1.75, y: 2.5, z: 2.25, rTop: 0.20, rBot: 1.05, h: 4.6, rotZ: -0.25, rotX: 0.16, opacity: 0.025 },
+    { x: -2.85, y: 2.4, z: 1.25, rTop: 0.22, rBot: 1.15, h: 4.6, rotZ: -0.24, rotX: 0.15, opacity: 0.024 },
+    { x: -2.40, y: 2.3, z: -2.15, rTop: 0.20, rBot: 1.08, h: 4.4, rotZ: -0.22, rotX: 0.14, opacity: 0.022 }
   ];
 
   const godRayMeshes = [];
@@ -2928,14 +2930,14 @@ export function initCitadelWorldV6(canvas) {
     godRayMeshes.push({ mesh: shaft, baseOpacity: cfg.opacity, phase: idx * 1.3 });
   });
 
-  // Rotating Bootcamp Fresnel Volumetric Lighthouse Beam Cone
+  // Rotating Bootcamp Fresnel Volumetric Lighthouse Beam Cone (crisp subtle shaft, zero glare)
   const lighthouseBeamCone = new THREE.Mesh(
-    new THREE.ConeGeometry(0.68, 3.6, 24, 1, true),
+    new THREE.ConeGeometry(0.46, 3.2, 24, 1, true),
     new THREE.MeshBasicMaterial({
       map: godRayTex,
       color: 0xFFB84D,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.018,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.DoubleSide
@@ -2955,33 +2957,33 @@ export function initCitadelWorldV6(canvas) {
   const cloudTex = createVolumetricCloudTexture(THREE);
   const cloudPuffs = [];
 
-  // Stratum 1: Low Coastal Sea Mist (y = 0.08..0.46) around Harbor, Bootcamp cliffs & Kage trenches
+  // Stratum 1: Low Coastal Sea Mist (kept subtle so basalt & harbor details stay razor-sharp)
   const lowMistAnchors = [
-    { x: 1.65, y: 0.16, z: -0.85, sx: 1.85, sy: 0.55, opacity: 0.34, tint: 0x8CE8E2, speed: 0.12 },
-    { x: 2.55, y: 0.22, z: -1.65, sx: 1.95, sy: 0.62, opacity: 0.38, tint: 0x9ED8E0, speed: 0.10 },
-    { x: 3.15, y: 0.28, z: -2.45, sx: 1.75, sy: 0.58, opacity: 0.36, tint: 0xB8D8E8, speed: 0.14 },
-    { x: 1.25, y: 0.14, z: 0.95, sx: 1.65, sy: 0.48, opacity: 0.30, tint: 0x7CD8D4, speed: 0.11 },
-    { x: -1.45, y: 0.18, z: 0.65, sx: 1.70, sy: 0.52, opacity: 0.28, tint: 0x9EC8D8, speed: 0.09 },
-    { x: -2.65, y: 0.24, z: 1.55, sx: 1.80, sy: 0.56, opacity: 0.32, tint: 0xE8B88A, speed: 0.13 }
+    { x: 1.65, y: 0.08, z: -0.85, sx: 1.35, sy: 0.28, opacity: 0.05, tint: 0x8CE8E2, speed: 0.12 },
+    { x: 2.55, y: 0.10, z: -1.65, sx: 1.40, sy: 0.30, opacity: 0.05, tint: 0x9ED8E0, speed: 0.10 },
+    { x: 3.15, y: 0.12, z: -2.45, sx: 1.35, sy: 0.28, opacity: 0.05, tint: 0xB8D8E8, speed: 0.14 },
+    { x: 1.25, y: 0.08, z: 0.95, sx: 1.25, sy: 0.26, opacity: 0.05, tint: 0x7CD8D4, speed: 0.11 },
+    { x: -1.45, y: 0.10, z: 0.65, sx: 1.30, sy: 0.28, opacity: 0.05, tint: 0x9EC8D8, speed: 0.09 },
+    { x: -2.65, y: 0.12, z: 1.55, sx: 1.35, sy: 0.28, opacity: 0.05, tint: 0xE8B88A, speed: 0.13 }
   ];
 
-  // Stratum 2: Mid Cumulus Cloud Banks (y = 1.15..2.35) weaving directly between The City's brick towers & flying buttresses
+  // Stratum 2: Mid Cumulus Cloud Banks (subtle atmospheric wisps that never blur stone bricks or feathers)
   const midCityClouds = [
-    { x: 1.92, y: 1.38, z: 1.62, sx: 1.45, sy: 0.68, opacity: 0.46, tint: 0xFFE0B2, speed: 0.16 },
-    { x: 2.72, y: 1.68, z: 2.18, sx: 1.55, sy: 0.72, opacity: 0.48, tint: 0xFFD494, speed: 0.14 },
-    { x: 2.15, y: 1.95, z: 2.42, sx: 1.35, sy: 0.64, opacity: 0.44, tint: 0xFFF0D4, speed: 0.18 },
-    { x: 2.85, y: 1.28, z: 1.42, sx: 1.38, sy: 0.60, opacity: 0.42, tint: 0xE6D2B5, speed: 0.15 },
-    { x: 1.52, y: 1.52, z: 2.05, sx: 1.28, sy: 0.58, opacity: 0.40, tint: 0xFFDCA8, speed: 0.17 },
-    { x: 0.65, y: 1.75, z: 0.85, sx: 1.50, sy: 0.66, opacity: 0.36, tint: 0xFFE4B8, speed: 0.13 },
-    { x: -2.25, y: 1.45, z: -1.85, sx: 1.48, sy: 0.64, opacity: 0.35, tint: 0xD8E2F0, speed: 0.12 },
-    { x: 2.45, y: 1.42, z: -1.95, sx: 1.42, sy: 0.62, opacity: 0.38, tint: 0xDCE6F2, speed: 0.15 }
+    { x: 1.92, y: 1.38, z: 1.62, sx: 1.05, sy: 0.38, opacity: 0.05, tint: 0xFFE0B2, speed: 0.16 },
+    { x: 2.72, y: 1.68, z: 2.18, sx: 1.10, sy: 0.40, opacity: 0.05, tint: 0xFFD494, speed: 0.14 },
+    { x: 2.15, y: 1.95, z: 2.42, sx: 1.00, sy: 0.36, opacity: 0.05, tint: 0xFFF0D4, speed: 0.18 },
+    { x: 2.85, y: 1.28, z: 1.42, sx: 1.02, sy: 0.36, opacity: 0.05, tint: 0xE6D2B5, speed: 0.15 },
+    { x: 1.52, y: 1.52, z: 2.05, sx: 0.98, sy: 0.34, opacity: 0.05, tint: 0xFFDCA8, speed: 0.17 },
+    { x: 0.85, y: 1.75, z: 1.15, sx: 1.00, sy: 0.36, opacity: 0.04, tint: 0xFFE4B8, speed: 0.13 },
+    { x: -2.25, y: 1.45, z: -1.85, sx: 1.05, sy: 0.38, opacity: 0.05, tint: 0xD8E2F0, speed: 0.12 },
+    { x: 2.45, y: 2.55, z: -2.45, sx: 1.05, sy: 0.36, opacity: 0.04, tint: 0xDCE6F2, speed: 0.15 }
   ];
 
   // Stratum 3: High Cirrus & Astrolabe Crown Wisps (y = 2.75..3.55)
   const highCirrusClouds = [
-    { x: 0.25, y: 3.05, z: -0.35, sx: 2.15, sy: 0.58, opacity: 0.32, tint: 0xFFE2B0, speed: 0.08 },
-    { x: 2.10, y: 2.88, z: 1.75, sx: 1.95, sy: 0.54, opacity: 0.36, tint: 0xFFD89A, speed: 0.09 },
-    { x: -1.80, y: 3.15, z: 0.90, sx: 2.05, sy: 0.52, opacity: 0.28, tint: 0xE8D8C0, speed: 0.07 }
+    { x: 0.25, y: 3.05, z: -0.35, sx: 1.85, sy: 0.48, opacity: 0.11, tint: 0xFFE2B0, speed: 0.08 },
+    { x: 2.10, y: 2.88, z: 1.75, sx: 1.75, sy: 0.46, opacity: 0.12, tint: 0xFFD89A, speed: 0.09 },
+    { x: -1.80, y: 3.15, z: 0.90, sx: 1.80, sy: 0.45, opacity: 0.10, tint: 0xE8D8C0, speed: 0.07 }
   ];
 
   [...lowMistAnchors, ...midCityClouds, ...highCirrusClouds].forEach((cfg, idx) => {
@@ -3024,20 +3026,34 @@ export function initCitadelWorldV6(canvas) {
   worldGroup.add(birdsGroup);
 
   const matBirdBody = new THREE.MeshStandardMaterial({
-    color: 0x3D4A5E,
+    color: 0x6A5846,
     map: featherColorTex,
     bumpMap: featherBumpTex,
-    bumpScale: 0.035,
-    roughness: 0.36,
-    metalness: 0.38
+    bumpScale: 0.065,
+    roughness: 0.68,
+    metalness: 0.06,
+    emissive: 0x000000,
+    emissiveIntensity: 0.0
   });
   const matBirdWing = new THREE.MeshStandardMaterial({
-    color: 0xFFFFFF,
+    color: 0xD8C6A8,
     map: featherColorTex,
     bumpMap: featherBumpTex,
-    bumpScale: 0.048,
-    roughness: 0.30,
-    metalness: 0.45
+    bumpScale: 0.075,
+    roughness: 0.64,
+    metalness: 0.08,
+    emissive: 0x000000,
+    emissiveIntensity: 0.0
+  });
+  const matBirdBurnishedGold = new THREE.MeshStandardMaterial({
+    color: 0x9E7838,
+    map: featherColorTex,
+    bumpMap: featherBumpTex,
+    bumpScale: 0.055,
+    roughness: 0.58,
+    metalness: 0.16,
+    emissive: 0x000000,
+    emissiveIntensity: 0.0
   });
 
   // Flock I (11 Citadel Falcons): Figure-8 weaving tightly around The City Keep, brick towers & flying buttresses
@@ -3085,7 +3101,7 @@ export function initCitadelWorldV6(canvas) {
         matBody: matBirdBody,
         matWing: matBirdWing,
         matFeather: matBirdWing,
-        matGoldTip: matGoldCanopy,
+        matGoldTip: matBirdBurnishedGold,
         scale: fDef.scale * (0.92 + (i % 3) * 0.08)
       });
       birdsGroup.add(bird.birdGroup);
@@ -3113,7 +3129,7 @@ export function initCitadelWorldV6(canvas) {
       matBody: matBirdBody,
       matWing: matBirdWing,
       matFeather: matBirdWing,
-      matGoldTip: matGoldCanopy,
+      matGoldTip: matBirdBurnishedGold,
       scale: hs.scale
     });
     hBird.birdGroup.position.copy(hs.pos);
@@ -3142,7 +3158,7 @@ export function initCitadelWorldV6(canvas) {
       matBody: matBirdBody,
       matWing: matBirdWing,
       matFeather: matBirdWing,
-      matGoldTip: matGoldCanopy,
+      matGoldTip: matBirdBurnishedGold,
       scale: ks.scale
     });
     kb.birdGroup.position.copy(ks.pos);
@@ -3154,27 +3170,28 @@ export function initCitadelWorldV6(canvas) {
 
   // 18 Delicate 4-Winged Bioluminescent Dragonflies darting among the Kage World-Tree's mossy bark & veined leaves
   const matDragonflyWing = new THREE.MeshStandardMaterial({
-    color: 0xE6FFFC,
-    emissive: 0x2CE6D8,
-    emissiveIntensity: 0.85,
+    color: 0xB8E6DF,
+    emissive: 0x167A72,
+    emissiveIntensity: 0.08,
     transparent: true,
-    opacity: 0.78,
-    roughness: 0.15,
+    opacity: 0.58,
+    roughness: 0.32,
+    metalness: 0.10,
     side: THREE.DoubleSide
   });
 
   const kageDragonflies = [];
-  for (let d = 0; d < 18; d++) {
+  for (let d = 0; d < 8; d++) {
     const isGoldInsect = d % 2 === 0;
     const df = createLuminousDragonfly(THREE, {
-      matBody: matSpecularBrass,
-      matGlow: isGoldInsect ? matGoldCanopy : matCyanCore,
+      matBody: matOxidizedBronze,
+      matGlow: isGoldInsect ? matGoldCanopy : matCyanRoot,
       matWing: matDragonflyWing,
-      scale: 0.95 + (d % 3) * 0.22
+      scale: 0.52 + (d % 3) * 0.10
     });
-    const angle = (d / 18) * Math.PI * 2 + 0.3;
-    const radius = 0.36 + (d % 4) * 0.22;
-    const height = 1.15 + (d % 6) * 0.22;
+    const angle = (d / 8) * Math.PI * 2 + 0.45;
+    const radius = 0.58 + (d % 3) * 0.24;
+    const height = 1.25 + (d % 4) * 0.26;
     df.dfGroup.position.set(Math.cos(angle) * radius, height, Math.sin(angle) * radius);
     kageFaunaGroup.add(df.dfGroup);
     kageDragonflies.push({
