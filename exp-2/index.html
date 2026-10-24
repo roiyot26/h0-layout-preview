@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EXP-02 // BRUTALIST SIGNAL PRESS — Full-Viewport Kinetic Type &amp; Physics Matter (/now)</title>
+<style>
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Bold.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Black.ttf') format('truetype');
+    font-weight: 900;
+  }
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('../fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 900;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Patrick Hand';
+    src: url('../fonts/PatrickHand-Regular.ttf') format('truetype');
+    font-weight: 400;
+  }
+
+  :root {
+    --obsidian: #16181A;
+    --bone: #F2EEE4;
+    --oxide: #1F3A5F;
+    --signal: #E3B341;
+    --rust: #B84A39;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bone);
+    color: var(--obsidian);
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: crosshair;
+  }
+
+  #kinetic-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    z-index: 1;
+  }
+
+  .press-bar-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    background: var(--obsidian);
+    color: var(--bone);
+    z-index: 10;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--obsidian);
+  }
+
+  .press-id {
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    background: var(--rust);
+    color: var(--bone);
+    text-transform: uppercase;
+  }
+
+  .mode-tabs {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .mode-btn {
+    border: none;
+    border-left: 1.5px solid rgba(242, 238, 228, 0.2);
+    background: var(--obsidian);
+    color: rgba(242, 238, 228, 0.72);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 0 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s ease;
+  }
+  .mode-btn:hover {
+    background: var(--oxide);
+    color: var(--bone);
+  }
+  .mode-btn.active {
+    background: var(--signal);
+    color: var(--obsidian);
+  }
+
+  .press-bar-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: var(--obsidian);
+    color: var(--bone);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    border-top: 3px solid var(--signal);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+  }
+
+  .spawn-btn {
+    background: var(--signal);
+    color: var(--obsidian);
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    padding: 9px 18px;
+    cursor: pointer;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 var(--rust);
+  }
+</style>
+</head>
+<body>
+
+<header class="press-bar-top">
+  <div class="press-id">EXP-02 // BRUTALIST SIGNAL PRESS — TYPOGRAPHY AS PHYSICAL COLLIDER MATTER</div>
+  <nav class="mode-tabs" aria-label="Kinetic Press Modes">
+    <button class="mode-btn active" data-station="city">03 NOW · THE CITY</button>
+    <button class="mode-btn" data-station="kage">KAGE SECOND BRAIN (410 PRs)</button>
+    <button class="mode-btn" data-station="workshop">04 THE WORKSHOP</button>
+    <button class="mode-btn" data-station="campus">02 CAMPUS (2022–26)</button>
+    <button class="mode-btn" data-station="bootcamp">01 BOOTCAMP (2021)</button>
+  </nav>
+</header>
+
+<canvas id="kinetic-canvas"></canvas>
+
+<footer class="press-bar-bottom">
+  <div>
+    SLICE CURSOR THROUGH GIANT TYPE TO SHEAR · TOKENS PHYSICALLY BOUNCE OFF MONUMENTAL COPY GIRDER BEAMS
+  </div>
+  <div style="display:flex; align-items:center; gap:18px;">
+    <span style="color:#E3B341; font-weight:700;">410 PRs · 16 REPOS · 2,183 COMMITS · 443 VAULT NOTES</span>
+    <button class="spawn-btn" id="spawn-task-btn">[SPACE] DROP 1-LINE TASK INTO KAGE ↯</button>
+  </div>
+</footer>
+
+<script>
+const canvas = document.getElementById('kinetic-canvas');
+const ctx = canvas.getContext('2d');
+
+let W = window.innerWidth;
+let H = window.innerHeight;
+let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Each station defines 3 angled full-viewport Typographic Girders that act as BOTH the copy AND the physical collision ramps!
+const STATIONS = {
+  city: {
+    bgWord: 'THE CITY',
+    bgNum: '03',
+    kicker: 'STATION 03 // PLATFORM 3 // JAN 2026 – NOW // FULL-STACK DEVELOPER AT MOVEO CREATIVE',
+    girders: [
+      {
+        x1: 40, y1: 225, x2: 1020, y2: 285,
+        bg: '#16181A', fg: '#F2EEE4', accent: '#E3B341',
+        headline: 'NOW · THE CITY // MOVEO CREATIVE LEAD',
+        copy: "I'm the lead developer on full-stack projects for enterprise clients: custom WordPress (PHP, Gutenberg, ACF) & React/Next.js built end to end."
+      },
+      {
+        x1: 360, y1: 500, x2: 1390, y2: 430,
+        bg: '#1F3A5F', fg: '#F2EEE4', accent: '#B84A39',
+        headline: 'CODING AGENTS IN THE TEAM // 3-GATE WORKFLOW',
+        copy: "Every project carries its own rules file. Machine checks run first on every change, and a dev reads what's left: data, accounts & mid-build decisions."
+      },
+      {
+        x1: 50, y1: 735, x2: 1160, y2: 795,
+        bg: '#E3B341', fg: '#16181A', accent: '#16181A',
+        headline: '410 PRs · 16 REPOS · 2,183 COMMITS · 443 VAULT NOTES',
+        copy: "I talk to clients and their vendors directly: gathering requirements, coordinating integrations and chasing issues until they're closed."
+      }
+    ],
+    tokens: ['WP · PHP · ACF', 'REACT / NEXT.JS', 'CLIENT & VENDOR LEAD', 'PROJECT RULES FILE', 'MACHINE CHECKS FIRST', 'DEV SIGN-OFF', '410 PRs MERGED', '443 VAULT NOTES']
+  },
+  kage: {
+    bgWord: 'KAGE AI',
+    bgNum: '410',
+    kicker: 'SIGNAL BOX // KAGE SECOND BRAIN // RUNNING SINCE 1 MAY 2026 (BEFORE THAT: 53 PRs JAN–APR)',
+    girders: [
+      {
+        x1: 40, y1: 225, x2: 1020, y2: 285,
+        bg: '#16181A', fg: '#E3B341', accent: '#F2EEE4',
+        headline: 'KAGE, MY SECOND BRAIN, INTRODUCES ITSELF',
+        copy: "“I'm Kage, an AI assistant. I remember Roi's projects and do the engineering legwork (research, code, review, drafts), so his part is making the decisions.”"
+      },
+      {
+        x1: 360, y1: 500, x2: 1390, y2: 430,
+        bg: '#B84A39', fg: '#F2EEE4', accent: '#E3B341',
+        headline: '2ND-MODEL LINE-CITED REVIEW GATE // ZERO EXPLAINING TWICE',
+        copy: "Each session starts from the last written handoff. Every code change goes past a reviewer that has to quote the exact line it objects to."
+      },
+      {
+        x1: 50, y1: 735, x2: 1160, y2: 795,
+        bg: '#1F3A5F', fg: '#F2EEE4', accent: '#E3B341',
+        headline: '410 PRs · 16 REPOS · 2,183 KAGE COMMITS · 443 VAULT NOTES',
+        copy: "Safety hooks block force-pushes, protected-branch pushes, and anything reaching production without Roi's go for that one change."
+      }
+    ],
+    tokens: ['1-LINE TASK', 'HYBRID RAG (443)', 'MCP SERVER', 'WORKER SPEC', 'LINE-CITED FAIL ↺', 'BLOCK FORCE-PUSH', 'ROI GO → PR #410']
+  },
+  workshop: {
+    bgWord: 'WORKSHOP',
+    bgNum: '04',
+    kicker: 'STATION 04 // PLATFORM 4 // THINGS I BUILD IN MY OWN TIME, MOSTLY TO LEARN PROPERLY',
+    girders: [
+      {
+        x1: 40, y1: 225, x2: 1020, y2: 285,
+        bg: '#16181A', fg: '#F2EEE4', accent: '#E3B341',
+        headline: 'VIRTUAL GARDEN // WXT MANIFEST V3 + VITEST CI',
+        copy: 'A Chrome extension that grows a small garden from productive browsing and wilts otherwise. Four looks: zen, cosmic, ocean and pixel.'
+      },
+      {
+        x1: 360, y1: 500, x2: 1390, y2: 430,
+        bg: '#1F3A5F', fg: '#F2EEE4', accent: '#E3B341',
+        headline: 'CHORD-CYCLE-OPEN // MEDIAPIPE WEBCAM HANDS + WEB AUDIO',
+        copy: 'A chord wheel played in the browser with pointer, touch or webcam hand tracking. Opening your hand swells the chord; zero MIDI hardware.'
+      },
+      {
+        x1: 50, y1: 735, x2: 1160, y2: 795,
+        bg: '#B84A39', fg: '#F2EEE4', accent: '#E3B341',
+        headline: 'DOODLE REBORN (3D R3F DESK) + BLENDER H0 MODELING',
+        copy: '2-player draw-and-guess game where turns fly as a paper plane across a 3D desk (Next.js, React 19, R3F, Neon). Plus Blender Corner where this H0 layout began.'
+      }
+    ],
+    tokens: ['VIRTUAL GARDEN', 'WXT + VITEST', 'CHORD-CYCLE-OPEN', 'MEDIAPIPE HANDS', 'DOODLE REBORN', 'REACT THREE FIBER', 'BLENDER 1:87']
+  },
+  campus: {
+    bgWord: 'CAMPUS',
+    bgNum: '02',
+    kicker: 'STATION 02 // PLATFORM 2 // FEB 2022 – JAN 2026 // MISTER BIT & CODING ACADEMY',
+    girders: [
+      {
+        x1: 40, y1: 225, x2: 1020, y2: 285,
+        bg: '#1F3A5F', fg: '#F2EEE4', accent: '#E3B341',
+        headline: '2022–26 TEACHING CAMPUS // MISTER BIT INSTRUCTOR & DEV',
+        copy: 'I taught full-stack courses at Coding Academy to cycles of 60–70 students: JavaScript, React, Node.js, Express and MongoDB, plus company projects.'
+      },
+      {
+        x1: 360, y1: 500, x2: 1390, y2: 430,
+        bg: '#16181A', fg: '#E3B341', accent: '#B84A39',
+        headline: 'READ CODE FAST · EXPLAIN WITHOUT MAKING ANYONE FEEL STUPID',
+        copy: "“Teaching is where I learned to read other people's code quickly and explain what's wrong with it without making anyone feel stupid.”"
+      },
+      {
+        x1: 50, y1: 735, x2: 1160, y2: 795,
+        bg: '#E3B341', fg: '#16181A', accent: '#16181A',
+        headline: '4 YEARS · 60–70 STUDENTS PER CYCLE · FULL-STACK PRODUCTION',
+        copy: 'End-to-end mentorship and architecture across React, Node.js, Express, MongoDB and modern TypeScript.'
+      }
+    ],
+    tokens: ['MISTER BIT (4 YRS)', '60–70 STUDENTS', 'FAST CODE READS', 'ZERO EGO REVIEW', 'REACT + NODE.JS', 'MONGODB']
+  },
+  bootcamp: {
+    bgWord: 'BOOTCAMP',
+    bgNum: '01',
+    kicker: 'STATION 01 // PLATFORM 1 // NOV 2021 – FEB 2022 // CODING ACADEMY INTENSIVE',
+    girders: [
+      {
+        x1: 40, y1: 225, x2: 1020, y2: 285,
+        bg: '#16181A', fg: '#E3B341', accent: '#B84A39',
+        headline: '2021 BOOTCAMP TOWN // WHERE THE H0 LOOP BEGAN',
+        copy: 'Four months, intensive. Most of it was self-led learning, plus team projects run the way real dev teams run them.'
+      },
+      {
+        x1: 360, y1: 500, x2: 1390, y2: 430,
+        bg: '#B84A39', fg: '#F2EEE4', accent: '#E3B341',
+        headline: 'FRONTEND + BACKEND FOUNDATION // REAL TEAM SPRINTS',
+        copy: 'I came out with the front end (HTML, CSS, JavaScript, React) and the back end (Node.js, Express, MongoDB).'
+      },
+      {
+        x1: 50, y1: 735, x2: 1160, y2: 795,
+        bg: '#1F3A5F', fg: '#F2EEE4', accent: '#E3B341',
+        headline: 'STATION 01 → 02 CAMPUS → 03 THE CITY → 04 WORKSHOP',
+        copy: 'From intensive bootcamp sprints in 2021 to teaching 60–70 student cohorts and leading enterprise engineering with Kage in 2026.'
+      }
+    ],
+    tokens: ['NOV 2021 ORIGIN', 'SELF-LED GRIT', 'TEAM GIT SPRINTS', 'HTML · CSS · JS', 'REACT + EXPRESS', 'MONGODB']
+  }
+};
+
+let activeKey = 'city';
+let shock = 0.4;
+let mx = W * 0.5, my = H * 0.4, prevMx = mx, prevMy = my, vx = 0, vy = 0;
+
+window.addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; });
+
+// Physical Rigid-Body Task & Metric Tokens bouncing across the full-viewport typographic girders
+const tokens = [];
+function spawnToken(x, y, customLabel) {
+  const pool = STATIONS[activeKey].tokens;
+  const label = customLabel || pool[Math.floor(Math.random() * pool.length)];
+  const isRejectSim = Math.random() < 0.25;
+  tokens.push({
+    x: x !== undefined ? x : 160 + Math.random() * (W - 320),
+    y: y !== undefined ? y : 65 + Math.random() * 40,
+    vx: (Math.random() - 0.5) * 5,
+    vy: 1 + Math.random() * 2.5,
+    w: Math.max(132, label.length * 9.5 + 26),
+    h: 34,
+    rot: (Math.random() - 0.5) * 0.2,
+    vrot: (Math.random() - 0.5) * 0.025,
+    label,
+    needsFix: isRejectSim,
+    col: isRejectSim ? '#B84A39' : (Math.random() > 0.45 ? '#E3B341' : '#16181A'),
+    fg: isRejectSim ? '#F2EEE4' : (Math.random() > 0.45 ? '#16181A' : '#E3B341'),
+    impactGlow: 0
+  });
+  if (tokens.length > 24) tokens.shift();
+}
+
+for (let i = 0; i < 16; i++) {
+  spawnToken(120 + (i * 82) % (W - 240), 75 + (i % 4) * 145);
+}
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeKey = btn.getAttribute('data-station');
+    shock = 1.2;
+    for (let i = 0; i < 7; i++) spawnToken();
+  });
+});
+
+document.getElementById('spawn-task-btn').addEventListener('click', () => {
+  shock = 0.9;
+  for (let i = 0; i < 6; i++) spawnToken(W * 0.35 + i * 90, 65);
+});
+
+window.addEventListener('pointerdown', e => {
+  if (e.target.closest('header, footer, button')) return;
+  shock = 0.85;
+  spawnToken(e.clientX, e.clientY, '1-LINE TASK → KAGE');
+  spawnToken(e.clientX + 40, e.clientY - 20, 'MCP VAULT: 443');
+});
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    document.getElementById('spawn-task-btn').click();
+  }
+});
+
+// Draw a colossal Slit-Scan Deformable Background Word spanning the entire canvas
+function drawSlitScanMonument(word, num, t) {
+  const strips = 18;
+  const usableH = H - 92;
+  const stripH = usableH / strips;
+
+  for (let i = 0; i < strips; i++) {
+    const sy = 44 + i * stripH;
+    const dMouse = Math.abs(my - (sy + stripH * 0.5));
+    const pull = Math.max(0, 1 - dMouse / 220);
+    const offset = Math.sin(t * 2.6 + i * 0.45) * (14 + shock * 45) + pull * vx * 2.2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, sy, W, stripH + 0.6);
+    ctx.clip();
+
+    // Alternating faint paper grain bands
+    ctx.fillStyle = i % 2 === 0 ? '#F2EEE4' : '#EAE4D7';
+    ctx.fillRect(0, sy, W, stripH + 1);
+
+    // Colossal 290px background kinetic typography
+    ctx.font = '900 285px "Barlow Semi Condensed", sans-serif';
+    ctx.fillStyle = 'rgba(22, 24, 26, 0.085)';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(word, 35 + offset, H * 0.36);
+
+    ctx.font = '900 340px "Barlow Semi Condensed", sans-serif';
+    ctx.fillStyle = 'rgba(184, 74, 57, 0.10)';
+    ctx.fillText(num, W - 470 - offset * 1.2, H * 0.66);
+
+    ctx.restore();
+  }
+}
+
+// Draw an angled physical Typographic Girder Beam that carries copy AND acts as a physics ramp
+function drawTypographicGirder(g, idx, t) {
+  const dx = g.x2 - g.x1;
+  const dy = g.y2 - g.y1;
+  const len = Math.hypot(dx, dy);
+  const angle = Math.atan2(dy, dx);
+  const beamH = 88;
+
+  // Pointer proximity shear
+  const midX = (g.x1 + g.x2) * 0.5;
+  const midY = (g.y1 + g.y2) * 0.5;
+  const distM = Math.hypot(mx - midX, my - midY);
+  const shear = Math.max(0, 1 - distM / 320) * (vx * 0.35) + Math.sin(t * 5 + idx) * shock * 12;
+
+  ctx.save();
+  ctx.translate(g.x1, g.y1);
+  ctx.rotate(angle);
+  ctx.transform(1, 0, shear * 0.015, 1, 0, 0);
+
+  // Brutalist hard shadow
+  ctx.fillStyle = '#16181A';
+  ctx.fillRect(8, 8, len, beamH);
+
+  // Main girder body
+  ctx.fillStyle = g.bg;
+  ctx.fillRect(0, 0, len, beamH);
+  ctx.strokeStyle = '#16181A';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(0, 0, len, beamH);
+
+  // Top rail stripe
+  ctx.fillStyle = g.accent;
+  ctx.fillRect(0, 0, len, 6);
+
+  // Headline on beam
+  ctx.font = '900 30px "Barlow Semi Condensed", sans-serif';
+  ctx.fillStyle = g.fg;
+  ctx.fillText(g.headline, 18, 36);
+
+  // Exact portfolio copy along the beam
+  ctx.font = '500 13.5px "IBM Plex Sans", sans-serif';
+  ctx.fillStyle = g.fg;
+  ctx.fillText(g.copy, 18, 64);
+
+  ctx.restore();
+}
+
+const tStart = performance.now();
+
+function animate(now) {
+  const t = (now - tStart) * 0.001;
+  vx = (mx - prevMx) * 0.6 + vx * 0.4;
+  vy = (my - prevMy) * 0.6 + vy * 0.4;
+  prevMx = mx; prevMy = my;
+  shock *= 0.93;
+
+  const st = STATIONS[activeKey];
+
+  // 1. Slit-Scan Deformable Background Typography
+  drawSlitScanMonument(st.bgWord, st.bgNum, t);
+
+  // Top Kicker Stamp + Unrounded Kage Telemetry Pillars on the right
+  ctx.save();
+  ctx.fillStyle = '#16181A';
+  ctx.fillRect(28, 62, 740, 28);
+  ctx.font = '700 11px "IBM Plex Mono", monospace';
+  ctx.fillStyle = '#E3B341';
+  ctx.fillText(st.kicker, 40, 80);
+
+  // Handwritten instruction note
+  ctx.font = '400 19px "Patrick Hand", cursive';
+  ctx.fillStyle = '#B84A39';
+  ctx.fillText('↳ Physical typography installation: task tokens bounce down the copy girders through Kage’s review gates', 32, 114);
+  ctx.restore();
+
+  // 2. Draw the 3 angled Typographic Girder Ramps
+  st.girders.forEach((g, idx) => drawTypographicGirder(g, idx, t));
+
+  // 3. Update & render rigid-body tokens colliding with the angled Typographic Girders
+  tokens.forEach(tk => {
+    tk.vy += 0.24;
+    tk.x += tk.vx;
+    tk.y += tk.vy;
+    tk.rot += tk.vrot;
+    tk.impactGlow *= 0.9;
+
+    // Cursor magnetic kick
+    const dPointer = Math.hypot(tk.x - mx, tk.y - my);
+    if (dPointer < 105 && dPointer > 1) {
+      tk.vx += ((tk.x - mx) / dPointer) * 2.2;
+      tk.vy += ((tk.y - my) / dPointer) * 2.2;
+    }
+
+    // Collide with each angled typographic girder
+    st.girders.forEach((g, gIdx) => {
+      const minX = Math.min(g.x1, g.x2) - 20;
+      const maxX = Math.max(g.x1, g.x2) + 20;
+      if (tk.x >= minX && tk.x <= maxX) {
+        const u = (tk.x - g.x1) / (g.x2 - g.x1);
+        const surfY = g.y1 + u * (g.y2 - g.y1);
+        if (tk.y + tk.h * 0.5 >= surfY - 4 && tk.y - tk.h * 0.5 <= surfY + 26 && tk.vy > 0) {
+          tk.y = surfY - tk.h * 0.5 - 4;
+          const slope = (g.y2 - g.y1) / (g.x2 - g.x1);
+          if (gIdx === 1 && tk.needsFix) {
+            // Second girder acts as the 2nd-Model Line-Cited Review Gate — kicks failing diffs back up!
+            tk.vy = -8.8;
+            tk.vx = -3.5;
+            tk.needsFix = false;
+            tk.label = 'LINE CITE FIXED ✓';
+            tk.col = '#E3B341';
+            tk.fg = '#16181A';
+          } else {
+            tk.vy = -tk.vy * 0.54;
+            tk.vx += slope * 4.2;
+          }
+          tk.impactGlow = 1.0;
+          tk.vrot = slope * 0.05;
+        }
+      }
+    });
+
+    // Screen walls & recycle
+    if (tk.x < 70) { tk.x = 70; tk.vx = Math.abs(tk.vx) * 0.8; }
+    if (tk.x > W - 70) { tk.x = W - 70; tk.vx = -Math.abs(tk.vx) * 0.8; }
+    if (tk.y > H - 65) {
+      tk.y = 65;
+      tk.x = 140 + Math.random() * (W - 280);
+      tk.vy = 1.2;
+      tk.vx = (Math.random() - 0.5) * 3.5;
+    }
+
+    ctx.save();
+    ctx.translate(tk.x, tk.y);
+    ctx.rotate(Math.max(-0.4, Math.min(0.4, tk.rot)));
+
+    // Brutalist offset shadow
+    ctx.fillStyle = '#16181A';
+    ctx.fillRect(-tk.w * 0.5 + 4, -tk.h * 0.5 + 4, tk.w, tk.h);
+
+    ctx.fillStyle = tk.impactGlow > 0.2 ? '#E3B341' : tk.col;
+    ctx.fillRect(-tk.w * 0.5, -tk.h * 0.5, tk.w, tk.h);
+    ctx.strokeStyle = '#16181A';
+    ctx.lineWidth = 2.2;
+    ctx.strokeRect(-tk.w * 0.5, -tk.h * 0.5, tk.w, tk.h);
+
+    ctx.font = '700 11px "IBM Plex Mono", monospace';
+    ctx.fillStyle = tk.impactGlow > 0.2 ? '#16181A' : tk.fg;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(tk.label, 0, 1);
+    ctx.restore();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

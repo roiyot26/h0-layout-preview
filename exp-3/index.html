@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EXP-03 // THE LIVING TABLE — Interactive 3D X-Ray CAD &amp; Spatial Slice (/now)</title>
+<style>
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Bold.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Black.ttf') format('truetype');
+    font-weight: 900;
+  }
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('../fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 900;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Patrick Hand';
+    src: url('../fonts/PatrickHand-Regular.ttf') format('truetype');
+    font-weight: 400;
+  }
+
+  :root {
+    --obsidian: #16181A;
+    --bone: #F2EEE4;
+    --oxide: #1F3A5F;
+    --signal: #E3B341;
+    --rust: #B84A39;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #132338;
+    color: var(--bone);
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: crosshair;
+  }
+
+  #gl-blueprint, #cad-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+  #gl-blueprint { z-index: 1; }
+  #cad-canvas { z-index: 2; }
+
+  /* Architectural Blueprint Frame & Controls */
+  .cad-header {
+    position: fixed;
+    top: 18px;
+    left: 24px;
+    right: 24px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .cad-title-block {
+    pointer-events: auto;
+    border-left: 3px solid var(--signal);
+    padding-left: 14px;
+  }
+  .cad-kicker {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--signal);
+    text-transform: uppercase;
+  }
+  .cad-main-title {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 0.06em;
+    color: var(--bone);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .cad-selector {
+    pointer-events: auto;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .cad-btn {
+    background: rgba(22, 24, 26, 0.72);
+    border: 1px solid rgba(242, 238, 228, 0.32);
+    color: var(--bone);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    padding: 8px 14px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+  }
+  .cad-btn:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+  .cad-btn.active {
+    background: var(--signal);
+    color: var(--obsidian);
+    border-color: var(--bone);
+    font-weight: 700;
+    box-shadow: 0 0 22px rgba(227, 179, 65, 0.45);
+  }
+
+  .cad-footer {
+    position: fixed;
+    bottom: 18px;
+    left: 24px;
+    right: 24px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+  }
+
+  .slice-controls {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(22, 24, 26, 0.84);
+    border: 1px solid var(--signal);
+    padding: 10px 16px;
+  }
+
+  .slice-slider {
+    accent-color: var(--signal);
+    width: 170px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gl-blueprint"></canvas>
+<canvas id="cad-canvas"></canvas>
+
+<header class="cad-header">
+  <div class="cad-title-block">
+    <div class="cad-kicker">EXP-03 // HOLOGRAPHIC TOPOGRAPHIC CAD SHADER &amp; 3D MRI SLICE PLANE</div>
+    <div class="cad-main-title">ROI YOTVAT — 1:87 H0 LIVING BLUEPRINT TABLE (4.8m × 1.5m)</div>
+  </div>
+  <nav class="cad-selector" aria-label="3D Architectural Targets">
+    <button class="cad-btn active" data-focus="city">03 NOW · THE CITY</button>
+    <button class="cad-btn" data-focus="kage">KAGE SIGNAL BOX (MCP)</button>
+    <button class="cad-btn" data-focus="workshop">04 THE WORKSHOP</button>
+    <button class="cad-btn" data-focus="campus">02 CAMPUS (2022–26)</button>
+    <button class="cad-btn" data-focus="bootcamp">01 BOOTCAMP (2021)</button>
+  </nav>
+</header>
+
+<footer class="cad-footer">
+  <div class="slice-controls">
+    <span style="color:#E3B341; font-weight:700;">X-RAY MRI SLICE PLANE:</span>
+    <input type="range" min="-260" max="260" value="25" class="slice-slider" id="xray-slider" />
+    <span id="xray-readout" style="color:#F2EEE4;">X-CUT: +025mm [ACTIVE]</span>
+  </div>
+  <div style="text-align:right; color:rgba(242,238,228,0.75); line-height:1.5;">
+    MOVE POINTER TO SWEEP X-RAY CROSS-SECTION PLANE · DRAG TO ORBIT 3D TABLE<br/>
+    <span style="color:#E3B341;">UNROUNDED KAGE LEDGER: 410 PRs · 16 REPOS · 2,183 COMMITS · 443 VAULT NOTES</span>
+  </div>
+</footer>
+
+<script>
+// ============================================================================
+// 1. WEBGL TOPOGRAPHIC BLUEPRINT SHADER BACKDROP
+// ============================================================================
+const glCanvas = document.getElementById('gl-blueprint');
+const gl = glCanvas.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: true });
+let uTime, uRes, uSlice;
+
+if (gl) {
+  const vs = `attribute vec2 p; void main(){ gl_Position=vec4(p,0.,1.); }`;
+  const fs = `
+    precision highp float;
+    uniform vec2 u_res;
+    uniform float u_time;
+    uniform float u_slice;
+
+    const vec3 OXIDE    = vec3(0.105, 0.205, 0.345); // Deep blueprint oxide
+    const vec3 OBSIDIAN = vec3(0.075, 0.090, 0.115);
+    const vec3 BONE     = vec3(0.949, 0.933, 0.894);
+    const vec3 SIGNAL   = vec3(0.890, 0.702, 0.255);
+    const vec3 RUST     = vec3(0.722, 0.290, 0.224);
+
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    }
+    float noise(vec2 p) {
+      vec2 i = floor(p), f = fract(p);
+      vec2 u = f*f*(3.0-2.0*f);
+      return mix(mix(hash(i), hash(i+vec2(1,0)), u.x),
+                 mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), u.x), u.y);
+    }
+
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
+
+      // Architectural millimeter grid
+      vec2 grid1 = abs(fract(uv * 18.0) - 0.5);
+      vec2 grid2 = abs(fract(uv * 3.6) - 0.5);
+      float gFine = smoothstep(0.47, 0.5, max(grid1.x, grid1.y));
+      float gMaj  = smoothstep(0.485, 0.5, max(grid2.x, grid2.y));
+
+      // Topographic elevation isolines
+      float elev = noise(uv * 2.8 + vec2(u_time * 0.03, 0.0)) * 0.65
+                 + noise(uv * 6.2 - vec2(0.0, u_time * 0.02)) * 0.35;
+      float contour = smoothstep(0.91, 0.985, abs(sin(elev * 26.0)));
+
+      vec3 col = mix(OXIDE, OBSIDIAN, smoothstep(0.15, 0.95, length(uv)));
+      col += BONE * gFine * 0.045;
+      col += BONE * gMaj * 0.11;
+      col += SIGNAL * contour * 0.12;
+
+      // X-ray slice glow band across blueprint
+      float sliceNorm = u_slice / 260.0 * 0.45;
+      float sliceDist = abs(uv.x - sliceNorm);
+      col += RUST * exp(-sliceDist * 16.0) * 0.32;
+      col += SIGNAL * smoothstep(0.004, 0.0, sliceDist) * 0.55;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+  function sh(t, s){ const x=gl.createShader(t); gl.shaderSource(x,s); gl.compileShader(x); return x; }
+  const pr = gl.createProgram();
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs));
+  gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(pr);
+  gl.useProgram(pr);
+
+  const b = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, b);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(pr, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  uTime  = gl.getUniformLocation(pr, 'u_time');
+  uRes   = gl.getUniformLocation(pr, 'u_res');
+  uSlice = gl.getUniformLocation(pr, 'u_slice');
+}
+
+// ============================================================================
+// 2. 3D ARCHITECTURAL X-RAY TABLE & 60FPS SPATIAL CALLOUT ENGINE
+// ============================================================================
+const cadCanvas = document.getElementById('cad-canvas');
+const ctx = cadCanvas.getContext('2d');
+
+let W = window.innerWidth;
+let H = window.innerHeight;
+let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  glCanvas.width = W * dpr;
+  glCanvas.height = H * dpr;
+  if (gl) gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+  cadCanvas.width = W * dpr;
+  cadCanvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// 3D Table Rotation & MRI Slice State
+let yaw = -0.32;
+let targetYaw = -0.32;
+let pitch = 0.58;
+let targetPitch = 0.58;
+let sliceX = 25; // mm in model space [-260..+260]
+let targetSliceX = 25;
+let activeFocus = 'city';
+
+const sliderEl = document.getElementById('xray-slider');
+const readoutEl = document.getElementById('xray-readout');
+
+sliderEl.addEventListener('input', (e) => {
+  targetSliceX = Number(e.target.value);
+});
+
+// 5 Architectural Structures on the 1:87 H0 Table with exact copy & interior X-ray cores
+const STRUCTURES = {
+  city: {
+    id: 'city',
+    code: 'FIG 03 // STATION 03: THE CITY (FRONT STRAIGHT)',
+    title: 'NOW · THE CITY',
+    dates: 'Jan 2026 – now · Full-stack developer at Moveo Creative',
+    pos: { x: 40, y: 0, z: 115 },
+    size: { w: 120, h: 62, d: 52 },
+    yawTarget: -0.28,
+    sliceTarget: 40,
+    accent: '#E3B341',
+    cardSide: 'left',
+    summary: "I'm the lead developer on full-stack projects for enterprise clients. These are custom WordPress sites (PHP, Gutenberg, ACF) and React/Next.js sites, built end to end, from requirements through implementation and testing to deployment.",
+    detail: "I talk to clients and their vendors directly: gathering requirements, coordinating integrations and chasing issues until they're closed.",
+    xrayInterior: 'X-RAY CORE // TEAM AI WORKFLOW: Every project carries its own rules file → machine checks run first → human dev reads data, accounts & mid-build decisions.',
+    specs: [
+      'STACK: Custom WordPress (PHP, Gutenberg, ACF) + React / Next.js / TypeScript',
+      'ROLE: End-to-end enterprise lead · Client & vendor API integration',
+      'TEAM AI: Project rules file + automated checks + developer sign-off'
+    ]
+  },
+  kage: {
+    id: 'kage',
+    code: 'FIG 03-B // SIGNAL BOX INTERLOCKING: KAGE SECOND BRAIN',
+    title: 'KAGE · SECOND BRAIN',
+    dates: 'Running since 1 May 2026 (Before that: 53 PRs, Jan–Apr 2026, for one client)',
+    pos: { x: 155, y: 0, z: 75 },
+    size: { w: 68, h: 78, d: 48 },
+    yawTarget: -0.52,
+    sliceTarget: 155,
+    accent: '#B84A39',
+    cardSide: 'right',
+    summary: "“I'm Kage, an AI assistant. I remember Roi's projects and do the engineering legwork (research, code, review, drafts), so his part is making the decisions.”",
+    detail: "1-line task → Orchestrator queries hybrid search over 443 vault notes (re-indexed on every commit over MCP) → Worker agents get self-contained spec → 2nd-model review gate quotes exact failing lines → Roi's go → PR.",
+    xrayInterior: 'X-RAY CORE // SAFETY HOOKS: Blocks force-pushes, protected-branch pushes, and anything reaching production without Roi’s explicit go.',
+    specs: [
+      '410 PRs opened from GitHub account since 1 May 2026 across 16 repos',
+      '2,183 commits to Kage’s own repo · 443 notes in the MCP vault',
+      'Each session starts from the last written handoff; nothing explained twice'
+    ]
+  },
+  workshop: {
+    id: 'workshop',
+    code: 'FIG 04 // STATION 04: THE WORKSHOP (INNER SPUR)',
+    title: '04 · THE WORKSHOP',
+    dates: 'Anytime · Side projects built in my own time to learn properly',
+    pos: { x: -45, y: 0, z: 10 },
+    size: { w: 105, h: 48, d: 56 },
+    yawTarget: 0.18,
+    sliceTarget: -45,
+    accent: '#E3B341',
+    cardSide: 'left',
+    summary: 'Four active workbenches on the inner spur: Virtual Garden (WXT Manifest V3 Chrome extension), chord-cycle-open (MediaPipe webcam hand tracking + Web Audio), Doodle Reborn (Next.js, React 19, Three.js R3F, Neon), and Blender Corner.',
+    detail: 'I model in Blender — this entire 1:87 H0 railway layout started there.',
+    xrayInterior: 'X-RAY CORE // 4 WORKBENCHES: Virtual Garden (zen/cosmic/ocean/pixel) · chord-cycle-open · Doodle Reborn 3D desk · Blender H0 modeling.',
+    specs: [
+      'Virtual Garden: WXT Manifest V3 · TypeScript · Vitest CI on every PR',
+      'chord-cycle-open: Webcam MediaPipe hand tracking + Web Audio synth',
+      'Doodle Reborn: Pass-and-play or async 2-player 3D paper-plane game'
+    ]
+  },
+  campus: {
+    id: 'campus',
+    code: 'FIG 02 // STATION 02: TEACHING CAMPUS (BACK STRAIGHT)',
+    title: '2022–26 · CAMPUS',
+    dates: 'Feb 2022 – Jan 2026 · Full-stack developer & coding instructor at Mister Bit',
+    pos: { x: 25, y: 0, z: -115 },
+    size: { w: 118, h: 56, d: 48 },
+    yawTarget: 0.45,
+    sliceTarget: 25,
+    accent: '#E3B341',
+    cardSide: 'right',
+    summary: 'I taught full-stack courses at Coding Academy to cycles of 60–70 students: JavaScript, React, Node.js, Express and MongoDB. Alongside teaching, I also worked on company projects.',
+    detail: "“Teaching is where I learned to read other people's code quickly and explain what's wrong with it without making anyone feel stupid.”",
+    xrayInterior: 'X-RAY CORE // PEDAGOGY & PRODUCTION: 4 years at Mister Bit · 60–70 students per cycle · fast code diagnostics.',
+    specs: [
+      'CURRICULUM: JavaScript (ES6+), React, Node.js, Express, MongoDB',
+      'SCALE: Cycles of 60–70 students + production company projects',
+      'SUPERPOWER: Rapid code comprehension & clear, ego-free feedback'
+    ]
+  },
+  bootcamp: {
+    id: 'bootcamp',
+    code: 'FIG 01 // STATION 01: BOOTCAMP TOWN (WEST LOOP)',
+    title: '2021 · BOOTCAMP',
+    dates: 'Nov 2021 – Feb 2022 · Full-stack developer bootcamp at Coding Academy',
+    pos: { x: -165, y: 0, z: -45 },
+    size: { w: 86, h: 44, d: 44 },
+    yawTarget: 0.72,
+    sliceTarget: -165,
+    accent: '#B84A39',
+    cardSide: 'left',
+    summary: 'Four months, intensive. Most of it was self-led learning, plus team projects run the way real dev teams run them.',
+    detail: 'I came out with the front end (HTML, CSS, JavaScript, React) and the back end (Node.js, Express, MongoDB).',
+    xrayInterior: 'X-RAY CORE // ORIGIN POINT: Intensive self-led engineering sprints & team git workflows.',
+    specs: [
+      'FRONTEND: HTML5, CSS3, JavaScript, React single-page apps',
+      'BACKEND: Node.js, Express REST APIs, MongoDB databases',
+      'FORMAT: 4 months intensive · Real agile team sprints'
+    ]
+  }
+};
+
+// Focus selector buttons
+document.querySelectorAll('.cad-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cad-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const key = btn.getAttribute('data-focus');
+    activeFocus = key;
+    const st = STRUCTURES[key];
+    targetYaw = st.yawTarget;
+    targetSliceX = st.sliceTarget;
+    sliderEl.value = String(st.sliceTarget);
+  });
+});
+
+// Pointer interaction: move sweeps X-ray slice slightly, drag orbits 3D table
+let dragging = false;
+let lastX = 0, lastY = 0;
+
+window.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('header, footer, button, input')) return;
+  dragging = true;
+  lastX = e.clientX;
+  lastY = e.clientY;
+});
+
+window.addEventListener('pointermove', (e) => {
+  if (dragging) {
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    targetYaw += dx * 0.0065;
+    targetPitch = Math.max(0.28, Math.min(0.95, targetPitch + dy * 0.005));
+  } else if (!e.target.closest('header, footer, button, input')) {
+    // Subtle interactive X-ray sweep with pointer X
+    const normX = (e.clientX / W - 0.5) * 360;
+    targetSliceX = normX;
+    sliderEl.value = String(Math.round(normX));
+  }
+});
+
+window.addEventListener('pointerup', () => { dragging = false; });
+
+// 3D -> 2D Isometric/Perspective Table Projection
+function projectTable3D(x, y, z) {
+  const cy = Math.cos(yaw), sy = Math.sin(yaw);
+  const cp = Math.cos(pitch), sp = Math.sin(pitch);
+
+  // Rotate around Y (yaw)
+  const rx = x * cy - z * sy;
+  const rz = x * sy + z * cy;
+
+  // Rotate around X (pitch), where y is vertical height above table (negative y is up)
+  const ry = y * cp - rz * sp;
+  const depth = y * sp + rz * cp + 680;
+
+  const fov = 960;
+  const scale = fov / Math.max(120, depth);
+  return {
+    x: W * 0.50 + rx * scale,
+    y: H * 0.55 + ry * scale,
+    scale,
+    depth,
+    worldX: x
+  };
+}
+
+// Draw 3D wireframe box with X-Ray Cross-Section Slice Highlight!
+function drawArchitecturalStructure(st, t, isFocused) {
+  const { x, y, z } = st.pos;
+  const hw = st.size.w * 0.5;
+  const hd = st.size.d * 0.5;
+  const h = st.size.h;
+  const roofH = h + 22;
+
+  // Check if X-ray slice plane intersects this building!
+  const isSliced = sliceX >= (x - hw - 15) && sliceX <= (x + hw + 15);
+
+  // 8 corners of building base + walls (note: y goes UP as negative in screen coords)
+  const corners = [
+    projectTable3D(x - hw, 0,  z - hd),
+    projectTable3D(x + hw, 0,  z - hd),
+    projectTable3D(x + hw, 0,  z + hd),
+    projectTable3D(x - hw, 0,  z + hd),
+    projectTable3D(x - hw, -h, z - hd),
+    projectTable3D(x + hw, -h, z - hd),
+    projectTable3D(x + hw, -h, z + hd),
+    projectTable3D(x - hw, -h, z + hd),
+    projectTable3D(x - hw * 0.85, -roofH, z),
+    projectTable3D(x + hw * 0.85, -roofH, z)
+  ];
+
+  ctx.save();
+
+  // Base footprint glow
+  ctx.fillStyle = isFocused
+    ? 'rgba(227, 179, 65, 0.18)'
+    : (isSliced ? 'rgba(184, 74, 57, 0.18)' : 'rgba(242, 238, 228, 0.05)');
+  ctx.beginPath();
+  ctx.moveTo(corners[0].x, corners[0].y);
+  ctx.lineTo(corners[1].x, corners[1].y);
+  ctx.lineTo(corners[2].x, corners[2].y);
+  ctx.lineTo(corners[3].x, corners[3].y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Outer CAD wireframe edges
+  ctx.strokeStyle = isFocused ? '#E3B341' : 'rgba(242, 238, 228, 0.72)';
+  ctx.lineWidth = isFocused ? 2.0 : 1.15;
+
+  const edges = [
+    [0,1],[1,2],[2,3],[3,0], // base
+    [4,5],[5,6],[6,7],[7,4], // eaves
+    [0,4],[1,5],[2,6],[3,7], // columns
+    [4,8],[7,8],[5,9],[6,9],[8,9] // pitched roof ridge
+  ];
+  ctx.beginPath();
+  edges.forEach(([a, b]) => {
+    ctx.moveTo(corners[a].x, corners[a].y);
+    ctx.lineTo(corners[b].x, corners[b].y);
+  });
+  ctx.stroke();
+
+  // If X-Ray Slice Plane cuts through or building is focused, draw glowing internal MRI ribs & neural core!
+  if (isSliced || isFocused) {
+    const cutX = Math.max(x - hw, Math.min(x + hw, sliceX));
+    const s0 = projectTable3D(cutX, 0, z - hd);
+    const s1 = projectTable3D(cutX, 0, z + hd);
+    const s2 = projectTable3D(cutX, -h, z + hd);
+    const s3 = projectTable3D(cutX, -roofH, z);
+    const s4 = projectTable3D(cutX, -h, z - hd);
+
+    ctx.fillStyle = 'rgba(184, 74, 57, 0.34)';
+    ctx.strokeStyle = '#E3B341';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(s0.x, s0.y);
+    ctx.lineTo(s1.x, s1.y);
+    ctx.lineTo(s2.x, s2.y);
+    ctx.lineTo(s3.x, s3.y);
+    ctx.lineTo(s4.x, s4.y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Glowing internal Kage / Station core node
+    const corePt = projectTable3D(x, -h * 0.55, z);
+    ctx.fillStyle = '#E3B341';
+    ctx.beginPath();
+    ctx.arc(corePt.x, corePt.y, 4.5 + Math.sin(t * 5) * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Rooftop anchor pin for 3D leader line
+  const roofAnchor = projectTable3D(x, -roofH - 8, z);
+  ctx.fillStyle = isFocused ? '#E3B341' : '#F2EEE4';
+  ctx.beginPath();
+  ctx.arc(roofAnchor.x, roofAnchor.y, isFocused ? 5 : 3.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Compact floating 3D label above non-focused buildings
+  if (!isFocused) {
+    ctx.font = '700 10.5px "IBM Plex Mono", monospace';
+    ctx.fillStyle = '#F2EEE4';
+    ctx.fillText(st.title, roofAnchor.x + 8, roofAnchor.y - 6);
+  }
+
+  ctx.restore();
+  return roofAnchor;
+}
+
+// Helper: wrapped text inside spatial blueprint plate
+function wrapText(text, x, y, maxW, lh, font, col) {
+  ctx.font = font;
+  ctx.fillStyle = col;
+  const words = text.split(' ');
+  let line = '';
+  let cy = y;
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxW && i > 0) {
+      ctx.fillText(line, x, cy);
+      line = words[i] + ' ';
+      cy += lh;
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line, x, cy);
+  return cy + lh;
+}
+
+// ============================================================================
+// MAIN 60FPS RENDER LOOP
+// ============================================================================
+const t0 = performance.now();
+
+function animate(now) {
+  const t = (now - t0) * 0.001;
+
+  yaw += (targetYaw - yaw) * 0.08;
+  pitch += (targetPitch - pitch) * 0.08;
+  sliceX += (targetSliceX - sliceX) * 0.12;
+
+  const signStr = sliceX >= 0 ? '+' + String(Math.round(sliceX)).padStart(3, '0') : String(Math.round(sliceX)).padStart(4, '0');
+  readoutEl.textContent = `X-CUT: ${signStr}mm [MRI ACTIVE]`;
+
+  // 1. WebGL Topographic Blueprint Shader
+  if (gl) {
+    gl.uniform1f(uTime, t);
+    gl.uniform2f(uRes, glCanvas.width, glCanvas.height);
+    gl.uniform1f(uSlice, sliceX);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+
+  // 2. 3D CAD Table, Oval H0 Track, X-Ray Slice Plane & Tethered Callout Plates
+  ctx.clearRect(0, 0, W, H);
+
+  // Draw 3D H0 Baseboard Benchwork (480 × 280 model units)
+  const bw = 250, bd = 155;
+  const boardCorners = [
+    projectTable3D(-bw, 0, -bd),
+    projectTable3D( bw, 0, -bd),
+    projectTable3D( bw, 0,  bd),
+    projectTable3D(-bw, 0,  bd),
+    projectTable3D(-bw, 18, -bd),
+    projectTable3D( bw, 18, -bd),
+    projectTable3D( bw, 18,  bd),
+    projectTable3D(-bw, 18,  bd)
+  ];
+
+  ctx.strokeStyle = 'rgba(242, 238, 228, 0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  [
+    [0,1],[1,2],[2,3],[3,0],
+    [4,5],[5,6],[6,7],[7,4],
+    [0,4],[1,5],[2,6],[3,7]
+  ].forEach(([a, b]) => {
+    ctx.moveTo(boardCorners[a].x, boardCorners[a].y);
+    ctx.lineTo(boardCorners[b].x, boardCorners[b].y);
+  });
+  ctx.stroke();
+
+  // Draw 3D Topographic Mesh Lines across the table surface
+  ctx.strokeStyle = 'rgba(242, 238, 228, 0.13)';
+  ctx.lineWidth = 1;
+  for (let gx = -220; gx <= 220; gx += 40) {
+    ctx.beginPath();
+    for (let gz = -140; gz <= 140; gz += 20) {
+      const elevY = -Math.sin(gx * 0.02 + gz * 0.025) * 6;
+      const pt = projectTable3D(gx, elevY, gz);
+      if (gz === -140) ctx.moveTo(pt.x, pt.y);
+      else ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+  }
+
+  // Draw the 1:87 H0 Oval Track Loop + Sleepers in 3D
+  const trackSegs = 96;
+  ctx.strokeStyle = '#E3B341';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  for (let i = 0; i <= trackSegs; i++) {
+    const ang = (i / trackSegs) * Math.PI * 2;
+    const tx = Math.cos(ang) * 205;
+    const tz = Math.sin(ang) * 118;
+    const pt = projectTable3D(tx, -1, tz);
+    if (i === 0) ctx.moveTo(pt.x, pt.y);
+    else ctx.lineTo(pt.x, pt.y);
+  }
+  ctx.stroke();
+
+  // Draw moving 3D H0 Locomotive + 2 Coaches along the oval loop
+  const trainAngle = t * 0.55;
+  for (let c = 0; c < 3; c++) {
+    const a = trainAngle - c * 0.14;
+    const tx = Math.cos(a) * 205;
+    const tz = Math.sin(a) * 118;
+    const pBot = projectTable3D(tx, -2, tz);
+    const pTop = projectTable3D(tx, -14, tz);
+
+    ctx.fillStyle = c === 0 ? '#E3B341' : '#F2EEE4';
+    ctx.beginPath();
+    ctx.arc(pTop.x, pTop.y, c === 0 ? 5.5 : 4.0, 0, Math.PI * 2);
+    ctx.fill();
+    if (c === 0) {
+      ctx.font = '700 9.5px "IBM Plex Mono", monospace';
+      ctx.fillStyle = '#E3B341';
+      ctx.fillText('H0 LOCO // ON TIME', pTop.x + 9, pTop.y - 4);
+    }
+  }
+
+  // Draw 3D Kage MCP Neural Signal Arcs from Kage Signal Box to all stations
+  const kagePos = STRUCTURES.kage.pos;
+  Object.values(STRUCTURES).forEach((st, idx) => {
+    if (st.id === 'kage') return;
+    ctx.strokeStyle = 'rgba(227, 179, 65, 0.42)';
+    ctx.lineWidth = 1.3;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    for (let s = 0; s <= 20; s++) {
+      const u = s / 20;
+      const ax = kagePos.x + (st.pos.x - kagePos.x) * u;
+      const az = kagePos.z + (st.pos.z - kagePos.z) * u;
+      const ay = -35 - Math.sin(u * Math.PI) * 75;
+      const pt = projectTable3D(ax, ay, az);
+      if (s === 0) ctx.moveTo(pt.x, pt.y);
+      else ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Moving MCP pulse along the 3D arc
+    const uPulse = (t * 0.65 + idx * 0.25) % 1;
+    const px = kagePos.x + (st.pos.x - kagePos.x) * uPulse;
+    const pz = kagePos.z + (st.pos.z - kagePos.z) * uPulse;
+    const py = -35 - Math.sin(uPulse * Math.PI) * 75;
+    const ppt = projectTable3D(px, py, pz);
+    ctx.fillStyle = '#E3B341';
+    ctx.beginPath();
+    ctx.arc(ppt.x, ppt.y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Draw the glowing 3D MRI / X-Ray Cross-Section Plane slicing across the table
+  const sliceCorners = [
+    projectTable3D(sliceX,  18, -bd - 15),
+    projectTable3D(sliceX,  18,  bd + 15),
+    projectTable3D(sliceX, -125, bd + 15),
+    projectTable3D(sliceX, -125, -bd - 15)
+  ];
+  ctx.fillStyle = 'rgba(184, 74, 57, 0.14)';
+  ctx.strokeStyle = '#B84A39';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(sliceCorners[0].x, sliceCorners[0].y);
+  ctx.lineTo(sliceCorners[1].x, sliceCorners[1].y);
+  ctx.lineTo(sliceCorners[2].x, sliceCorners[2].y);
+  ctx.lineTo(sliceCorners[3].x, sliceCorners[3].y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Draw all 5 3D Architectural Structures and record their projected anchors
+  const anchors = {};
+  Object.values(STRUCTURES).forEach(st => {
+    anchors[st.id] = drawArchitecturalStructure(st, t, st.id === activeFocus);
+  });
+
+  // ==========================================================================
+  // 3. TETHERED 3D SPATIAL BLUEPRINT PLATES (LEFT: FOCUSED STATION, RIGHT: KAGE)
+  // ==========================================================================
+  const mainSt = STRUCTURES[activeFocus];
+  const mainAnchor = anchors[activeFocus];
+
+  // Left Primary Architectural Callout Plate tethered to active 3D structure
+  const leftPlateX = 26;
+  const leftPlateY = 92;
+  const leftPlateW = 435;
+  const leftPlateH = 490;
+
+  // Dynamic 60fps leader line from 3D building rooftop to the blueprint spec plate!
+  ctx.strokeStyle = '#E3B341';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(mainAnchor.x, mainAnchor.y);
+  ctx.lineTo(leftPlateX + leftPlateW + 28, mainAnchor.y);
+  ctx.lineTo(leftPlateX + leftPlateW, leftPlateY + 42);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(18, 28, 44, 0.88)';
+  ctx.fillRect(leftPlateX, leftPlateY, leftPlateW, leftPlateH);
+  ctx.strokeStyle = '#F2EEE4';
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(leftPlateX, leftPlateY, leftPlateW, leftPlateH);
+
+  // Corner CAD registration ticks
+  ctx.fillStyle = '#E3B341';
+  ctx.fillRect(leftPlateX, leftPlateY, 8, 48);
+
+  ctx.font = '700 10.5px "IBM Plex Mono", monospace';
+  ctx.fillStyle = '#E3B341';
+  ctx.fillText(mainSt.code, leftPlateX + 20, leftPlateY + 26);
+
+  ctx.font = '900 54px "Barlow Semi Condensed", sans-serif';
+  ctx.fillStyle = '#F2EEE4';
+  ctx.fillText(mainSt.title, leftPlateX + 18, leftPlateY + 78);
+
+  ctx.font = '700 11px "IBM Plex Mono", monospace';
+  ctx.fillStyle = '#E3B341';
+  ctx.fillText(mainSt.dates.toUpperCase(), leftPlateX + 20, leftPlateY + 100);
+
+  let cy = wrapText(
+    mainSt.summary,
+    leftPlateX + 20,
+    leftPlateY + 128,
+    leftPlateW - 40,
+    20,
+    '500 13.5px "IBM Plex Sans", sans-serif',
+    '#F2EEE4'
+  );
+
+  cy = wrapText(
+    mainSt.detail,
+    leftPlateX + 20,
+    cy + 6,
+    leftPlateW - 40,
+    19,
+    '400 12.8px "IBM Plex Sans", sans-serif',
+    'rgba(242, 238, 228, 0.84)'
+  );
+
+  // X-Ray Cross-Section Callout Box inside Left Plate
+  cy += 8;
+  ctx.fillStyle = 'rgba(184, 74, 57, 0.28)';
+  ctx.fillRect(leftPlateX + 18, cy, leftPlateW - 36, 74);
+  ctx.strokeStyle = '#B84A39';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(leftPlateX + 18, cy, leftPlateW - 36, 74);
+
+  wrapText(
+    mainSt.xrayInterior,
+    leftPlateX + 28,
+    cy + 20,
+    leftPlateW - 56,
+    17,
+    '700 11px "IBM Plex Mono", monospace',
+    '#F2EEE4'
+  );
+
+  cy += 94;
+  mainSt.specs.forEach((sp) => {
+    ctx.fillStyle = '#E3B341';
+    ctx.font = '700 11px "IBM Plex Mono", monospace';
+    ctx.fillText('▸ ' + sp, leftPlateX + 20, cy);
+    cy += 22;
+  });
+
+  // Right Spatial Callout Plate: Always-live Kage Second Brain & Unrounded Ledger tethered to Signal Box
+  const rightPlateW = 415;
+  const rightPlateH = 490;
+  const rightPlateX = W - rightPlateW - 26;
+  const rightPlateY = 92;
+  const kageAnchor = anchors.kage;
+
+  ctx.strokeStyle = '#B84A39';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(kageAnchor.x, kageAnchor.y);
+  ctx.lineTo(rightPlateX - 24, kageAnchor.y);
+  ctx.lineTo(rightPlateX, rightPlateY + 55);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(22, 24, 26, 0.90)';
+  ctx.fillRect(rightPlateX, rightPlateY, rightPlateW, rightPlateH);
+  ctx.strokeStyle = '#E3B341';
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(rightPlateX, rightPlateY, rightPlateW, rightPlateH);
+
+  ctx.font = '700 10.5px "IBM Plex Mono", monospace';
+  ctx.fillStyle = '#E3B341';
+  ctx.fillText('SIGNAL BOX TELEMETRY // KAGE SECOND BRAIN (MCP)', rightPlateX + 18, rightPlateY + 26);
+
+  ctx.font = '900 34px "Barlow Semi Condensed", sans-serif';
+  ctx.fillStyle = '#F2EEE4';
+  ctx.fillText('KAGE, MY SECOND BRAIN', rightPlateX + 18, rightPlateY + 62);
+
+  let ky = wrapText(
+    "“I'm Kage, an AI assistant. I remember Roi's projects and do the engineering legwork (research, code, review, drafts), so his part is making the decisions.”",
+    rightPlateX + 18,
+    rightPlateY + 86,
+    rightPlateW - 36,
+    18,
+    '400 15.5px "Patrick Hand", cursive',
+    '#E3B341'
+  );
+
+  // 4 Unrounded Sculptural Numbers Grid
+  const nums = [
+    { v: '410', l: 'PRs opened from my GitHub account since 1 May 2026' },
+    { v: '16', l: 'repos those PRs went to' },
+    { v: '2,183', l: "commits to Kage's own repo" },
+    { v: '443', l: 'notes in the vault (served over MCP)' }
+  ];
+
+  const cardW = (rightPlateW - 44) / 2;
+  const cardH = 78;
+  nums.forEach((n, idx) => {
+    const col = idx % 2;
+    const row = Math.floor(idx / 2);
+    const nx = rightPlateX + 18 + col * (cardW + 8);
+    const ny = ky + 6 + row * (cardH + 8);
+
+    ctx.fillStyle = 'rgba(31, 58, 95, 0.45)';
+    ctx.fillRect(nx, ny, cardW, cardH);
+    ctx.strokeStyle = 'rgba(242, 238, 228, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(nx, ny, cardW, cardH);
+
+    ctx.font = '900 34px "Barlow Semi Condensed", sans-serif';
+    ctx.fillStyle = '#E3B341';
+    ctx.fillText(n.v, nx + 10, ny + 34);
+
+    wrapText(n.l, nx + 10, ny + 50, cardW - 16, 13, '400 10px "IBM Plex Mono", monospace', '#F2EEE4');
+  });
+
+  let ry = ky + 186;
+  ctx.font = '700 10.5px "IBM Plex Mono", monospace';
+  ctx.fillStyle = '#B84A39';
+  ctx.fillText('KAGE · HOW A TASK MOVES & WHAT MATTERS:', rightPlateX + 18, ry);
+
+  const rules = [
+    "1. Each session starts from the last one's written handoff, so nothing gets explained twice.",
+    "2. Every code change goes past a reviewer that has to quote the exact line it objects to.",
+    "3. Safety hooks block force-pushes, protected-branch pushes, and anything reaching prod without Roi's go.",
+    "4. Running since 1 May 2026. Before that: 53 PRs, Jan–Apr 2026, for one client."
+  ];
+  ry += 18;
+  rules.forEach(r => {
+    ry = wrapText(r, rightPlateX + 18, ry, rightPlateW - 36, 15.5, '400 11.5px "IBM Plex Sans", sans-serif', 'rgba(242, 238, 228, 0.88)');
+    ry += 4;
+  });
+
+  requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EXP-01 // THE NEURAL YARD — Roi Yotvat (/now)</title>
+<style>
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Bold.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Barlow Semi Condensed';
+    src: url('../fonts/BarlowSemiCondensed-Black.ttf') format('truetype');
+    font-weight: 900;
+  }
+  @font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('../fonts/IBMPlexSans-VariableFont_wdth,wght.ttf') format('truetype');
+    font-weight: 100 900;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+  }
+  @font-face {
+    font-family: 'IBM Plex Mono';
+    src: url('../fonts/IBMPlexMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+  }
+  @font-face {
+    font-family: 'Patrick Hand';
+    src: url('../fonts/PatrickHand-Regular.ttf') format('truetype');
+    font-weight: 400;
+  }
+
+  :root {
+    --obsidian: #16181A;
+    --bone: #F2EEE4;
+    --oxide: #1F3A5F;
+    --signal: #E3B341;
+    --rust: #B84A39;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--obsidian);
+    color: var(--bone);
+    font-family: 'IBM Plex Sans', sans-serif;
+    cursor: crosshair;
+  }
+
+  #gl-canvas, #scene-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+  #gl-canvas { z-index: 1; }
+  #scene-canvas { z-index: 2; pointer-events: none; }
+
+  /* Spatial 3D floating anchor layer (no boxes/cards, pure holographic projection planes) */
+  #spatial-stage {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    perspective: 1100px;
+    transform-style: preserve-3d;
+  }
+
+  /* Minimalist experimental HUD - raw telemetry lines on the glass */
+  .hud-top {
+    position: fixed;
+    top: 22px;
+    left: 28px;
+    right: 28px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .hud-brand {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hud-kicker {
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    color: var(--signal);
+    text-transform: uppercase;
+  }
+  .hud-title {
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bone);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hud-title span.pip {
+    width: 8px;
+    height: 8px;
+    background: var(--signal);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--signal);
+    animation: pulse 1.6s infinite alternate;
+  }
+
+  @keyframes pulse {
+    from { opacity: 0.4; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1.25); }
+  }
+
+  .hud-stations {
+    pointer-events: auto;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .station-trigger {
+    background: rgba(22, 24, 26, 0.55);
+    border: none;
+    border-bottom: 2px solid rgba(242, 238, 228, 0.22);
+    color: rgba(242, 238, 228, 0.65);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    padding: 8px 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(4px);
+  }
+  .station-trigger:hover {
+    color: var(--bone);
+    border-bottom-color: var(--signal);
+    transform: translateY(-2px);
+  }
+  .station-trigger.active {
+    color: var(--obsidian);
+    background: var(--signal);
+    border-bottom-color: var(--bone);
+    font-weight: 700;
+    box-shadow: 0 0 24px rgba(227, 179, 65, 0.45);
+  }
+
+  .hud-bottom {
+    position: fixed;
+    bottom: 22px;
+    left: 28px;
+    right: 28px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .telemetry-readout {
+    display: flex;
+    gap: 28px;
+    align-items: flex-end;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: rgba(242, 238, 228, 0.72);
+  }
+  .telemetry-readout .val {
+    display: block;
+    font-family: 'Barlow Semi Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+    color: var(--signal);
+    line-height: 1;
+    margin-top: 3px;
+  }
+
+  .action-cluster {
+    pointer-events: auto;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .pulse-btn {
+    background: transparent;
+    border: 1.5px solid var(--signal);
+    color: var(--signal);
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 12px 20px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 25px rgba(227, 179, 65, 0.18), inset 0 0 18px rgba(227, 179, 65, 0.12);
+  }
+  .pulse-btn:hover {
+    background: var(--signal);
+    color: var(--obsidian);
+    box-shadow: 0 0 38px rgba(227, 179, 65, 0.65);
+  }
+
+  .hint-pill {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: rgba(242, 238, 228, 0.55);
+    text-transform: uppercase;
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* Left rail Z-depth spine indicator */
+  .z-spine {
+    position: fixed;
+    left: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    pointer-events: auto;
+  }
+  .z-node {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(242, 238, 228, 0.42);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .z-node::before {
+    content: '';
+    width: 16px;
+    height: 1.5px;
+    background: rgba(242, 238, 228, 0.28);
+    transition: all 0.25s ease;
+  }
+  .z-node.active {
+    color: var(--signal);
+    font-weight: 700;
+  }
+  .z-node.active::before {
+    width: 34px;
+    height: 2px;
+    background: var(--signal);
+    box-shadow: 0 0 10px var(--signal);
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gl-canvas"></canvas>
+<canvas id="scene-canvas"></canvas>
+
+<header class="hud-top">
+  <div class="hud-brand">
+    <div class="hud-kicker">EXP-01 // GLSL VOLUMETRIC SIGNAL FIELD &amp; 3D SPLINE FLIGHT</div>
+    <div class="hud-title">
+      <span class="pip"></span>
+      ROI YOTVAT — H0 NEURAL YARD (1:87)
+    </div>
+  </div>
+  <nav class="hud-stations" aria-label="3D Spline Waypoints">
+    <button class="station-trigger active" data-stop="0">03 NOW · THE CITY</button>
+    <button class="station-trigger" data-stop="1">TEAM AGENTS</button>
+    <button class="station-trigger" data-stop="2">KAGE SECOND BRAIN</button>
+    <button class="station-trigger" data-stop="3">410 · 16 · 2,183 · 443</button>
+    <button class="station-trigger" data-stop="4">04 THE WORKSHOP</button>
+    <button class="station-trigger" data-stop="5">02 CAMPUS &amp; 01 BOOTCAMP</button>
+  </nav>
+</header>
+
+<aside class="z-spine" id="z-spine">
+  <div class="z-node active" data-stop="0">Z:0000 // NOW · CITY</div>
+  <div class="z-node" data-stop="1">Z:1000 // TEAM WORKFLOW</div>
+  <div class="z-node" data-stop="2">Z:2000 // KAGE MCP BRAIN</div>
+  <div class="z-node" data-stop="3">Z:3000 // UNROUNDED LEDGER</div>
+  <div class="z-node" data-stop="4">Z:4000 // THE WORKSHOP</div>
+  <div class="z-node" data-stop="5">Z:5000 // CAMPUS + BOOTCAMP</div>
+</aside>
+
+<footer class="hud-bottom">
+  <div class="telemetry-readout">
+    <div>
+      SPLINE Z-POS
+      <span class="val" id="tel-z">0004 m</span>
+    </div>
+    <div>
+      KAGE VAULT NODES
+      <span class="val" id="tel-notes">443</span>
+    </div>
+    <div>
+      MERGED PR PACKETS
+      <span class="val" id="tel-prs">410</span>
+    </div>
+    <div>
+      SIGNAL STATUS
+      <span class="val" id="tel-status" style="color:#F2EEE4;">ON TIME // LOCKED</span>
+    </div>
+  </div>
+
+  <div class="action-cluster">
+    <div class="hint-pill">
+      SCROLL / DRAG TO FLY ALONG H0 SPLINE<br/>
+      MOVE POINTER TO BEND ELECTROMAGNETIC FIELD
+    </div>
+    <button class="pulse-btn" id="fire-pulse-btn">[SPACE] FIRE 1-LINE TASK PULSE ⚡</button>
+  </div>
+</footer>
+
+<script>
+// ============================================================================
+// 1. WEBGL GLSL SHADER BACKDROP — VOLUMETRIC ELECTROMAGNETIC H0 FIELD
+// ============================================================================
+const glCanvas = document.getElementById('gl-canvas');
+const gl = glCanvas.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: true });
+
+let glProgram = null;
+let uTime, uRes, uCamZ, uMouse, uPulse;
+
+if (gl) {
+  const vsSource = `
+    attribute vec2 a_pos;
+    void main() {
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    uniform vec2 u_res;
+    uniform float u_time;
+    uniform float u_camZ;
+    uniform vec2 u_mouse;
+    uniform float u_pulse;
+
+    // Palette in linear-ish normalized RGB
+    const vec3 COL_OBSIDIAN = vec3(0.086, 0.094, 0.102); // #16181A
+    const vec3 COL_BONE     = vec3(0.949, 0.933, 0.894); // #F2EEE4
+    const vec3 COL_OXIDE    = vec3(0.122, 0.227, 0.373); // #1F3A5F
+    const vec3 COL_SIGNAL   = vec3(0.890, 0.702, 0.255); // #E3B341
+    const vec3 COL_RUST     = vec3(0.722, 0.290, 0.224); // #B84A39
+
+    float hash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    }
+
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(
+        mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+        mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+        u.y
+      );
+    }
+
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - 0.5 * u_res) / min(u_res.x, u_res.y);
+      vec2 m = (u_mouse - 0.5 * u_res) / min(u_res.x, u_res.y);
+
+      // Subtle barrel distortion + magnetic cursor warp
+      float dMouse = length(uv - m);
+      vec2 warp = (uv - m) * exp(-dMouse * 3.5) * (0.12 + 0.18 * u_pulse);
+      vec2 p = uv - warp;
+
+      // Tunnel / horizon projection
+      float zFlow = u_camZ * 0.0045 + u_time * 0.35;
+      float radius = length(p);
+      float angle = atan(p.y, p.x);
+
+      // Electromagnetic topographic isolines
+      float n1 = noise(p * 3.8 + vec2(0.0, zFlow * 0.4));
+      float n2 = noise(p * 8.2 - vec2(zFlow * 0.2, u_time * 0.15));
+      float field = sin((radius * 14.0 - zFlow * 2.4) + n1 * 4.2 + n2 * 2.0);
+      float isoLine = smoothstep(0.92, 0.99, abs(field));
+
+      // Perspective ground grid & catenary flux lines
+      float yAbs = abs(p.y - 0.06) + 0.035;
+      float perspZ = 1.0 / yAbs + zFlow * 4.0;
+      float perspX = (p.x - 0.18 * sin(perspZ * 0.08)) / yAbs;
+
+      float railGridX = smoothstep(0.94, 0.995, abs(sin(perspX * 2.2)));
+      float railGridZ = smoothstep(0.95, 0.995, abs(sin(perspZ * 1.4)));
+      float horizonMask = smoothstep(0.02, 0.45, abs(p.y - 0.06));
+
+      vec3 col = COL_OBSIDIAN;
+
+      // Deep oxide atmospheric nebula
+      col += COL_OXIDE * (0.35 + 0.35 * sin(angle * 2.0 + u_time * 0.2)) * exp(-radius * 1.15);
+      col += COL_OXIDE * 0.42 * (railGridX + railGridZ * 0.5) * horizonMask;
+
+      // Signal yellow isolines + pulse shockwave
+      float pulseRing = exp(-abs(radius - fract(u_time * 0.45) * 1.35) * 18.0) * u_pulse;
+      col += COL_SIGNAL * isoLine * 0.22;
+      col += COL_SIGNAL * pulseRing * 0.95;
+
+      // Terracotta harmonic core near vanishing point
+      float coreGlow = exp(-length(p - vec2(0.08 * sin(u_time * 0.4), 0.06)) * 4.2);
+      col += mix(COL_RUST, COL_SIGNAL, 0.5 + 0.5 * sin(u_camZ * 0.002)) * coreGlow * (0.32 + 0.4 * u_pulse);
+
+      // Subtle CRT scanline & film grain
+      float scan = 0.96 + 0.04 * sin(gl_FragCoord.y * 1.6);
+      float gr = (hash(gl_FragCoord.xy + fract(u_time) * 100.0) - 0.5) * 0.035;
+      col = col * scan + gr;
+
+      // Vignette
+      col *= smoothstep(1.45, 0.25, radius);
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function compileShader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, vsSource));
+  gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, fsSource));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  glProgram = prog;
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  uTime  = gl.getUniformLocation(prog, 'u_time');
+  uRes   = gl.getUniformLocation(prog, 'u_res');
+  uCamZ  = gl.getUniformLocation(prog, 'u_camZ');
+  uMouse = gl.getUniformLocation(prog, 'u_mouse');
+  uPulse = gl.getUniformLocation(prog, 'u_pulse');
+}
+
+// ============================================================================
+// 2. 3D SPATIAL SPLINE & MONUMENTAL KINETIC ARCHITECTURE ENGINE
+// ============================================================================
+const sceneCanvas = document.getElementById('scene-canvas');
+const ctx = sceneCanvas.getContext('2d');
+
+let W = window.innerWidth;
+let H = window.innerHeight;
+let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  glCanvas.width = W * dpr;
+  glCanvas.height = H * dpr;
+  if (gl) gl.viewport(0, 0, glCanvas.width, glCanvas.height);
+  sceneCanvas.width = W * dpr;
+  sceneCanvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Camera state along the 6000-unit closed H0 loop
+const LOOP_LENGTH = 6000;
+let camZ = 0;
+let targetCamZ = 0;
+let camVel = 0;
+let mouseX = W * 0.55;
+let mouseY = H * 0.45;
+let smoothMX = mouseX;
+let smoothMY = mouseY;
+let pulseEnergy = 0.65; // Start with an active visual pulse so initial frame is electric
+
+// 6 Spatial Station Monoliths along the 3D rail spline
+const STOPS = [
+  {
+    z: 0,
+    code: 'STATION 03 // PLATFORM 3 // H0 FRONT STRAIGHT',
+    title: 'NOW · THE CITY',
+    sub: 'JAN 2026 – NOW · FULL-STACK DEVELOPER AT MOVEO CREATIVE',
+    accent: '#E3B341',
+    secAccent: '#1F3A5F',
+    heroNumber: '03',
+    lead: "I'm the lead developer on full-stack projects for enterprise clients.",
+    body: [
+      'Custom WordPress sites (PHP, Gutenberg, ACF) and React / Next.js sites, built end to end — from requirements through implementation and testing to deployment.',
+      "I talk to clients and their vendors directly: gathering requirements, coordinating integrations and chasing issues until they're closed."
+    ],
+    nodes: [
+      { tag: 'STACK // 01', label: 'React · Next.js · TypeScript · Node', col: '#E3B341' },
+      { tag: 'STACK // 02', label: 'Custom WordPress · PHP · Gutenberg · ACF', col: '#F2EEE4' },
+      { tag: 'OWNERSHIP', label: 'Requirements → Architecture → QA → Prod', col: '#E3B341' },
+      { tag: 'DIRECT CLIENT LEAD', label: 'Vendor APIs · Integrations · Issue Closure', col: '#B84A39' }
+    ],
+    handNote: 'Moveo Creative · Tel Aviv · Enterprise Full-Stack Lead'
+  },
+  {
+    z: 1000,
+    code: 'CITY TRAM DEPOT // TEAM AI WORKFLOW',
+    title: 'CODING AGENTS IN THE TEAM',
+    sub: 'RAISING TEAM OUTPUT WITHOUT LOWERING ENGINEERING QUALITY',
+    accent: '#B84A39',
+    secAccent: '#E3B341',
+    heroNumber: 'AI',
+    lead: "I brought AI coding agents, and custom tooling around them, into the team's workflow to raise output without lowering quality.",
+    body: [
+      "The team's setup is simpler than Kage. Every project carries its own rules file for the agent.",
+      "Machine checks run first on every change, and a developer reads what's left: whether it does what was asked, anything touching data or accounts, and any decisions made mid-build."
+    ],
+    nodes: [
+      { tag: 'GATE 01 // CONTEXT', label: 'Per-Project Agent Rules File', col: '#E3B341' },
+      { tag: 'GATE 02 // AUTOMATION', label: 'Machine Checks Run First on Every Diff', col: '#F2EEE4' },
+      { tag: 'GATE 03 // HUMAN REVIEW', label: 'Dev Reads Data, Accounts & Mid-Build Decisions', col: '#B84A39' },
+      { tag: 'RESULT', label: 'Higher Velocity · Zero Unreviewed Releases', col: '#E3B341' }
+    ],
+    handNote: 'Every project carries its own rules file → machine checks → human sign-off'
+  },
+  {
+    z: 2000,
+    code: 'SIGNAL BOX INTERLOCKING // KAGE SECOND BRAIN',
+    title: 'KAGE · SECOND BRAIN',
+    sub: 'ORCHESTRATOR + HYBRID RAG OVER MCP + 2ND-MODEL LINE-CITED REVIEW GATE',
+    accent: '#E3B341',
+    secAccent: '#B84A39',
+    heroNumber: 'MCP',
+    lead: "“I'm Kage, an AI assistant. I remember Roi's projects and do the engineering legwork (research, code, review, drafts), so his part is making the decisions.”",
+    body: [
+      "1. Each session starts from the last one's written handoff, so nothing gets explained twice.",
+      "2. Every code change goes past a reviewer that has to quote the exact line it objects to.",
+      "3. Safety hooks block force-pushes, pushes to protected branches, and anything reaching production without Roi's go for that one change."
+    ],
+    nodes: [
+      { tag: '01 → 02', label: '1-Line Task → Orchestrator Queries Hybrid Search', col: '#E3B341' },
+      { tag: '03 MCP VAULT', label: '443 Notes Re-Indexed on Every Commit via MCP', col: '#F2EEE4' },
+      { tag: '04 → 05 GATE', label: 'Worker Spec → 2nd Model Quotes Failing Lines', col: '#B84A39' },
+      { tag: '06 → 08 MERGE', label: "Roi's Go → PR Opened → Decisions Written Back", col: '#E3B341' }
+    ],
+    handNote: 'Press [SPACE] to fire a 1-line task through Kage’s 8-step rail interlocking'
+  },
+  {
+    z: 3000,
+    code: 'VERIFIED TELEMETRY // UNROUNDED RECORDS SINCE 1 MAY 2026',
+    title: '410 · 16 · 2,183 · 443',
+    sub: 'NEVER ROUNDED · NEVER TURNED INTO A PERCENTAGE · BEFORE MAY 2026: 53 PRS FOR ONE CLIENT',
+    accent: '#E3B341',
+    secAccent: '#1F3A5F',
+    heroNumber: '410',
+    lead: 'Kage’s own records since 1 May 2026 (plus 53 PRs Jan–Apr 2026 for one client):',
+    body: [
+      '410 PRs opened from my GitHub account since 1 May 2026 across 16 target repositories.',
+      "2,183 commits to Kage's own repository · 443 living engineering notes indexed in the vault."
+    ],
+    nodes: [
+      { tag: '410 PRs', label: 'Opened from GitHub account since 1 May 2026', col: '#E3B341' },
+      { tag: '16 REPOS', label: 'Repositories those 410 pull requests went to', col: '#F2EEE4' },
+      { tag: '2,183 COMMITS', label: "Commits to Kage's own orchestration repo", col: '#E3B341' },
+      { tag: '443 NOTES', label: 'Notes in the vault served over MCP hybrid search', col: '#B84A39' }
+    ],
+    handNote: 'Unrounded raw ledger — verified on every build'
+  },
+  {
+    z: 4000,
+    code: 'STATION 04 // PLATFORM 4 // THE WORKSHOP (ANYTIME)',
+    title: 'THE WORKSHOP',
+    sub: 'THINGS I BUILD IN MY OWN TIME, MOSTLY TO LEARN SOMETHING PROPERLY',
+    accent: '#B84A39',
+    secAccent: '#E3B341',
+    heroNumber: '04',
+    lead: 'Four active workbenches on the layout — from Web Audio + MediaPipe hand tracking to 3D React Three Fiber & Blender:',
+    body: [
+      '• Virtual Garden — WXT (Manifest V3), TypeScript & Vitest Chrome extension with 4 worlds (zen, cosmic, ocean, pixel).',
+      '• chord-cycle-open — Browser chord wheel played via pointer, touch or webcam MediaPipe hand tracking + Web Audio.',
+      '• Doodle Reborn — 2-player turn-based draw-and-guess game across a 3D desk (Next.js, React 19, R3F, Neon Postgres).'
+    ],
+    nodes: [
+      { tag: 'BENCH 01', label: 'Virtual Garden · WXT Manifest V3 · Vitest CI', col: '#E3B341' },
+      { tag: 'BENCH 02', label: 'chord-cycle-open · MediaPipe Hand Tracking + WebAudio', col: '#F2EEE4' },
+      { tag: 'BENCH 03', label: 'Doodle Reborn · Next.js · React 19 · Three.js R3F', col: '#B84A39' },
+      { tag: 'BENCH 04', label: 'Blender Corner · I model in Blender; layout started here', col: '#E3B341' }
+    ],
+    handNote: 'Every side project ships with automated tests, CI & live interactive demos'
+  },
+  {
+    z: 5000,
+    code: 'STATIONS 02 & 01 // TEACHING CAMPUS (2022–26) & BOOTCAMP (2021)',
+    title: 'CAMPUS & BOOTCAMP',
+    sub: 'FEB 2022 – JAN 2026 AT MISTER BIT · NOV 2021 – FEB 2022 AT CODING ACADEMY',
+    accent: '#E3B341',
+    secAccent: '#1F3A5F',
+    heroNumber: '02·01',
+    lead: "“Teaching is where I learned to read other people's code quickly and explain what's wrong with it without making anyone feel stupid.”",
+    body: [
+      '2022–26 Campus (Mister Bit): Taught full-stack courses at Coding Academy to cycles of 60–70 students (JS, React, Node.js, Express, MongoDB) alongside company projects.',
+      '2021 Bootcamp (Coding Academy): Four months, intensive self-led learning + real team projects across HTML, CSS, JS, React, Node.js, Express & MongoDB.'
+    ],
+    nodes: [
+      { tag: '02 CAMPUS // 4 YRS', label: 'Mister Bit · Full-Stack Dev & Instructor (2022–26)', col: '#E3B341' },
+      { tag: '60–70 STUDENTS', label: 'Per cycle across JS, React, Node, Express, MongoDB', col: '#F2EEE4' },
+      { tag: 'CODE REVIEW CRAFT', label: 'Spot root causes fast · Explain clearly without ego', col: '#B84A39' },
+      { tag: '01 BOOTCAMP // 2021', label: 'Coding Academy · 4-Month Intensive Full-Stack Origin', col: '#E3B341' }
+    ],
+    handNote: 'Loops back at Z:6000 → Z:0000 (Now · The City) on the continuous H0 oval'
+  }
+];
+
+// Create 260 live signal packets racing along the 3D tracks
+const packets = Array.from({ length: 260 }, (_, i) => ({
+  z: Math.random() * LOOP_LENGTH,
+  speed: 6 + Math.random() * 18,
+  lane: (i % 5) - 2, // -2, -1, 0, 1, 2
+  color: i % 4 === 0 ? '#B84A39' : (i % 2 === 0 ? '#E3B341' : '#F2EEE4'),
+  size: 1.5 + Math.random() * 3.0,
+  label: i % 19 === 0 ? ['PR#410', 'MCP:443', 'COMMIT:2183', 'REPO:16', 'REVIEW:OK', 'SPEC:SYNC'][i % 6] : null
+}));
+
+// Curving 3D spline function
+function splineOffset(worldZ, t) {
+  const u = worldZ * 0.0018;
+  const bendX = Math.sin(u) * 190 + Math.cos(u * 0.5 + t * 0.2) * 55;
+  const bendY = Math.cos(u * 0.8) * 38 + Math.sin(u * 1.4) * 18;
+  return { x: bendX, y: bendY };
+}
+
+// Project 3D point relative to camera
+function project3D(worldX, worldY, relZ, t) {
+  const fov = 560;
+  const safeZ = Math.max(relZ, 12);
+  const scale = fov / safeZ;
+  const curve = splineOffset(camZ + relZ, t);
+  const camCurve = splineOffset(camZ, t);
+
+  // Cursor gravity bends the spline in 3D space
+  const mxNorm = (smoothMX - W * 0.5) / (W * 0.5);
+  const myNorm = (smoothMY - H * 0.5) / (H * 0.5);
+  const cursorPullX = mxNorm * (relZ * 0.14);
+  const cursorPullY = myNorm * (relZ * 0.09);
+
+  const sx = W * 0.52 + (worldX + (curve.x - camCurve.x) + cursorPullX) * scale;
+  const sy = H * 0.54 + (worldY + (curve.y - camCurve.y) + cursorPullY) * scale;
+  return { x: sx, y: sy, scale };
+}
+
+// Wrap distance on the loop
+function loopDelta(z, refZ) {
+  let d = (z - refZ) % LOOP_LENGTH;
+  if (d < -LOOP_LENGTH * 0.5) d += LOOP_LENGTH;
+  if (d > LOOP_LENGTH * 0.5) d -= LOOP_LENGTH;
+  return d;
+}
+
+// Sync active HUD buttons
+function updateHUDActiveStop() {
+  const normZ = ((camZ % LOOP_LENGTH) + LOOP_LENGTH) % LOOP_LENGTH;
+  let nearestIdx = 0;
+  let bestDist = 1e9;
+  STOPS.forEach((s, idx) => {
+    const d = Math.abs(loopDelta(s.z, normZ));
+    if (d < bestDist) {
+      bestDist = d;
+      nearestIdx = idx;
+    }
+  });
+
+  document.querySelectorAll('.station-trigger').forEach((btn, idx) => {
+    btn.classList.toggle('active', idx === nearestIdx);
+  });
+  document.querySelectorAll('.z-node').forEach((node, idx) => {
+    node.classList.toggle('active', idx === nearestIdx);
+  });
+  document.getElementById('tel-z').textContent = String(Math.round(normZ)).padStart(4, '0') + ' m';
+}
+
+// Station jump handlers
+document.querySelectorAll('[data-stop]').forEach(el => {
+  el.addEventListener('click', () => {
+    const idx = Number(el.getAttribute('data-stop'));
+    const destZ = STOPS[idx].z;
+    const delta = loopDelta(destZ, camZ);
+    targetCamZ = camZ + delta;
+    pulseEnergy = 1.0;
+  });
+});
+
+// Fire 1-line task pulse
+function triggerTaskPulse() {
+  pulseEnergy = 1.35;
+  const statusEl = document.getElementById('tel-status');
+  statusEl.textContent = 'TASK PULSE → MCP → GATE PASS';
+  statusEl.style.color = '#E3B341';
+  packets.forEach(p => { p.speed = 26 + Math.random() * 24; });
+  setTimeout(() => {
+    statusEl.textContent = 'ON TIME // LOCKED';
+    statusEl.style.color = '#F2EEE4';
+  }, 1800);
+}
+document.getElementById('fire-pulse-btn').addEventListener('click', triggerTaskPulse);
+
+// Wheel, drag & keyboard flight controls
+window.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  targetCamZ += e.deltaY * 1.15;
+}, { passive: false });
+
+let dragging = false;
+let lastY = 0;
+window.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('button, .z-node')) return;
+  dragging = true;
+  lastY = e.clientY;
+  pulseEnergy = Math.max(pulseEnergy, 0.75);
+});
+window.addEventListener('pointermove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  if (dragging) {
+    const dy = lastY - e.clientY;
+    lastY = e.clientY;
+    targetCamZ += dy * 3.5;
+  }
+});
+window.addEventListener('pointerup', () => { dragging = false; });
+
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    triggerTaskPulse();
+  } else if (e.code === 'ArrowDown' || e.code === 'ArrowRight') {
+    targetCamZ += 250;
+  } else if (e.code === 'ArrowUp' || e.code === 'ArrowLeft') {
+    targetCamZ -= 250;
+  }
+});
+
+// Helper: draw glowing architectural leader line + floating holographic plate
+function renderSpatialGate(stop, relZ, t) {
+  // Fade in smoothly as it approaches from deep Z (2400 -> 120)
+  const alpha = relZ < 110
+    ? Math.max(0, (relZ - 35) / 75)
+    : Math.max(0, Math.min(1, (2200 - relZ) / 1100));
+  if (alpha <= 0.01) return;
+
+  const pCenter = project3D(0, 0, relZ, t);
+  const s = pCenter.scale;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  // 1. Draw the monumental 3D Signal Gantry Frame straddling the tracks
+  const gateW = 540 * s;
+  const gateH = 320 * s;
+  const gx = pCenter.x;
+  const gy = pCenter.y - 30 * s;
+
+  ctx.strokeStyle = stop.accent;
+  ctx.lineWidth = Math.max(1, 2.2 * s);
+  ctx.beginPath();
+  // Left & Right structural pylons
+  ctx.moveTo(gx - gateW * 0.5, gy + gateH * 0.48);
+  ctx.lineTo(gx - gateW * 0.5, gy - gateH * 0.52);
+  ctx.lineTo(gx + gateW * 0.5, gy - gateH * 0.52);
+  ctx.lineTo(gx + gateW * 0.5, gy + gateH * 0.48);
+  ctx.stroke();
+
+  // Cross-bracing & signal corner ticks
+  ctx.strokeStyle = 'rgba(242, 238, 228, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(gx - gateW * 0.5, gy - gateH * 0.36);
+  ctx.lineTo(gx + gateW * 0.5, gy - gateH * 0.36);
+  ctx.stroke();
+
+  // Giant background sculptural watermark numeral in 3D space
+  ctx.font = `900 ${Math.round(230 * s)}px "Barlow Semi Condensed", sans-serif`;
+  ctx.fillStyle = 'rgba(227, 179, 65, 0.09)';
+  ctx.textAlign = 'right';
+  ctx.fillText(stop.heroNumber, gx + gateW * 0.48, gy + gateH * 0.28);
+
+  // Only render full kinetic typography & interactive nodes when within reading range
+  if (relZ < 1450 && relZ > 60) {
+    const leftX = gx - gateW * 0.46;
+    const topY = gy - gateH * 0.48;
+
+    // Station Code Kicker
+    ctx.textAlign = 'left';
+    ctx.font = `700 ${Math.max(9, Math.round(11.5 * s))}px "IBM Plex Mono", monospace`;
+    ctx.fillStyle = stop.accent;
+    ctx.fillText(stop.code, leftX, topY - 12 * s);
+
+    // Monumental Kinetic Display Title with chromatic offset on velocity
+    const velShift = Math.min(12, Math.abs(camVel) * 0.35);
+    const titleSize = Math.max(22, Math.round(76 * s));
+    ctx.font = `900 ${titleSize}px "Barlow Semi Condensed", sans-serif`;
+
+    if (velShift > 0.6) {
+      ctx.fillStyle = 'rgba(184, 74, 57, 0.70)';
+      ctx.fillText(stop.title, leftX - velShift, topY + 56 * s);
+      ctx.fillStyle = 'rgba(31, 58, 95, 0.75)';
+      ctx.fillText(stop.title, leftX + velShift, topY + 56 * s);
+    }
+    ctx.fillStyle = '#F2EEE4';
+    ctx.fillText(stop.title, leftX, topY + 56 * s);
+
+    // Subtitle bar
+    ctx.font = `700 ${Math.max(8, Math.round(11.5 * s))}px "IBM Plex Mono", monospace`;
+    ctx.fillStyle = '#E3B341';
+    ctx.fillText(stop.sub, leftX, topY + 78 * s);
+
+    // Editorial Lead & Body suspended in the left spatial plane (backdrop blur plate for contrast)
+    const plateY = topY + 94 * s;
+    const plateW = 310 * s;
+    const plateH = 158 * s;
+
+    ctx.fillStyle = 'rgba(22, 24, 26, 0.82)';
+    ctx.fillRect(leftX - 10 * s, plateY, plateW, plateH);
+    ctx.strokeStyle = stop.accent;
+    ctx.lineWidth = Math.max(1.5, 2.5 * s);
+    ctx.beginPath();
+    ctx.moveTo(leftX - 10 * s, plateY);
+    ctx.lineTo(leftX - 10 * s, plateY + plateH);
+    ctx.stroke();
+
+    // Wrap text helper
+    function drawWrapped(text, x, y, maxWidth, lineHeight, font, color) {
+      ctx.font = font;
+      ctx.fillStyle = color;
+      const words = text.split(' ');
+      let line = '';
+      let cy = y;
+      for (let i = 0; i < words.length; i++) {
+        const test = line + words[i] + ' ';
+        if (ctx.measureText(test).width > maxWidth && i > 0) {
+          ctx.fillText(line, x, cy);
+          line = words[i] + ' ';
+          cy += lineHeight;
+        } else {
+          line = test;
+        }
+      }
+      ctx.fillText(line, x, cy);
+      return cy + lineHeight;
+    }
+
+    let curY = drawWrapped(
+      stop.lead,
+      leftX + 4 * s,
+      plateY + 22 * s,
+      plateW - 24 * s,
+      17 * s,
+      `600 ${Math.max(10, Math.round(13.5 * s))}px "IBM Plex Sans", sans-serif`,
+      '#F2EEE4'
+    );
+
+    curY += 4 * s;
+    stop.body.forEach(par => {
+      curY = drawWrapped(
+        par,
+        leftX + 4 * s,
+        curY,
+        plateW - 24 * s,
+        15 * s,
+        `400 ${Math.max(9, Math.round(11.5 * s))}px "IBM Plex Sans", sans-serif`,
+        'rgba(242, 238, 228, 0.84)'
+      );
+      curY += 5 * s;
+    });
+
+    // Handwritten Patrick Hand annotation along the bottom girder
+    ctx.font = `400 ${Math.max(11, Math.round(16 * s))}px "Patrick Hand", cursive`;
+    ctx.fillStyle = '#E3B341';
+    ctx.fillText('↳ ' + stop.handNote, leftX, plateY + plateH + 22 * s);
+
+    // Right-side 3D Orbital Telemetry Nodes connected by glowing leader wires to the rails
+    const rightX = gx + 48 * s;
+    stop.nodes.forEach((nd, idx) => {
+      const ny = plateY + idx * 41 * s + Math.sin(t * 2.2 + idx) * 3 * s;
+      const nw = 205 * s;
+      const nh = 33 * s;
+
+      // Leader wire down to the 3D track bed
+      ctx.strokeStyle = 'rgba(227, 179, 65, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rightX, ny + nh * 0.5);
+      ctx.lineTo(gx + 10 * s, gy + gateH * 0.42);
+      ctx.stroke();
+
+      // Node plate
+      ctx.fillStyle = 'rgba(31, 58, 95, 0.42)';
+      ctx.fillRect(rightX, ny, nw, nh);
+      ctx.strokeStyle = nd.col;
+      ctx.lineWidth = Math.max(1, 1.8 * s);
+      ctx.strokeRect(rightX, ny, nw, nh);
+
+      ctx.font = `700 ${Math.max(7, Math.round(9.5 * s))}px "IBM Plex Mono", monospace`;
+      ctx.fillStyle = nd.col;
+      ctx.fillText(nd.tag, rightX + 8 * s, ny + 12 * s);
+
+      ctx.font = `600 ${Math.max(8, Math.round(11 * s))}px "IBM Plex Sans", sans-serif`;
+      ctx.fillStyle = '#F2EEE4';
+      ctx.fillText(nd.label, rightX + 8 * s, ny + 26 * s);
+    });
+  }
+
+  ctx.restore();
+}
+
+// ============================================================================
+// 3. MAIN 60FPS RENDER LOOP
+// ============================================================================
+const startTime = performance.now();
+
+function animate(now) {
+  const t = (now - startTime) * 0.001;
+
+  // Smooth spring physics on camera Z and pointer
+  const prevCamZ = camZ;
+  camZ += (targetCamZ - camZ) * 0.09;
+  camVel = camZ - prevCamZ;
+  smoothMX += (mouseX - smoothMX) * 0.12;
+  smoothMY += (mouseY - smoothMY) * 0.12;
+  pulseEnergy = Math.max(0.18, pulseEnergy * 0.975);
+
+  updateHUDActiveStop();
+
+  // 1. Render WebGL GLSL Fragment Shader
+  if (gl && glProgram) {
+    gl.uniform1f(uTime, t);
+    gl.uniform2f(uRes, glCanvas.width, glCanvas.height);
+    gl.uniform1f(uCamZ, camZ);
+    gl.uniform2f(uMouse, smoothMX * dpr, (H - smoothMY) * dpr);
+    gl.uniform1f(uPulse, pulseEnergy);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
+
+  // 2. Render 3D Track Spline, Sleepers, Packets & Monumental Gates
+  ctx.clearRect(0, 0, W, H);
+
+  // Draw 3D H0 Twin Rails & Wooden Sleepers receding into the horizon
+  const stepZ = 36;
+  const maxDrawZ = 2200;
+  const firstSleeperZ = Math.floor(camZ / stepZ) * stepZ;
+
+  for (let wz = firstSleeperZ + maxDrawZ; wz > camZ + 24; wz -= stepZ) {
+    const relZ = wz - camZ;
+    const alpha = Math.max(0, Math.min(0.75, (maxDrawZ - relZ) / maxDrawZ));
+    const pL = project3D(-115, 130, relZ, t);
+    const pR = project3D(115, 130, relZ, t);
+    const pRailL = project3D(-72, 128, relZ, t);
+    const pRailR = project3D(72, 128, relZ, t);
+    const pNextL = project3D(-72, 128, relZ + stepZ, t);
+    const pNextR = project3D(72, 128, relZ + stepZ, t);
+
+    // Sleeper tie
+    ctx.strokeStyle = `rgba(242, 238, 228, ${alpha * 0.25})`;
+    ctx.lineWidth = Math.max(1, 3.2 * pL.scale);
+    ctx.beginPath();
+    ctx.moveTo(pL.x, pL.y);
+    ctx.lineTo(pR.x, pR.y);
+    ctx.stroke();
+
+    // Twin steel + signal-yellow rails
+    ctx.strokeStyle = `rgba(227, 179, 65, ${alpha * 0.72})`;
+    ctx.lineWidth = Math.max(1, 2.4 * pRailL.scale);
+    ctx.beginPath();
+    ctx.moveTo(pRailL.x, pRailL.y);
+    ctx.lineTo(pNextL.x, pNextL.y);
+    ctx.moveTo(pRailR.x, pRailR.y);
+    ctx.lineTo(pNextR.x, pNextR.y);
+    ctx.stroke();
+  }
+
+  // Draw live Kage / PR signal packets streaming along the rails
+  packets.forEach(pk => {
+    pk.z = (pk.z + pk.speed * (0.25 + pulseEnergy * 0.8)) % LOOP_LENGTH;
+    if (pk.speed > 12) pk.speed *= 0.99;
+
+    let relZ = loopDelta(pk.z, camZ);
+    if (relZ > 30 && relZ < 2100) {
+      const worldX = pk.lane * 55;
+      const worldY = pk.lane === 0 ? 124 : (pk.lane % 2 === 0 ? -95 : 20);
+      const pt = project3D(worldX, worldY, relZ, t);
+      const tail = project3D(worldX, worldY, relZ + 48, t);
+      const a = Math.min(1, (2100 - relZ) / 1400);
+
+      ctx.strokeStyle = pk.color;
+      ctx.globalAlpha = a * 0.85;
+      ctx.lineWidth = Math.max(1, pk.size * pt.scale * 1.4);
+      ctx.beginPath();
+      ctx.moveTo(pt.x, pt.y);
+      ctx.lineTo(tail.x, tail.y);
+      ctx.stroke();
+
+      if (pk.label && relZ < 900) {
+        ctx.font = `700 ${Math.max(8, Math.round(10 * pt.scale))}px "IBM Plex Mono", monospace`;
+        ctx.fillStyle = pk.color;
+        ctx.fillText(pk.label, pt.x + 6, pt.y - 4);
+      }
+    }
+  });
+  ctx.globalAlpha = 1;
+
+  // Sort stops back-to-front relative to camera and draw them in 3D space
+  const visibleStops = STOPS.map(s => {
+    let relZ = loopDelta(s.z, camZ);
+    // Keep current station right in front of the camera (at relZ ~ 340) when camZ == s.z
+    relZ += 340;
+    return { stop: s, relZ };
+  }).filter(item => item.relZ > 20 && item.relZ < 2300)
+    .sort((a, b) => b.relZ - a.relZ);
+
+  visibleStops.forEach(item => {
+    renderSpatialGate(item.stop, item.relZ, t);
+  });
+
+  requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
