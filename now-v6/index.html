@@ -1274,10 +1274,11 @@
 
   <script type="module">
     import { THREE } from '../vendor/three-citadel-bundle.js';
-    import { initCitadelWorldV6 } from '../vendor/citadel-world-v6.js?v=8.0.0';
+    import { initCitadelWorldV6 } from '../vendor/citadel-world-v6.js?v=9.0.5';
 
     const canvas = document.getElementById('worldCanvas');
     const world = initCitadelWorldV6(canvas);
+    window.__citadelWorld = world;
     const {
       renderer,
       camera,
